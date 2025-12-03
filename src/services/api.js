@@ -43,23 +43,39 @@ export const api = createApi({
       }),
       invalidatesTags: ["MainTag"],
     }),
-    // updateItem: builder.mutation({
-    //   query: ({ id, body }) => ({
-    //     url: `items/${id}`,
-    //     method: "PUT",
-    //     body,
-    //   }),
-    // }),
-    // deleteItem: builder.mutation({
-    //   query: (id) => ({
-    //     url: `items/${id}`,
-    //     method: "DELETE", invalidatesTags: ["MainTag"],
-    //   }),
-    // }),
+    EditRegister: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `/register/${id}/`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    register_Detail: builder.query({
+      query: (id) => `/register/${id}/`,
+      providesTags: ["MainTag"],
+    }),
+    EditRegisterPhoto: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `/register/${id}/`,
+        method: "PUT",
+        body,
+        headers: { "Content-Type": "application/json" },
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    aplication: builder.query({
+      query: () => "/ariza/",
+      providesTags: ["MainTag"],
+    }),
   }),
 });
 
 export const {
+  useAplicationQuery,
+  useEditRegisterPhotoMutation,
+  useRegister_DetailQuery,
+  useEditRegisterMutation,
   useAddRegisterMutation,
   useRegisterQuery,
   useLazyObyektQuery,

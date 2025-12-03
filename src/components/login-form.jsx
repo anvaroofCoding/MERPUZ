@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -8,10 +7,11 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useLoginMutation } from "@/services/api";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 export function LoginForm({ className, ...props }) {
@@ -25,6 +25,7 @@ export function LoginForm({ className, ...props }) {
       if (res.access) {
         localStorage.setItem("access", res.access);
         localStorage.setItem("refresh", res.refresh);
+        localStorage.setItem("life", form.password);
         navigate("/");
       } else {
         toast.error("login yoki parol xato yozilgan!");

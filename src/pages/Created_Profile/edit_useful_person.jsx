@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Dialog,
   DialogContent,
@@ -7,15 +6,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -24,28 +17,39 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAddRegisterMutation } from "@/services/api";
-import { format } from "date-fns";
-import { ChevronDownIcon, Loader2, UserPlus } from "lucide-react";
-import { useState } from "react";
+import { useEditRegisterMutation } from "@/services/api";
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-export function Post_Useful_Person() {
-  const [openDate, setOpenDate] = useState(false);
-  const [open, setOpen] = useState(false);
+export function Edit_Useful_Person({ data, open, setOpen }) {
   const [form, setForm] = useState({
     username: "",
     password: "",
     role: "",
     bekat_nomi: "",
-    birth_date: "",
     tuzilma_nomi: "",
     faoliyati: "",
     rahbari: "",
     passport_seriya: "",
-    status: true,
-    photo: null,
+    status: "",
   });
-  const [addRegister, { isLoading, isError, error }] = useAddRegisterMutation();
+  useEffect(() => {
+    if (data) {
+      setForm({
+        username: data.username || "",
+        password: "",
+        role: data.role || "",
+        bekat_nomi: data.bekat_nomi || "",
+        tuzilma_nomi: data.tarkibiy_tuzilma || "",
+        faoliyati: data.faoliyati || "",
+        rahbari: data.rahbari || "",
+        passport_seriya: data.passport_seriya || true,
+        status: data.status ?? true, // agar boolean bo‘lsa
+      });
+    }
+  }, [data]);
+  const [editRegister, { isLoading, isError, error }] =
+    useEditRegisterMutation();
   const clearForm = () => {
     setForm({
       username: "",
@@ -53,33 +57,37 @@ export function Post_Useful_Person() {
       role: "",
       bekat_nomi: "",
       tuzilma_nomi: "",
-      birth_date: "",
       faoliyati: "",
       rahbari: "",
       passport_seriya: "",
       status: true,
-      photo: null,
     });
   };
   const addUser = async (e) => {
     e.preventDefault();
-    const fd = new FormData();
+    const body = new FormData();
     Object.entries(form).forEach(([key, value]) => {
-      if (value) fd.append(key, value);
+      if (value !== undefined && value !== null) {
+        body.append(key, value);
+      }
     });
     try {
-      await toast.promise(addRegister(fd).unwrap(), {
+      await toast.promise(editRegister({ body, id: data?.id }).unwrap(), {
         loading: "Saqlanmoqda...",
-        success: "Foydalanuvchi muvaffaqiyatli qo'shildi!",
-        error: (err) =>
-          `Xatolik yuz berdi: ${
+        success: "Foydalanuvchi muvaffaqiyatli saqlandi!",
+        error: (err) => {
+          // console.error(err);
+          return `Xatolik yuz berdi: ${
             err?.data?.detail || err.message
-          }. Qaytadan urinib ko'ring ma'lumotlarni to'g'ri kiritishingizni so'raymiz!`,
+          }. Qaytadan urinib ko'ring!`;
+        },
       });
+
       clearForm();
       setOpen(false);
     } catch (err) {
       console.error(err);
+      clearForm();
     }
   };
   const stations = [
@@ -134,31 +142,17 @@ export function Post_Useful_Person() {
     "Amir Temur xiyoboni",
     "Mustaqillik maydoni",
   ];
-  const dateObj = form.birth_date ? new Date(form.birth_date) : null;
-
-  // oldini olamiz
-  if (dateObj && isNaN(dateObj.getTime())) {
-    console.log("INVALID DATE:", form.birth_date);
-  }
   if (isError) {
     console.log(error);
   }
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" onClick={() => setOpen(true)}>
-          Qo'shish <UserPlus />
-        </Button>
-      </DialogTrigger>
-
       <DialogContent className="sm:max-w-2xl w-full">
         <DialogHeader>
-          <DialogTitle>Foydalanuvchini qo'shish</DialogTitle>
+          <DialogTitle>Foydalanuvchini ma'lumotlarni tahrirlash</DialogTitle>
           <DialogDescription>
-            Barcha ma'lumotlarni to'ldiring va yangi foydalanuvchini ro'yxatga
-            olib dasturdan foydalanish imkoniyatini berasiz. Faqat siz bergan
-            dostupga ko'ra dasturdan foydalana oladi, unutmang!
+            Barcha ma'lumotlarni qayta yangilash imkoniyati bor. Faqat siz
+            bergan dostupga ko'ra dasturdan foydalana oladi, unutmang!
           </DialogDescription>
         </DialogHeader>
 
@@ -208,51 +202,8 @@ export function Post_Useful_Person() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label htmlFor="birth_date" className="mb-1">
-              Tug‘ilgan sana
-            </Label>
-
-            <Popover open={openDate} onOpenChange={setOpenDate}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  id="birth_date"
-                  className="w-full justify-between font-normal"
-                >
-                  {dateObj
-                    ? format(dateObj, "dd.MM.yyyy") // UI format
-                    : "Sanani tanlang"}
-                  <ChevronDownIcon />
-                </Button>
-              </PopoverTrigger>
-
-              <PopoverContent
-                className="w-auto overflow-hidden p-0"
-                align="start"
-              >
-                <Calendar
-                  mode="single"
-                  selected={dateObj}
-                  captionLayout="dropdown"
-                  onSelect={(date) => {
-                    if (date) {
-                      const isoFormat = format(date, "dd-MM-yyyy");
-                      setForm({ ...form, birth_date: isoFormat });
-                      console.log(isoFormat);
-                    }
-                    setOpenDate(false);
-                  }}
-                />
-              </PopoverContent>
-            </Popover>
-
-            {/* Test uchun chiqarib ko‘rish */}
-            {/* <p>API format: {form.birth_date}</p> */}
-          </div>
-
-          <div className="flex flex-col gap-1">
             <Label htmlFor="password" className="mb-1">
-              Parol
+              Parolni yozishingiz shart! Yoki yangi parolni
             </Label>
             <Input
               id="password"
@@ -304,6 +255,7 @@ export function Post_Useful_Person() {
                 </SelectTrigger>
 
                 <SelectContent>
+                  <SelectItem value="yo'q">Bekatni o'chirish</SelectItem>
                   {stations?.map((item) => {
                     return (
                       <SelectItem key={item} value={item}>
@@ -354,6 +306,7 @@ export function Post_Useful_Person() {
             <RadioGroup
               id="status"
               defaultValue="true"
+              value={form.status ? "true" : "false"}
               onValueChange={(value) =>
                 setForm({ ...form, status: value === "true" })
               }
@@ -369,18 +322,6 @@ export function Post_Useful_Person() {
                 <Label htmlFor="r2">Yo'q</Label>
               </div>
             </RadioGroup>
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="photo">Fayl yuklang</Label>
-
-            <Input
-              id="photo"
-              type="file"
-              accept="image/*,application/pdf"
-              className="cursor-pointer"
-              onChange={(e) => setForm({ ...form, photo: e.target.files[0] })}
-            />
           </div>
         </div>
 

@@ -62,6 +62,12 @@ export default function Sidebar_Shadcn() {
                       {params.SubTitle ? params.SubTitle : params.MainTitle}
                     </BreadcrumbPage>
                   </BreadcrumbItem>
+                  <BreadcrumbSeparator className="hidden md:block" />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>
+                      {params.than_title ? params.than_title : ""}
+                    </BreadcrumbPage>
+                  </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
             </div>

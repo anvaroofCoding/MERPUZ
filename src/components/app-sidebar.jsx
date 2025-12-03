@@ -1,4 +1,3 @@
-import * as React from "react";
 import {
   AudioWaveform,
   BellRing,
@@ -25,9 +24,11 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { useRegisterQuery } from "@/services/api";
 import { useTranslation } from "react-i18next";
 
 export function AppSidebar({ ...props }) {
+  const { data: supper, isLoading } = useRegisterQuery();
   const { t } = useTranslation();
   const data = {
     user: {
@@ -80,7 +81,7 @@ export function AppSidebar({ ...props }) {
         items: [
           {
             title: "Arizalar Yuborish",
-            url: "#",
+            url: "Arizalar",
           },
           {
             title: t("25_20251120"),
@@ -171,7 +172,7 @@ export function AppSidebar({ ...props }) {
         <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser data={supper} isLoading={isLoading} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useRegisterQuery } from "@/services/api";
+import { useAplicationQuery } from "@/services/api";
 import { IconCircleCheckFilled, IconLoader } from "@tabler/icons-react";
 import {
   ChevronDown,
@@ -29,39 +29,23 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Edit_Useful_Person } from "./edit_useful_person";
-import { Post_Useful_Person } from "./post_useful_person";
+import { Edit_Useful_Person } from "../Created_Profile/edit_useful_person";
+import { Post_Useful_Person } from "../Created_Profile/post_useful_person";
 
-export default function Useful_Person() {
+export default function Applications() {
   const navigate = useNavigate();
   const [editModal, setEditModal] = useState(false);
   const [editData, setEditData] = useState("");
-  const { data, isLoading } = useRegisterQuery();
+  const { data, isLoading } = useAplicationQuery();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("all");
-  const filtered = data?.filter((item) => {
-    // search uchun username va rahbar
-    const matchesSearch =
-      item.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (item.rahbari &&
-        item.rahbari.toLowerCase().includes(searchTerm.toLowerCase()));
-
-    // status filter: select qiymati string bo‘ladi, lekin item.status boolean
-    const matchesStatus =
-      statusFilter === "all" || item.status === (statusFilter === "true");
-
-    // rol filter
-    const matchesRole = sortBy === "all" || item.role === sortBy;
-
-    return matchesSearch && matchesStatus && matchesRole;
-  });
 
   const handleOpenEdit = (row) => {
     setEditData(row); // shu user ma'lumotlarini yuboramiz
     setEditModal(true); // modalni ochamiz
   };
-
+  console.log(data);
   return (
     <div className="w-full">
       {/* Controls Section */}
@@ -163,8 +147,8 @@ export default function Useful_Person() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading ? (
-              [...Array(30)].map((_, index) => (
+            {isLoading || !data ? (
+              [...Array(data?.length || 10)].map((_, index) => (
                 <TableRow key={index} className="border-none">
                   <TableCell>
                     <Skeleton className="w-full h-6 rounded" />
@@ -192,8 +176,8 @@ export default function Useful_Person() {
                   </TableCell>
                 </TableRow>
               ))
-            ) : filtered?.length > 0 ? (
-              filtered.map((item, index) => (
+            ) : data?.results?.length > 0 ? (
+              data?.results?.map((item, index) => (
                 <TableRow
                   key={item.id}
                   className={`border-b border-border hover:bg-muted/50 transition-colors ${
