@@ -65,13 +65,28 @@ export const api = createApi({
       invalidatesTags: ["MainTag"],
     }),
     aplication: builder.query({
-      query: () => "/ariza/",
+      query: ({ page = 1, limit = 10, search = "" }) =>
+        `/ariza?page=${page}&limit=${limit}&search=${search}`,
+      providesTags: ["MainTag"],
+    }),
+    AddAplication: builder.mutation({
+      query: (body) => ({
+        url: "/ariza/",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    OptionTuzilma: builder.query({
+      query: () => `/tuzilma-nomi/`,
       providesTags: ["MainTag"],
     }),
   }),
 });
 
 export const {
+  useOptionTuzilmaQuery,
+  useAddAplicationMutation,
   useAplicationQuery,
   useEditRegisterPhotoMutation,
   useRegister_DetailQuery,
