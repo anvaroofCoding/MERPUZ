@@ -1,6 +1,7 @@
 import Login from "@/auth/login";
 import Sidebar_Shadcn from "@/main/main-sidebar-shadcn.ui/sidebar_shadcn";
 import Applications from "@/pages/application/aplication";
+import Aplication_Detail from "@/pages/application/aplication_detail";
 import One_UseFul_Person from "@/pages/Created_Profile/one_useful_person";
 import Useful_Person from "@/pages/Created_Profile/useful_person";
 import Dashboard from "@/pages/dashboard/dashboard";
@@ -28,6 +29,10 @@ export const router = createBrowserRouter([
       {
         path: "/Arizalar/:MainTitle/:SubTitle",
         element: <Applications />,
+      },
+      {
+        path: "/Arizalar/:MainTitle/:SubTitle/:than_title/:id",
+        element: <Aplication_Detail />,
       },
     ],
   },

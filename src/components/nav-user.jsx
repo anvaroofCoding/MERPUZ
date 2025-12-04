@@ -23,11 +23,11 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Skeleton } from "./ui/skeleton";
 
 export function NavUser({ data, isLoading }) {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const { isMobile } = useSidebar();
   const user = Array.isArray(data) && data.length ? data[0] : null;
   const MainTitle = "Mening profilim";
@@ -38,7 +38,7 @@ export function NavUser({ data, isLoading }) {
     localStorage.removeItem("access");
     localStorage.removeItem("refresh");
     localStorage.removeItem("life");
-    navigate("no-token-and-go-login");
+    window.location.pathname = "/no-token-and-go-login";
   };
   return (
     <SidebarMenu>

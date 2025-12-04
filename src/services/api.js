@@ -65,8 +65,14 @@ export const api = createApi({
       invalidatesTags: ["MainTag"],
     }),
     aplication: builder.query({
-      query: ({ page = 1, limit = 10, search = "" }) =>
-        `/ariza?page=${page}&limit=${limit}&search=${search}`,
+      query: ({
+        page = 1,
+        limit = 10,
+        search = "",
+        status = "",
+        tuzilma_nomi = "",
+      }) =>
+        `/ariza?page=${page}&limit=${limit}&search=${search}&status=${status}&tuzilma_nomi=${tuzilma_nomi}`,
       providesTags: ["MainTag"],
     }),
     AddAplication: builder.mutation({
@@ -81,10 +87,20 @@ export const api = createApi({
       query: () => `/tuzilma-nomi/`,
       providesTags: ["MainTag"],
     }),
+    OptionAplication: builder.query({
+      query: () => `/ariza/`,
+      providesTags: ["MainTag"],
+    }),
+    aplication_details: builder.query({
+      query: (id) => `/ariza/${id}/`,
+      providesTags: ["MainTag"],
+    }),
   }),
 });
 
 export const {
+  useAplication_detailsQuery,
+  useOptionAplicationQuery,
   useOptionTuzilmaQuery,
   useAddAplicationMutation,
   useAplicationQuery,

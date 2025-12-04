@@ -38,6 +38,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   useAddAplicationMutation,
   useAplicationQuery,
+  useOptionAplicationQuery,
   useOptionTuzilmaQuery,
 } from "@/services/api";
 import { IconCircleCheckFilled, IconLoader } from "@tabler/icons-react";
@@ -46,20 +47,23 @@ import {
   Eye,
   EyeOff,
   FilePlusCorner,
+  Loader,
+  MessageCircleX,
   MoreVertical,
   Search,
+  Send,
   Upload,
   UserRoundPen,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Edit_Useful_Person } from "../Created_Profile/edit_useful_person";
 
 export default function Applications() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [sortBy, setSortBy] = useState("");
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const limit = 50;
@@ -93,7 +97,11 @@ export default function Applications() {
     page,
     limit,
     search: searchTerm,
+    status: statusFilter,
+    tuzilma_nomi: sortBy,
   });
+  const { data: OptionAplications, isLoading: OptionAplicationLoading } =
+    useOptionAplicationQuery();
   const { data: OptionTuzilma, isLoading: OptionTuzilmaLoader } =
     useOptionTuzilmaQuery();
   const [AddAplications, { isLoading: AplicationLoader, isError, error }] =
@@ -118,14 +126,18 @@ export default function Applications() {
     setEditModal(true);
   };
   const totalPages = Math.ceil((data?.count || 0) / limit);
-  if (isError) {
-    console.log(error);
-    if (error?.data?.comment) {
-      toast.error("Izoh yozishingiz shart!");
-      aplication_clear();
+  useEffect(() => {
+    if (isError) {
+      console.log(error);
+      if (error?.data?.comment) {
+        toast.error("Izoh yozishingiz shart!");
+        aplication_clear();
+      }
+      if (error?.data?.parol) {
+        toast.error("Parolingizni xato kiritdingiz");
+      }
     }
-    aplication_clear();
-  }
+  }, [isError, error]);
   return (
     <div className="w-full">
       {/* Controls Section */}
@@ -158,14 +170,14 @@ export default function Applications() {
               align="start"
               className="bg-card border-border"
             >
-              <DropdownMenuItem onClick={() => setStatusFilter("all")}>
+              <DropdownMenuItem onClick={() => setStatusFilter("")}>
                 Barchasi
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("true")}>
-                Faol
+              <DropdownMenuItem onClick={() => setStatusFilter("jarayonda")}>
+                Jarayonda
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("false")}>
-                Faol emas
+              <DropdownMenuItem onClick={() => setStatusFilter("bajarilgan")}>
+                Bajarilgan
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -177,7 +189,7 @@ export default function Applications() {
                 variant="outline"
                 className="gap-2 border-border bg-card hover:bg-card/80"
               >
-                Rol
+                Kimga
                 <ChevronDown className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -185,21 +197,35 @@ export default function Applications() {
               align="start"
               className="bg-card border-border"
             >
-              <DropdownMenuItem onClick={() => setSortBy("all")}>
+              <DropdownMenuItem onClick={() => setSortBy("")}>
                 Barchasi
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("tarkibiy")}>
-                Tarkibiy tuzilmalar
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("bekat")}>
-                Bekatlar
-              </DropdownMenuItem>
+              {OptionTuzilma?.map((item) => {
+                return (
+                  <DropdownMenuItem
+                    key={item?.id}
+                    onClick={() => setSortBy(item?.tuzilma_nomi)}
+                  >
+                    {item?.tuzilma_nomi}
+                  </DropdownMenuItem>
+                );
+              })}
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button variant="outline" onClick={() => setShow(true)}>
-            Qo'shish <FilePlusCorner />
-          </Button>
+          {show ? (
+            <Button
+              variant="outline"
+              className="bg-red-500 text-white"
+              onClick={() => setShow(true)}
+            >
+              Yopish <MessageCircleX />
+            </Button>
+          ) : (
+            <Button variant="outline" onClick={() => setShow(true)}>
+              Qo'shish <FilePlusCorner />
+            </Button>
+          )}
         </div>
       </div>
       {/* add */}
@@ -254,7 +280,7 @@ export default function Applications() {
                 <SelectContent>
                   {OptionTuzilma?.map((item) => {
                     return (
-                      <SelectItem value={item?.id}>
+                      <SelectItem key={item?.id} value={item?.id}>
                         {item?.tuzilma_nomi}
                       </SelectItem>
                     );
@@ -306,11 +332,21 @@ export default function Applications() {
                   aplication_clear();
                 }}
               >
-                Bekor qilish
+                Bekor qilish <MessageCircleX />
               </Button>
-              <Button className=" mt-2" onClick={handleSubmit}>
-                Yuborish
-              </Button>
+              {AplicationLoader ? (
+                <Button className=" mt-2" disabled>
+                  Yuborilmoqda... <Loader />
+                </Button>
+              ) : (
+                <Button
+                  className=" mt-2"
+                  disabled={form?.comment ? false : true}
+                  onClick={handleSubmit}
+                >
+                  Yuborish <Send />
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -338,7 +374,7 @@ export default function Applications() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading || OptionTuzilmaLoader ? (
+            {isLoading || OptionTuzilmaLoader || OptionAplicationLoading ? (
               [...Array(10)].map((_, index) => (
                 <TableRow key={index} className="border-none">
                   <TableCell>
@@ -358,12 +394,6 @@ export default function Applications() {
                   </TableCell>
                   <TableCell>
                     <Skeleton className="w-full h-6 rounded" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="w-full h-6 rounded" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="w-8 h-8 rounded" />
                   </TableCell>
                 </TableRow>
               ))
@@ -422,7 +452,7 @@ export default function Applications() {
                       >
                         <DropdownMenuItem
                           onClick={() => {
-                            const than_title = item?.username;
+                            const than_title = item?.tuzilma_nomi;
                             navigate(`${than_title}/${item?.id}`);
                           }}
                         >
