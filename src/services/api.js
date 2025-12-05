@@ -95,10 +95,27 @@ export const api = createApi({
       query: (id) => `/ariza/${id}/`,
       providesTags: ["MainTag"],
     }),
+    EditAplication: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `/ariza/${id}/`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    DeleteAplication: builder.mutation({
+      query: ({ id }) => ({
+        url: `/ariza/${id}/`,
+        method: "Delete",
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
   }),
 });
 
 export const {
+  useDeleteAplicationMutation,
+  useEditAplicationMutation,
   useAplication_detailsQuery,
   useOptionAplicationQuery,
   useOptionTuzilmaQuery,

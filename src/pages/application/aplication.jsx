@@ -216,8 +216,8 @@ export default function Applications() {
           {show ? (
             <Button
               variant="outline"
-              className="bg-red-500 text-white"
-              onClick={() => setShow(true)}
+              className="bg-red-500 hover:bg-red-600 text-white hover:text-gray-200"
+              onClick={() => setShow(false)}
             >
               Yopish <MessageCircleX />
             </Button>
@@ -485,41 +485,45 @@ export default function Applications() {
         open={editModal}
         setOpen={setEditModal}
       />
-      <div className="py-5">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                onClick={() => page > 1 && setPage(page - 1)}
-              />
-            </PaginationItem>
+      {data?.results?.length > 0 ? (
+        <div className="py-5">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={() => page > 1 && setPage(page - 1)}
+                />
+              </PaginationItem>
 
-            {/* Dynamik page numbers */}
-            {[...Array(totalPages)].map((_, index) => {
-              const pageNum = index + 1;
-              return (
-                <PaginationItem key={pageNum}>
-                  <PaginationLink
-                    href="#"
-                    isActive={page === pageNum}
-                    onClick={() => setPage(pageNum)}
-                  >
-                    {pageNum}
-                  </PaginationLink>
-                </PaginationItem>
-              );
-            })}
+              {/* Dynamik page numbers */}
+              {[...Array(totalPages)].map((_, index) => {
+                const pageNum = index + 1;
+                return (
+                  <PaginationItem key={pageNum}>
+                    <PaginationLink
+                      href="#"
+                      isActive={page === pageNum}
+                      onClick={() => setPage(pageNum)}
+                    >
+                      {pageNum}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
 
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                onClick={() => page < totalPages && setPage(page + 1)}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={() => page < totalPages && setPage(page + 1)}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      ) : (
+        ""
+      )}
     </div>
   );
 }
