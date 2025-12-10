@@ -1,13 +1,9 @@
 import React, { useEffect, useState } from "react";
 
-import { motion, AnimatePresence, useMotionValue } from "motion/react";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion, useMotionValue } from "motion/react";
 
-export const FollowerPointerCard = ({
-  children,
-  className,
-  title
-}) => {
+export const FollowerPointerCard = ({ children, className, title }) => {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const ref = React.useRef(null);
@@ -44,7 +40,8 @@ export const FollowerPointerCard = ({
         cursor: "none",
       }}
       ref={ref}
-      className={cn("relative", className)}>
+      className={cn("relative ", className)}
+    >
       <AnimatePresence>
         {isInside && <FollowPointer x={x} y={y} title={title} />}
       </AnimatePresence>
@@ -53,11 +50,7 @@ export const FollowerPointerCard = ({
   );
 };
 
-export const FollowPointer = ({
-  x,
-  y,
-  title
-}) => {
+export const FollowPointer = ({ x, y, title }) => {
   const colors = [
     "#0ea5e9",
     "#737373",
@@ -86,7 +79,8 @@ export const FollowPointer = ({
       exit={{
         scale: 0,
         opacity: 0,
-      }}>
+      }}
+    >
       <svg
         stroke="currentColor"
         fill="currentColor"
@@ -95,9 +89,9 @@ export const FollowPointer = ({
         className="h-6 w-6 -translate-x-[12px] -translate-y-[10px] -rotate-[70deg] transform stroke-sky-600 text-sky-500"
         height="1em"
         width="1em"
-        xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M14.082 2.182a.5.5 0 0 1 .103.557L8.528 15.467a.5.5 0 0 1-.917-.007L5.57 10.694.803 8.652a.5.5 0 0 1-.006-.916l12.728-5.657a.5.5 0 0 1 .556.103z"></path>
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d="M14.082 2.182a.5.5 0 0 1 .103.557L8.528 15.467a.5.5 0 0 1-.917-.007L5.57 10.694.803 8.652a.5.5 0 0 1-.006-.916l12.728-5.657a.5.5 0 0 1 .556.103z"></path>
       </svg>
       <motion.div
         style={{
@@ -117,7 +111,8 @@ export const FollowPointer = ({
         }}
         className={
           "min-w-max rounded-full bg-neutral-200 px-2 py-2 text-xs whitespace-nowrap text-white"
-        }>
+        }
+      >
         {title || `William Shakespeare`}
       </motion.div>
     </motion.div>
