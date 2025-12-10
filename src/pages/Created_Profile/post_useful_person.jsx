@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Dialog,
   DialogContent,
@@ -11,11 +10,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -25,8 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAddRegisterMutation } from "@/services/api";
-import { format } from "date-fns";
-import { ChevronDownIcon, Loader2, UserPlus } from "lucide-react";
+import { Loader2, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 export function Post_Useful_Person() {
@@ -135,7 +128,6 @@ export function Post_Useful_Person() {
     "Mustaqillik maydoni",
   ];
   const dateObj = form.birth_date ? new Date(form.birth_date) : null;
-
   // oldini olamiz
   if (dateObj && isNaN(dateObj.getTime())) {
     console.log("INVALID DATE:", form.birth_date);
@@ -211,43 +203,13 @@ export function Post_Useful_Person() {
             <Label htmlFor="birth_date" className="mb-1">
               Tug‘ilgan sana
             </Label>
-
-            <Popover open={openDate} onOpenChange={setOpenDate}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  id="birth_date"
-                  className="w-full justify-between font-normal"
-                >
-                  {dateObj
-                    ? format(dateObj, "dd.MM.yyyy") // UI format
-                    : "Sanani tanlang"}
-                  <ChevronDownIcon />
-                </Button>
-              </PopoverTrigger>
-
-              <PopoverContent
-                className="w-auto overflow-hidden p-0"
-                align="start"
-              >
-                <Calendar
-                  mode="single"
-                  selected={dateObj}
-                  captionLayout="dropdown"
-                  onSelect={(date) => {
-                    if (date) {
-                      const isoFormat = format(date, "dd-MM-yyyy");
-                      setForm({ ...form, birth_date: isoFormat });
-                      console.log(isoFormat);
-                    }
-                    setOpenDate(false);
-                  }}
-                />
-              </PopoverContent>
-            </Popover>
-
-            {/* Test uchun chiqarib ko‘rish */}
-            {/* <p>API format: {form.birth_date}</p> */}
+            <Input
+              type="date"
+              id="birth_date"
+              className="w-full"
+              value={form.birth_date}
+              onChange={(e) => setForm({ ...form, birth_date: e.target.value })}
+            />
           </div>
 
           <div className="flex flex-col gap-1">
