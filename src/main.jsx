@@ -1,13 +1,13 @@
 import { StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
-import "./index.css";
-import App from "./App.jsx";
-import "./i18n";
-import { ThemeProvider } from "./context/ThemeContext";
-import { LangProvider } from "./context/LangContext";
 import { Provider } from "react-redux";
-import store from "./store";
+import App from "./App.jsx";
 import { Toaster } from "./components/ui/sonner";
+import { LangProvider } from "./context/LangContext";
+import { ThemeProvider } from "./context/ThemeContext";
+import "./i18n";
+import "./index.css";
+import store from "./store";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -22,5 +22,5 @@ createRoot(document.getElementById("root")).render(
         </LangProvider>
       </Suspense>
     </Provider>
-  </StrictMode>
+  </StrictMode>,
 );

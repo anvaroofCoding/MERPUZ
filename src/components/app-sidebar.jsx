@@ -85,7 +85,7 @@ export function AppSidebar({ ...props }) {
           },
           {
             title: t("25_20251120"),
-            url: "#",
+            url: "Kelgan-Arizalar",
           },
         ],
       },

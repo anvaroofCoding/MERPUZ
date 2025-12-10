@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
 import { CardContent } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -9,23 +7,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import {
-  Sun,
-  Moon,
-  Languages,
-  Loader2,
-  Volume2,
-  Bell,
-  Lock,
-  ListChecks,
-  Text,
-} from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { Switch } from "@/components/ui/switch";
 import { loadLanguage } from "@/i18n/loadLanguage";
+import {
+  Bell,
+  Languages,
+  ListChecks,
+  Loader2,
+  Lock,
+  Moon,
+  Sun,
+  Text,
+  Volume2,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 export default function SettingsPanel() {
   const { t } = useTranslation();
   const [darkMode, setDarkMode] = useState(
-    localStorage.getItem("theme") === "dark"
+    localStorage.getItem("theme") === "dark",
   );
   useEffect(() => {
     if (darkMode) {
@@ -52,6 +52,7 @@ export default function SettingsPanel() {
   useEffect(() => {
     localStorage.setItem("notiv", notiv);
   }, [notiv]);
+
   const fonts = [
     "roboto",
     "nunito",

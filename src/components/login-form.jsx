@@ -26,7 +26,7 @@ export function LoginForm({ className, ...props }) {
         localStorage.setItem("access", res.access);
         localStorage.setItem("refresh", res.refresh);
         localStorage.setItem("life", form.password);
-        navigate("/");
+        navigate("/Kompleks/Bosh sahifa/Kompleks Dashboard");
       } else {
         toast.error("login yoki parol xato yozilgan!");
       }

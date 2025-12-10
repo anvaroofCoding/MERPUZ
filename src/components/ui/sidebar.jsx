@@ -1,6 +1,6 @@
 import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
-import { PanelLeftIcon } from "lucide-react";
+import { Menu, PanelLeftIcon } from "lucide-react";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -228,10 +228,8 @@ function Sidebar({
     </div>
   );
 }
-
 function SidebarTrigger({ className, onClick, ...props }) {
   const { toggleSidebar } = useSidebar();
-
   return (
     <Button
       data-sidebar="trigger"
@@ -245,7 +243,8 @@ function SidebarTrigger({ className, onClick, ...props }) {
       }}
       {...props}
     >
-      <PanelLeftIcon />
+      <PanelLeftIcon className="hidden lg:block" />
+      <Menu className="lg:hidden block" />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );

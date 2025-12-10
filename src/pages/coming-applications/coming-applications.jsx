@@ -37,7 +37,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import {
   useAddAplicationMutation,
-  useAplicationQuery,
+  useComing_AplicationQuery,
   useOptionAplicationQuery,
   useOptionTuzilmaQuery,
 } from "@/services/api";
@@ -47,10 +47,8 @@ import {
   IconLoader,
 } from "@tabler/icons-react";
 import {
-  ChevronDown,
   Eye,
   EyeOff,
-  FilePlusCorner,
   Loader,
   MessageCircleX,
   MoreVertical,
@@ -63,10 +61,8 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Edit_Useful_Person } from "../Created_Profile/edit_useful_person";
 
-export default function Applications() {
+export default function Coming_Applications() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [sortBy, setSortBy] = useState("");
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const limit = 50;
@@ -106,13 +102,12 @@ export default function Applications() {
       });
     }
   };
-  const { data, isLoading } = useAplicationQuery({
+  const { data, isLoading } = useComing_AplicationQuery({
     page,
     limit,
     search: searchTerm,
-    status: statusFilter,
-    tuzilma_nomi: sortBy,
   });
+  console.log(data);
   const { data: OptionAplications, isLoading: OptionAplicationLoading } =
     useOptionAplicationQuery();
   const { data: OptionTuzilma, isLoading: OptionTuzilmaLoader } =
@@ -165,84 +160,6 @@ export default function Applications() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-        </div>
-
-        {/* Filters and Sort */}
-        <div className="flex flex-row gap-3">
-          {/* Status Filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="gap-2 border-border bg-card hover:bg-card/80"
-              >
-                Status
-                <ChevronDown className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              className="bg-card border-border"
-            >
-              <DropdownMenuItem onClick={() => setStatusFilter("")}>
-                Barchasi
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("jarayonda")}>
-                Jarayonda
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("bajarilgan")}>
-                Bajarilgan
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("qaytarildi")}>
-                Qaytarilgan
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Sort Filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="gap-2 border-border bg-card hover:bg-card/80"
-              >
-                Kimga
-                <ChevronDown className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              className="bg-card border-border"
-            >
-              <DropdownMenuItem onClick={() => setSortBy("")}>
-                Barchasi
-              </DropdownMenuItem>
-              {OptionTuzilma?.map((item) => {
-                return (
-                  <DropdownMenuItem
-                    key={item?.id}
-                    onClick={() => setSortBy(item?.tuzilma_nomi)}
-                  >
-                    {item?.tuzilma_nomi}
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {show ? (
-            <Button
-              variant="outline"
-              className="bg-red-500 hover:bg-red-600 text-white hover:text-gray-200"
-              onClick={() => setShow(false)}
-            >
-              Yopish <MessageCircleX />
-            </Button>
-          ) : (
-            <Button variant="outline" onClick={() => setShow(true)}>
-              Qo'shish <FilePlusCorner />
-            </Button>
-          )}
         </div>
       </div>
       {/* add */}
@@ -404,6 +321,9 @@ export default function Applications() {
               <TableHead className="w-[15%] font-semibold">
                 Ariza yaratuvchi
               </TableHead>
+              <TableHead className="w-[15%] font-semibold">
+                Yaratilgan sana
+              </TableHead>
               <TableHead className="w-[15%] font-semibold">Status</TableHead>
               <TableHead className="w-[37%] font-semibold">Izoh</TableHead>
               <TableHead className="w-[3%] text-right font-semibold">
@@ -415,6 +335,9 @@ export default function Applications() {
             {isLoading || OptionTuzilmaLoader || OptionAplicationLoading ? (
               [...Array(10)].map((_, index) => (
                 <TableRow key={index} className="border-none">
+                  <TableCell>
+                    <Skeleton className="w-full h-6 rounded" />
+                  </TableCell>
                   <TableCell>
                     <Skeleton className="w-full h-6 rounded" />
                   </TableCell>
@@ -447,11 +370,25 @@ export default function Applications() {
                     {item?.kim_tomonidan ? item?.kim_tomonidan : "Mavjud emas"}
                   </TableCell>
                   <TableCell className="font-medium text-foreground truncate">
-                    {item?.tuzilma_nomi ? item?.tuzilma_nomi : "Mavjud emas"}
+                    {item?.tuzilma ? item?.tuzilma : "Mavjud emas"}
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm truncate">
                     {item?.created_by ? item?.created_by : "Mavjud emas"}
                   </TableCell>
+                  <TableCell className="text-muted-foreground text-sm truncate">
+                    {item?.sana
+                      ? (() => {
+                          const d = new Date(item.sana);
+                          const dd = String(d.getDate()).padStart(2, "0");
+                          const mm = String(d.getMonth() + 1).padStart(2, "0");
+                          const yyyy = d.getFullYear();
+                          const hh = String(d.getHours()).padStart(2, "0");
+                          const mins = String(d.getMinutes()).padStart(2, "0");
+                          return `${dd}-${mm}-${yyyy} ${hh}:${mins}`;
+                        })()
+                      : "Mavjud emas"}
+                  </TableCell>
+
                   <TableCell>
                     <Badge
                       variant="outline"
@@ -501,7 +438,7 @@ export default function Applications() {
                       >
                         <DropdownMenuItem
                           onClick={() => {
-                            const than_title = item?.tuzilma_nomi;
+                            const than_title = item?.kim_tomonidan;
                             navigate(`${than_title}/${item?.id}`);
                           }}
                         >

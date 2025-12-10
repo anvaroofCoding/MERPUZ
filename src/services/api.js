@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://88.88.150.151:8090/api",
+  baseUrl: "https://pprs-7o08.onrender.com/api",
   prepareHeaders: (headers) => {
     const token = localStorage.getItem("access");
     if (token) {
@@ -109,11 +109,39 @@ export const api = createApi({
         method: "Delete",
       }),
       invalidatesTags: ["MainTag"],
+    }), // Arizani tugatish uchun ishlatiladigan api. Xato yozib yuborsa faqatgina
+    DeletePhoto: builder.mutation({
+      query: ({ ids }) => ({
+        url: `/ariza-image-delete/${ids}/`,
+        method: "Delete",
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    Coming_Aplication: builder.query({
+      query: ({ page = 1, limit = 10, search = "" }) =>
+        `/kelgan-arizalar?page=${page}&limit=${limit}&search=${search}`,
+      providesTags: ["MainTag"],
+    }),
+    Coming_Application_Detail: builder.query({
+      query: (id) => `/kelgan-arizalar/${id}/`,
+      providesTags: ["MainTag"],
+    }),
+    Coming_App_qabul_qilindi: builder.mutation({
+      query: (body) => ({
+        url: "/kelgan-arizalar-create/",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
     }),
   }),
 });
 
 export const {
+  useComing_App_qabul_qilindiMutation,
+  useComing_Application_DetailQuery,
+  useDeletePhotoMutation,
+  useComing_AplicationQuery,
   useDeleteAplicationMutation,
   useEditAplicationMutation,
   useAplication_detailsQuery,

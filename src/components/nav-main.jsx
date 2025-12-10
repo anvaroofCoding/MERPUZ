@@ -15,8 +15,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { Link, useNavigate } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 export function NavMain({ items }) {
   const navigate = useNavigate();
   return (
@@ -46,7 +45,7 @@ export function NavMain({ items }) {
                         <button
                           onClick={() =>
                             navigate(
-                              `${subItem.url}/${item.title}/${subItem.title}`
+                              `${subItem.url}/${item.title}/${subItem.title}`,
                             )
                           }
                           className="w-full text-left"
