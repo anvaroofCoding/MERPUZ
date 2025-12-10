@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAddRegisterMutation } from "@/services/api";
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 import { ChevronDownIcon, Loader2, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -134,11 +134,12 @@ export function Post_Useful_Person() {
     "Amir Temur xiyoboni",
     "Mustaqillik maydoni",
   ];
-  const dateObj = form.birth_date ? new Date(form.birth_date) : null;
+  const dateObj = form.birth_date ? parseISO(form.birth_date) : null;
 
   // oldini olamiz
-  if (dateObj && isNaN(dateObj.getTime())) {
+  if (dateObj && !isValid(dateObj)) {
     console.log("INVALID DATE:", form.birth_date);
+    toast.error("Sana noto‘g‘ri formatda kiritilgan!");
   }
   if (isError) {
     console.log(error);
