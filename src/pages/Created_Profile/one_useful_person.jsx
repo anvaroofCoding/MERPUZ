@@ -99,7 +99,7 @@ export default function MensProfileCard() {
       >
         <CardContent className="p-4 md:p-8">
           {/* Header Section with Background Shading */}
-          <section className="bg-slate-50 dark:bg-slate-900/30 rounded-lg p-4 md:p-8 mb-8 -mx-4 md:-mx-8 md:mx-0">
+          <section className="dark:bg-slate-900/30 rounded-lg p-4 md:p-8 mb-8 -mx-4 md:-mx-8 md:mx-0">
             <div className="flex flex-col md:flex-row gap-6 md:gap-8">
               {/* Avatar Section */}
               <div className="flex flex-col items-center md:items-start flex-shrink-0">
@@ -234,7 +234,7 @@ export default function MensProfileCard() {
           </section>
 
           {/* Details Section with Shading */}
-          <section className="bg-slate-50 dark:bg-slate-900/20 rounded-lg p-4 md:p-6 mb-8">
+          <section className="dark:bg-slate-900/20 rounded-lg p-4 md:p-6 mb-8">
             <header className="mb-6">
               {isLoading ? (
                 <Skeleton className="w-20 h-5" />
@@ -371,7 +371,7 @@ export default function MensProfileCard() {
           </section>
 
           {/* Footer Info Section */}
-          <footer className="bg-slate-50 dark:bg-slate-900/30 rounded-lg p-4 md:p-6 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+          <footer className="dark:bg-slate-900/30 rounded-lg p-4 md:p-6 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
             {isLoading ? (
               <>
                 <Skeleton className="w-32 h-4" />
@@ -404,7 +404,7 @@ export default function MensProfileCard() {
       <div className="xl:hidden block">
         <CardContent className="p-4 md:p-8">
           {/* Header Section with Background Shading */}
-          <section className="bg-slate-50 dark:bg-slate-900/30 rounded-lg p-4 md:p-8 mb-8 -mx-4 md:-mx-8 md:mx-0">
+          <section className="dark:bg-slate-900/30 rounded-lg p-4 md:p-8 mb-8 -mx-4 md:-mx-8 md:mx-0">
             <div className="flex flex-col md:flex-row gap-6 md:gap-8">
               {/* Avatar Section */}
               <div className="flex flex-col items-center md:items-start flex-shrink-0">
@@ -539,7 +539,7 @@ export default function MensProfileCard() {
           </section>
 
           {/* Details Section with Shading */}
-          <section className="bg-slate-50 dark:bg-slate-900/20 rounded-lg p-4 md:p-6 mb-8">
+          <section className="dark:bg-slate-900/20 rounded-lg p-4 md:p-6 mb-8">
             <header className="mb-6">
               {isLoading ? (
                 <Skeleton className="w-20 h-5" />
@@ -676,7 +676,7 @@ export default function MensProfileCard() {
           </section>
 
           {/* Footer Info Section */}
-          <footer className="bg-slate-50 dark:bg-slate-900/30 rounded-lg p-4 md:p-6 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+          <footer className="dark:bg-slate-900/30 rounded-lg p-4 md:p-6 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
             {isLoading ? (
               <>
                 <Skeleton className="w-32 h-4" />

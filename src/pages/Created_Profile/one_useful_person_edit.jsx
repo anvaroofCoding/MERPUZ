@@ -1,5 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEditRegisterMutation } from "@/services/api";
@@ -115,12 +122,12 @@ export function EditUserForm({ data, open, setOpen }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        {/* <DialogHeader>
+        <DialogHeader className="md:block hidden">
           <DialogTitle>Foydalanuvchi ma'lumotlarini tahrirlash</DialogTitle>
           <DialogDescription>
             Barcha ma’lumotlarni qayta yangilashingiz mumkin.
           </DialogDescription>
-        </DialogHeader> */}
+        </DialogHeader>
 
         <form onSubmit={addUser} className="flex flex-col gap-4 mt-4">
           {/* username */}
