@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAddRegisterMutation } from "@/services/api";
-import { format, isValid, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { ChevronDownIcon, Loader2, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -63,25 +63,18 @@ export function Post_Useful_Person() {
   };
   const addUser = async (e) => {
     e.preventDefault();
-
-    // Safe date parsing
-    const dateObj = form.birth_date ? parseISO(form.birth_date) : null;
-    if (dateObj && !isValid(dateObj)) {
-      toast.error("Sana noto‘g‘ri formatda kiritilgan!");
-      return;
-    }
-
     const fd = new FormData();
     Object.entries(form).forEach(([key, value]) => {
-      if (value !== null && value !== undefined) fd.append(key, value);
+      if (value) fd.append(key, value);
     });
-
     try {
       await toast.promise(addRegister(fd).unwrap(), {
         loading: "Saqlanmoqda...",
         success: "Foydalanuvchi muvaffaqiyatli qo'shildi!",
         error: (err) =>
-          `Xatolik yuz berdi: ${err?.data?.detail || err.message}`,
+          `Xatolik yuz berdi: ${
+            err?.data?.detail || err.message
+          }. Qaytadan urinib ko'ring ma'lumotlarni to'g'ri kiritishingizni so'raymiz!`,
       });
       clearForm();
       setOpen(false);
@@ -89,7 +82,6 @@ export function Post_Useful_Person() {
       console.error(err);
     }
   };
-
   const stations = [
     "Beruniy",
     "Tinchlik",
@@ -142,12 +134,11 @@ export function Post_Useful_Person() {
     "Amir Temur xiyoboni",
     "Mustaqillik maydoni",
   ];
-  const dateObj = form.birth_date ? parseISO(form.birth_date) : null;
+  const dateObj = form.birth_date ? new Date(form.birth_date) : null;
 
   // oldini olamiz
-  if (dateObj && !isValid(dateObj)) {
+  if (dateObj && isNaN(dateObj.getTime())) {
     console.log("INVALID DATE:", form.birth_date);
-    toast.error("Sana noto‘g‘ri formatda kiritilgan!");
   }
   if (isError) {
     console.log(error);

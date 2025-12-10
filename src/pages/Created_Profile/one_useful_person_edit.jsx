@@ -100,9 +100,7 @@ export function EditUserForm({ data, open, setOpen }) {
         loading: "Saqlanmoqda...",
         success: "Foydalanuvchi muvaffaqiyatli saqlandi!",
         error: (err) => {
-          return `Xatolik yuz berdi: ${
-            err?.data?.detail || err.message
-          }. Qaytadan urinib ko'ring!`;
+          console.log(err);
         },
       });
 
