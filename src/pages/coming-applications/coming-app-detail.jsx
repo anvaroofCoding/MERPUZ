@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -35,12 +42,16 @@ import {
   Clock,
   Download,
   Eye,
+  EyeOff,
   FileText,
   HelpCircle,
   ImageIcon,
+  Loader,
   Loader2,
   MoreVertical,
+  Send,
   Share2,
+  Upload,
   User,
   XCircle,
 } from "lucide-react";
@@ -49,12 +60,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 export default function Aplication_Detail() {
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
   const [selectedImage, setSelectedImage] = useState(null);
   const [expandedComment, setExpandedComment] = useState(false);
   const { data, isLoading } = useComing_Application_DetailQuery(id);
   const [open, setOpen] = useState(false);
+  const [open2, setOpen2] = useState(true);
   const [form, setForm] = useState({
     comment: "Arizangiz qabul qilindi!",
     ariza: id,
@@ -106,6 +119,9 @@ export default function Aplication_Detail() {
   const handleOpenModal = () => {
     setOpen(true);
   };
+  const handeOpen2Modal = () => {
+    setOpen2(true);
+  };
   async function addQabulQilishArizani() {
     try {
       await ArizaQabulQilindi({ body: form }).unwrap();
@@ -128,7 +144,23 @@ export default function Aplication_Detail() {
   function LoadingAriza() {
     toast.info("Ariza yuborilmoqda kuting!");
   }
-  console.log(data);
+  const handlePhotoUpload = (e) => {
+    const files = Array.from(e.target.files);
+    setForm((prev) => ({
+      ...prev,
+      photos: [...prev.photos, ...files],
+    }));
+  };
+
+  const handleBildirgiUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setForm({
+        ...form,
+        bildirgi: file,
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -189,181 +221,384 @@ export default function Aplication_Detail() {
         {/* Main Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Status Card */}
-            {isLoading ? (
-              <Skeleton className={"w-full h-70"} />
-            ) : (
-              <Card className="border-0 shadow-md-light bg-white dark:bg-slate-950/60 backdrop-blur-sm overflow-hidden">
-                <div className="bg-gradient-to-r from-primary/10 to-accent/5 p-6 border-b border-border/40">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {(() => {
-                        switch (data?.status) {
-                          case "jarayonda":
-                            return (
-                              <div className="relative">
-                                <div className="absolute inset-0 bg-blue-400 rounded-full blur-md opacity-30 animate-pulse"></div>
-                                <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400 relative z-10" />
-                              </div>
-                            );
+          {open2 ? (
+            <div className="lg:col-span-2 space-y-6">
+              <Card>
+                <CardHeader className="rounded-t-lg pb-3">
+                  <CardTitle className="text-lg md:text-xl text-blue-900 dark:text-blue-100">
+                    Arizani tahrirlash
+                  </CardTitle>
+                </CardHeader>
 
-                          case "bajarilgan":
-                            return (
-                              <CheckCircle2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-                            );
+                <CardContent className="pt-6 flex flex-col gap-5">
+                  {/* COMMENT */}
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-sm font-semibold">Komment</Label>
+                    <Textarea
+                      placeholder="Komment yozing"
+                      value={form.comment}
+                      onChange={(e) =>
+                        setForm({ ...form, comment: e.target.value })
+                      }
+                      className="min-h-24 resize-none"
+                    />
+                  </div>
 
-                          case "qabul qilindi":
-                            return (
-                              <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
-                            );
+                  <div className="flex flex-row items-center justify-center gap-5">
+                    {/* PASSWORD */}
+                    <div className="flex flex-col gap-2 relative w-full">
+                      <Label className="text-sm font-semibold">Parol</Label>
+                      <div className="relative">
+                        <Input
+                          type={passwordVisible ? "text" : "password"}
+                          placeholder="Parol"
+                          value={form.parol}
+                          onChange={(e) =>
+                            setForm({ ...form, parol: e.target.value })
+                          }
+                        />
+                        <button
+                          type="button"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          onClick={() => setPasswordVisible(!passwordVisible)}
+                        >
+                          {passwordVisible ? (
+                            <EyeOff size={18} />
+                          ) : (
+                            <Eye size={18} />
+                          )}
+                        </button>
+                      </div>
+                    </div>
 
-                          case "qaytarildi":
-                            return (
-                              <XCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
-                            );
-
-                          default:
-                            return (
-                              <HelpCircle className="h-6 w-6 text-gray-400" />
-                            );
+                    {/* TUZILMA SELECT */}
+                    <div className="flex flex-col gap-2">
+                      <Label className="text-sm font-semibold">Tuzilma</Label>
+                      <Select
+                        value={form.tuzilma}
+                        onValueChange={(val) =>
+                          setForm({ ...form, tuzilma: Number(val) })
                         }
-                      })()}
-
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          Joriy holat
-                        </p>
-                        <p className="text-lg font-semibold text-foreground capitalize">
-                          {(() => {
-                            switch (data?.status) {
-                              case "bajarilgan":
-                                return "Bajarilgan";
-                              case "qaytarildi":
-                                return "Qaytarildi";
-                              case "qabul qilindi":
-                                return "Qabul qilindi";
-                              case "jarayonda":
-                                return "Jarayonda";
-                              default:
-                                return "Noma'lum";
-                            }
-                          })()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-6 space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                        Qayerdan
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <Building2 className="h-4 w-4 text-primary" />
-                        </div>
-                        <p className="font-medium text-foreground">
-                          {data?.kim_tomonidan}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                        Qayerga
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center">
-                          <User className="h-4 w-4 text-foreground" />
-                        </div>
-                        <p className="font-medium text-foreground">
-                          {data?.tuzilma}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                      Yaratilgan sana
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
-                        <Calendar className="h-4 w-4 text-foreground" />
-                      </div>
-                      <p className="font-medium text-foreground">
-                        {formatDate(data?.sana)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            )}
-
-            {/* Comment Section */}
-            {isLoading ? (
-              <Skeleton className={"w-full h-70"} />
-            ) : (
-              <Card className="border-0 shadow-md-light bg-white dark:bg-slate-950/60 backdrop-blur-sm overflow-hidden">
-                <div className="bg-gradient-to-r from-secondary/10 to-primary/5 p-6 border-b border-border/40">
-                  <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-                    <div className="w-1 h-6 bg-secondary rounded-full"></div>
-                    Izoh
-                  </h2>
-                </div>
-                <div className="p-6">
-                  <div className="space-y-4">
-                    <p
-                      className={`text-sm leading-relaxed text-foreground/90 ${
-                        !expandedComment ? "line-clamp-4" : ""
-                      }`}
-                    >
-                      {data?.comment}
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            )}
-
-            {isLoading ? (
-              <Skeleton className={"w-full h-70"} />
-            ) : (
-              <Card className="border-0 shadow-md-light bg-white dark:bg-slate-950/60 backdrop-blur-sm overflow-hidden">
-                <div className="bg-gradient-to-r from-accent/10 to-secondary/5 p-6 border-b border-border/40">
-                  <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-                    <ImageIcon className="h-5 w-5 text-foreground" />
-                    Muammoning rasmlari ({data?.rasmlar?.length})
-                  </h2>
-                </div>
-                <div className="p-6">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    {data?.rasmlar.map((image, idx) => (
-                      <div
-                        key={image.id}
-                        onClick={() => setSelectedImage(image.rasm)}
-                        className="group relative cursor-pointer overflow-hidden rounded-lg shadow-sm-light hover:shadow-lg-light transition-all duration-300"
                       >
-                        <div className="aspect-square bg-gradient-to-br from-muted to-muted/50 overflow-hidden">
-                          <img
-                            src={image.rasm || "/placeholder.svg"}
-                            alt={`Attachment ${idx + 1}`}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                          />
-                        </div>
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                          <Eye className="h-5 w-5 text-white" />
-                        </div>
-                        <span className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-md">
-                          {idx + 1}
+                        <SelectTrigger>
+                          <SelectValue placeholder="Tuzilma tanlang" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {/* {OptionTuzilma?.map((item) => {
+                          return (
+                            <SelectItem key={item?.id} value={item?.id}>
+                              {item?.tuzilma_nomi}
+                            </SelectItem>
+                          );
+                        })} */}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* PHOTOS */}
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-sm font-semibold">
+                      Rasmlarni qo'shish{" "}
+                      <span className="text-muted-foreground text-xs">
+                        (ixtiyoriy)
+                      </span>
+                    </Label>
+
+                    <label className="border-2 border-dashed border-blue-300 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/50 flex items-center justify-center gap-2 p-4 rounded-lg cursor-pointer transition">
+                      <Upload
+                        size={18}
+                        className="text-blue-600 dark:text-blue-400"
+                      />
+                      <span className="text-sm font-medium">
+                        Rasmlar yuklash
+                      </span>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        multiple
+                        onChange={handlePhotoUpload}
+                      />
+                    </label>
+
+                    {form?.photos?.length > 0 && (
+                      <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 mt-2">
+                        {form.photos.map((photo, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={
+                                URL.createObjectURL(photo) || "/placeholder.svg"
+                              }
+                              alt="preview"
+                              className="w-full aspect-square object-cover rounded-lg border border-border"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removePhoto(index)}
+                              className="absolute -right-2 -top-2 bg-red-500 hover:bg-red-600 text-white w-6 h-6 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition z-10"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* FILE UPLOAD */}
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-sm font-semibold">Fayl</Label>
+
+                    <label className="border-2 border-dashed border-blue-300 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/50 flex items-center justify-center gap-2 p-4 rounded-lg cursor-pointer transition">
+                      <Upload
+                        size={18}
+                        className="text-blue-600 dark:text-blue-400"
+                      />
+                      <span className="text-sm font-medium">
+                        Faylni yuklash
+                      </span>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept=".pdf,.doc,.docx,.txt,.jpg,.png"
+                        onChange={handleBildirgiUpload}
+                      />
+                    </label>
+
+                    {form.bildirgi && (
+                      <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
+                        <span className="text-sm text-green-700 dark:text-green-300">
+                          ✓ {form.bildirgi.name}
                         </span>
                       </div>
-                    ))}
+                    )}
                   </div>
-                </div>
+                  {form?.bildirgi ? (
+                    <div className="flex flex-col gap-2">
+                      <Label className="text-sm font-semibold">
+                        Bildirgini yangilaganingiz haqida habar beraylikmi?
+                      </Label>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id="qayta_yuklandi"
+                            checked={form.qayta_yuklandi}
+                            onCheckedChange={(value) =>
+                              setForm({ ...form, qayta_yuklandi: value })
+                            }
+                          />
+                          <label
+                            htmlFor="qayta_yuklandi"
+                            className="text-sm cursor-pointer select-none"
+                          >
+                            Ha, xabar bering
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    ""
+                  )}
+
+                  {/* Submit Button */}
+                  <Button
+                    // onClick={handleSubmit}
+                    disabled={isLoading}
+                    className="bg-green-600 hover:bg-green-700 text-white w-full h-11 font-semibold text-base"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader size={18} className="animate-spin" />
+                        Yuborilmoqda...
+                      </>
+                    ) : (
+                      <>
+                        <Send size={18} />
+                        O'zgarishlarni saqlash
+                      </>
+                    )}
+                  </Button>
+                </CardContent>
               </Card>
-            )}
-            {/* Images Section */}
-          </div>
+            </div>
+          ) : (
+            <div className="lg:col-span-2 space-y-6">
+              {/* Status Card */}
+              {isLoading ? (
+                <Skeleton className={"w-full h-70"} />
+              ) : (
+                <Card className="border-0 shadow-md-light overflow-hidden">
+                  <div className="bg-gradient-to-r from-primary/10 to-accent/5 p-6 border-b border-border/40">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {(() => {
+                          switch (data?.status) {
+                            case "jarayonda":
+                              return (
+                                <div className="relative">
+                                  <div className="absolute inset-0 bg-blue-400 rounded-full blur-md opacity-30 animate-pulse"></div>
+                                  <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400 relative z-10" />
+                                </div>
+                              );
+
+                            case "bajarilgan":
+                              return (
+                                <CheckCircle2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                              );
+
+                            case "qabul qilindi":
+                              return (
+                                <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
+                              );
+
+                            case "qaytarildi":
+                              return (
+                                <XCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+                              );
+
+                            default:
+                              return (
+                                <HelpCircle className="h-6 w-6 text-gray-400" />
+                              );
+                          }
+                        })()}
+
+                        <div>
+                          <p className="text-sm text-muted-foreground">
+                            Joriy holat
+                          </p>
+                          <p className="text-lg font-semibold text-foreground capitalize">
+                            {(() => {
+                              switch (data?.status) {
+                                case "bajarilgan":
+                                  return "Bajarilgan";
+                                case "qaytarildi":
+                                  return "Qaytarildi";
+                                case "qabul qilindi":
+                                  return "Qabul qilindi";
+                                case "jarayonda":
+                                  return "Jarayonda";
+                                default:
+                                  return "Noma'lum";
+                              }
+                            })()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-6 space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                          Qayerdan
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Building2 className="h-4 w-4 text-primary" />
+                          </div>
+                          <p className="font-medium text-foreground">
+                            {data?.kim_tomonidan}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                          Qayerga
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center">
+                            <User className="h-4 w-4 text-foreground" />
+                          </div>
+                          <p className="font-medium text-foreground">
+                            {data?.tuzilma}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                        Yaratilgan sana
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
+                          <Calendar className="h-4 w-4 text-foreground" />
+                        </div>
+                        <p className="font-medium text-foreground">
+                          {formatDate(data?.sana)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              )}
+
+              {/* Comment Section */}
+              {isLoading ? (
+                <Skeleton className={"w-full h-70"} />
+              ) : (
+                <Card className="border-0 shadow-md-light  backdrop-blur-sm overflow-hidden">
+                  <div className="bg-gradient-to-r from-secondary/10 to-primary/5 p-6 border-b border-border/40">
+                    <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                      <div className="w-1 h-6 bg-secondary rounded-full"></div>
+                      Izoh
+                    </h2>
+                  </div>
+                  <div className="p-6">
+                    <div className="space-y-4">
+                      <p
+                        className={`text-sm leading-relaxed text-foreground/90 ${
+                          !expandedComment ? "line-clamp-4" : ""
+                        }`}
+                      >
+                        {data?.comment}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              )}
+
+              {isLoading ? (
+                <Skeleton className={"w-full h-70"} />
+              ) : (
+                <Card className="border-0 shadow-md-light  backdrop-blur-sm overflow-hidden">
+                  <div className="bg-gradient-to-r from-accent/10 to-secondary/5 p-6 border-b border-border/40">
+                    <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                      <ImageIcon className="h-5 w-5 text-foreground" />
+                      Muammoning rasmlari ({data?.rasmlar?.length})
+                    </h2>
+                  </div>
+                  <div className="p-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      {data?.rasmlar.map((image, idx) => (
+                        <div
+                          key={image.id}
+                          onClick={() => setSelectedImage(image.rasm)}
+                          className="group relative cursor-pointer overflow-hidden rounded-lg shadow-sm-light hover:shadow-lg-light transition-all duration-300"
+                        >
+                          <div className="aspect-square bg-gradient-to-br from-muted to-muted/50 overflow-hidden">
+                            <img
+                              src={image.rasm || "/placeholder.svg"}
+                              alt={`Attachment ${idx + 1}`}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            />
+                          </div>
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                            <Eye className="h-5 w-5 text-white" />
+                          </div>
+                          <span className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-md">
+                            {idx + 1}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </Card>
+              )}
+              {/* Images Section */}
+            </div>
+          )}
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
@@ -372,7 +607,7 @@ export default function Aplication_Detail() {
             {isLoading ? (
               <Skeleton className={"w-full h-70"} />
             ) : (
-              <Card className="border-0 shadow-md-light bg-white dark:bg-slate-950/60 backdrop-blur-sm overflow-hidden">
+              <Card className="border-0 shadow-md-light backdrop-blur-sm overflow-hidden">
                 <div className="bg-gradient-to-r from-primary/10 to-secondary/5 p-6 border-b border-border/40">
                   <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
                     <FileText className="h-5 w-5 text-primary" />
@@ -414,7 +649,7 @@ export default function Aplication_Detail() {
             {isLoading ? (
               <Skeleton className={"w-full h-70"} />
             ) : (
-              <Card className="border-0 shadow-md-light bg-white dark:bg-slate-950/60 backdrop-blur-sm overflow-hidden">
+              <Card className="border-0 shadow-md-light  backdrop-blur-sm overflow-hidden">
                 <div className="bg-gradient-to-r from-accent/10 to-primary/5 p-6 border-b border-border/40">
                   <h2 className="text-lg font-bold text-foreground">Amallar</h2>
                   {data?.status == "qaytarildi" ||
@@ -428,27 +663,46 @@ export default function Aplication_Detail() {
                   )}
                 </div>
                 <div className="p-6 space-y-3">
-                  <Button
-                    className="bg-green-600 hover:bg-green-700 text-white w-full h-10 font-semibold text-base flex items-center gap-2 justify-center"
-                    onClick={addQabulQilishArizani}
-                    disabled={
-                      ArizaQabuliLoading ||
-                      data?.status == "qaytarildi" ||
-                      data?.status == "qabul qilindi"
-                    }
-                  >
-                    {ArizaQabuliLoading ? (
-                      <span className="flex items-center justify-center gap-1.5">
-                        <Loader2 className="h-5 w-5 animate-spin" /> Ariza qabul
-                        qilinmoqda
-                      </span>
-                    ) : (
-                      <span className="flex items-center justify-center gap-1.5">
-                        <CheckCircle2 className="h-5 w-5" /> Arizani qabul
-                        qilish
-                      </span>
-                    )}
-                  </Button>
+                  {data?.status == "qabul qilindi" ? (
+                    <Button
+                      className="bg-blue-600 hover:bg-blue-700 text-white w-full h-10 font-semibold text-base flex items-center gap-2 justify-center"
+                      onClick={handeOpen2Modal}
+                    >
+                      {ArizaQabuliLoading ? (
+                        <span className="flex items-center justify-center gap-1.5">
+                          <Loader2 className="h-5 w-5 animate-spin" /> Arizani
+                          tugatish
+                        </span>
+                      ) : (
+                        <span className="flex items-center justify-center gap-1.5">
+                          <CheckCircle2 className="h-5 w-5" /> Arizani qabul
+                          qilish
+                        </span>
+                      )}
+                    </Button>
+                  ) : (
+                    <Button
+                      className="bg-green-600 hover:bg-green-700 text-white w-full h-10 font-semibold text-base flex items-center gap-2 justify-center"
+                      onClick={addQabulQilishArizani}
+                      disabled={
+                        ArizaQabuliLoading ||
+                        data?.status == "qaytarildi" ||
+                        data?.status == "qabul qilindi"
+                      }
+                    >
+                      {ArizaQabuliLoading ? (
+                        <span className="flex items-center justify-center gap-1.5">
+                          <Loader2 className="h-5 w-5 animate-spin" /> Ariza
+                          qabul qilinmoqda
+                        </span>
+                      ) : (
+                        <span className="flex items-center justify-center gap-1.5">
+                          <CheckCircle2 className="h-5 w-5" /> Arizani qabul
+                          qilish
+                        </span>
+                      )}
+                    </Button>
+                  )}
 
                   <Button
                     className="bg-red-600 hover:bg-red-700 text-white w-full h-10 font-semibold text-base flex items-center gap-2 justify-center"
@@ -467,7 +721,7 @@ export default function Aplication_Detail() {
             {isLoading ? (
               <Skeleton className={"w-full h-70"} />
             ) : (
-              <Card className="border-0 shadow-md-light bg-white dark:bg-slate-950/60 backdrop-blur-sm overflow-hidden">
+              <Card className="border-0 shadow-md-light backdrop-blur-sm overflow-hidden">
                 <div className="bg-gradient-to-r from-secondary/10 to-accent/5 p-6 border-b border-border/40">
                   <h2 className="text-lg font-bold text-foreground">
                     Ish jarayoni
