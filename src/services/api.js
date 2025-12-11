@@ -127,8 +127,8 @@ export const api = createApi({
       providesTags: ["MainTag"],
     }),
     Coming_App_qabul_qilindi: builder.mutation({
-      query: (body) => ({
-        url: "/kelgan-arizalar-create/",
+      query: ({ body }) => ({
+        url: "/kelgan-arizalar/status_ozgartirish/",
         method: "POST",
         body,
       }),
