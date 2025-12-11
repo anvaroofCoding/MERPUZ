@@ -48,7 +48,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
-export default function ComingAppDetail() {
+export default function Aplication_Detail() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [selectedImage, setSelectedImage] = useState(null);
@@ -128,6 +128,7 @@ export default function ComingAppDetail() {
   function LoadingAriza() {
     toast.info("Ariza yuborilmoqda kuting!");
   }
+  console.log(data);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -416,12 +417,25 @@ export default function ComingAppDetail() {
               <Card className="border-0 shadow-md-light bg-white dark:bg-slate-950/60 backdrop-blur-sm overflow-hidden">
                 <div className="bg-gradient-to-r from-accent/10 to-primary/5 p-6 border-b border-border/40">
                   <h2 className="text-lg font-bold text-foreground">Amallar</h2>
+                  {data?.status == "qaytarildi" ||
+                  data?.status == "qabul qilindi" ? (
+                    <p className="text-gray-500 text-sm">
+                      Amalyotni bajara olmaysiz. Faqat Admin murojaat
+                      qilishingiz mumkin!
+                    </p>
+                  ) : (
+                    ""
+                  )}
                 </div>
                 <div className="p-6 space-y-3">
                   <Button
                     className="bg-green-600 hover:bg-green-700 text-white w-full h-10 font-semibold text-base flex items-center gap-2 justify-center"
                     onClick={addQabulQilishArizani}
-                    disabled={ArizaQabuliLoading}
+                    disabled={
+                      ArizaQabuliLoading ||
+                      data?.status == "qaytarildi" ||
+                      data?.status == "qabul qilindi"
+                    }
                   >
                     {ArizaQabuliLoading ? (
                       <span className="flex items-center justify-center gap-1.5">
@@ -439,6 +453,10 @@ export default function ComingAppDetail() {
                   <Button
                     className="bg-red-600 hover:bg-red-700 text-white w-full h-10 font-semibold text-base flex items-center gap-2 justify-center"
                     onClick={handleOpenModal}
+                    disabled={
+                      data?.status == "qaytarildi" ||
+                      data?.status == "qabul qilindi"
+                    }
                   >
                     <XCircle className="h-5 w-5" /> Qaytarish
                   </Button>
