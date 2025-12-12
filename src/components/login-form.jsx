@@ -99,12 +99,12 @@ export function LoginForm({ className, ...props }) {
             Kirish
           </Button>
         </Field>
-        <FieldSeparator>Or continue with</FieldSeparator>
+        <FieldSeparator>Yoki bular bilan davom eting</FieldSeparator>
         <Field>
           <FieldDescription className="text-center">
             Login yoki parolingizni unutsingizmi?{" "}
             <Link to="/forgot-login" className="underline underline-offset-4">
-              Sign up
+              Tiklash
             </Link>
           </FieldDescription>
         </Field>

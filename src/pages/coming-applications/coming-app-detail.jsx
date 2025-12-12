@@ -17,15 +17,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  useComing_App_DoneMutation,
   useComing_App_qabul_qilindiMutation,
   useComing_Application_DetailQuery,
 } from "@/services/api";
@@ -58,7 +53,6 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-
 export default function Aplication_Detail() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const navigate = useNavigate();
@@ -67,18 +61,26 @@ export default function Aplication_Detail() {
   const [expandedComment, setExpandedComment] = useState(false);
   const { data, isLoading } = useComing_Application_DetailQuery(id);
   const [open, setOpen] = useState(false);
-  const [open2, setOpen2] = useState(true);
+  const [open2, setOpen2] = useState(false);
   const [form, setForm] = useState({
     comment: "Arizangiz qabul qilindi!",
     ariza: id,
     holat: "qabul qilindi",
   });
+  const [done, setDone] = useState({
+    ariza: id,
+    comment: "",
+    parol: "",
+    ilovalar: "",
+    akt_file: "",
+    holat: "bajarilgan",
+  });
+  console.log(done);
   const [form2, setForm2] = useState({
     comment: "",
     ariza: id,
     holat: "qaytarildi",
   });
-
   const clearInput = () => {
     setForm({
       comment: "",
@@ -86,26 +88,31 @@ export default function Aplication_Detail() {
       holat: "",
     });
   };
-
+  const clearInput2 = () => {
+    setForm({
+      comment: "",
+      parol: "",
+      ilovalar: "",
+      akt_file: "",
+    });
+  };
   const [ArizaQabulQilindi, { isLoading: ArizaQabuliLoading }] =
     useComing_App_qabul_qilindiMutation();
   const [ArizaniQaytarish, { isLoading: ArizaniqaytarishLoading }] =
     useComing_App_qabul_qilindiMutation();
-
+  const [ArizaniBajarish] = useComing_App_DoneMutation();
   const [fileSize, setFileSize] = useState(null);
-
   useEffect(() => {
-    if (!data?.bildirgi) return;
+    if (!data?.akt_file) return;
 
-    fetch(data.bildirgi, { method: "HEAD" })
+    fetch(data.akt_file, { method: "HEAD" })
       .then((res) => res.headers.get("content-length"))
       .then((bytes) => {
         if (bytes) {
           setFileSize((bytes / (1024 * 1024)).toFixed(2));
         }
       });
-  }, [data?.bildirgi]);
-
+  }, [data?.akt_file]);
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("uz-UZ", {
       year: "numeric",
@@ -115,7 +122,6 @@ export default function Aplication_Detail() {
       minute: "2-digit",
     });
   };
-
   const handleOpenModal = () => {
     setOpen(true);
   };
@@ -141,23 +147,51 @@ export default function Aplication_Detail() {
       console.log(error);
     }
   }
+  async function bajarishArizani(e) {
+    e.preventDefault();
+
+    // done object ichidan FormData yasaymiz
+    const formData = new FormData();
+    formData.append("akt_file", done.akt_file);
+    formData.append("ariza", done.ariza);
+    formData.append("comment", done.comment);
+    formData.append("holat", done.holat);
+    formData.append("ilovalar", done.ilovalar);
+    formData.append("parol", done.parol);
+
+    try {
+      toast.promise(ArizaniBajarish({ body: formData }).unwrap(), {
+        loading: "Bajarilmoqda...",
+        success: "Ariza muvaffaqiyatli bajarildi!",
+        error: "Xatolik!",
+      });
+
+      setOpen2(false);
+      clearInput2();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   function LoadingAriza() {
     toast.info("Ariza yuborilmoqda kuting!");
   }
-  const handlePhotoUpload = (e) => {
-    const files = Array.from(e.target.files);
-    setForm((prev) => ({
-      ...prev,
-      photos: [...prev.photos, ...files],
-    }));
-  };
 
   const handleBildirgiUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setForm({
-        ...form,
-        bildirgi: file,
+      setDone({
+        ...done,
+        akt_file: file,
+      });
+    }
+  };
+  const handleBildirgiUploads = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setDone({
+        ...done,
+        ilovalar: file,
       });
     }
   };
@@ -226,7 +260,7 @@ export default function Aplication_Detail() {
               <Card>
                 <CardHeader className="rounded-t-lg pb-3">
                   <CardTitle className="text-lg md:text-xl text-blue-900 dark:text-blue-100">
-                    Arizani tahrirlash
+                    Arizani bajargan bo'lsangiz quyida ma'lumotlarni to'ldiring
                   </CardTitle>
                 </CardHeader>
 
@@ -236,112 +270,63 @@ export default function Aplication_Detail() {
                     <Label className="text-sm font-semibold">Komment</Label>
                     <Textarea
                       placeholder="Komment yozing"
-                      value={form.comment}
+                      value={done.comment}
                       onChange={(e) =>
-                        setForm({ ...form, comment: e.target.value })
+                        setDone({ ...done, comment: e.target.value })
                       }
                       className="min-h-24 resize-none"
                     />
                   </div>
 
-                  <div className="flex flex-row items-center justify-center gap-5">
-                    {/* PASSWORD */}
-                    <div className="flex flex-col gap-2 relative w-full">
-                      <Label className="text-sm font-semibold">Parol</Label>
-                      <div className="relative">
-                        <Input
-                          type={passwordVisible ? "text" : "password"}
-                          placeholder="Parol"
-                          value={form.parol}
-                          onChange={(e) =>
-                            setForm({ ...form, parol: e.target.value })
-                          }
-                        />
-                        <button
-                          type="button"
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                          onClick={() => setPasswordVisible(!passwordVisible)}
-                        >
-                          {passwordVisible ? (
-                            <EyeOff size={18} />
-                          ) : (
-                            <Eye size={18} />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* TUZILMA SELECT */}
-                    <div className="flex flex-col gap-2">
-                      <Label className="text-sm font-semibold">Tuzilma</Label>
-                      <Select
-                        value={form.tuzilma}
-                        onValueChange={(val) =>
-                          setForm({ ...form, tuzilma: Number(val) })
+                  {/* PASSWORD */}
+                  <div className="flex flex-col gap-2 relative w-full">
+                    <Label className="text-sm font-semibold">Parol</Label>
+                    <div className="relative">
+                      <Input
+                        type={passwordVisible ? "text" : "password"}
+                        placeholder="Parol"
+                        value={done.parol}
+                        onChange={(e) =>
+                          setDone({ ...done, parol: e.target.value })
                         }
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        onClick={() => setPasswordVisible(!passwordVisible)}
                       >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Tuzilma tanlang" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {/* {OptionTuzilma?.map((item) => {
-                          return (
-                            <SelectItem key={item?.id} value={item?.id}>
-                              {item?.tuzilma_nomi}
-                            </SelectItem>
-                          );
-                        })} */}
-                        </SelectContent>
-                      </Select>
+                        {passwordVisible ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
+                      </button>
                     </div>
                   </div>
-
-                  {/* PHOTOS */}
+                  {/* FILE UPLOAD */}
                   <div className="flex flex-col gap-2">
-                    <Label className="text-sm font-semibold">
-                      Rasmlarni qo'shish{" "}
-                      <span className="text-muted-foreground text-xs">
-                        (ixtiyoriy)
-                      </span>
-                    </Label>
-
+                    <Label className="text-sm font-semibold">Ilava fayli</Label>
                     <label className="border-2 border-dashed border-blue-300 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/50 flex items-center justify-center gap-2 p-4 rounded-lg cursor-pointer transition">
                       <Upload
                         size={18}
                         className="text-blue-600 dark:text-blue-400"
                       />
                       <span className="text-sm font-medium">
-                        Rasmlar yuklash
+                        Faylni yuklash
                       </span>
                       <input
                         type="file"
                         className="hidden"
-                        accept="image/*"
-                        multiple
-                        onChange={handlePhotoUpload}
+                        accept=".pdf,.doc,.docx,.txt,.jpg,.png"
+                        onChange={handleBildirgiUploads}
                       />
                     </label>
 
-                    {form?.photos?.length > 0 && (
-                      <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 mt-2">
-                        {form.photos.map((photo, index) => (
-                          <div key={index} className="relative group">
-                            <img
-                              src={
-                                URL.createObjectURL(photo) || "/placeholder.svg"
-                              }
-                              alt="preview"
-                              className="w-full aspect-square object-cover rounded-lg border border-border"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => removePhoto(index)}
-                              className="absolute -right-2 -top-2 bg-red-500 hover:bg-red-600 text-white w-6 h-6 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition z-10"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ))}
+                    {done.ilovalar && (
+                      <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
+                        <span className="text-sm text-green-700 dark:text-green-300">
+                          ✓ {done.ilovalar.name}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -366,44 +351,18 @@ export default function Aplication_Detail() {
                       />
                     </label>
 
-                    {form.bildirgi && (
+                    {done.akt_file && (
                       <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
                         <span className="text-sm text-green-700 dark:text-green-300">
-                          ✓ {form.bildirgi.name}
+                          ✓ {done.akt_file.name}
                         </span>
                       </div>
                     )}
                   </div>
-                  {form?.bildirgi ? (
-                    <div className="flex flex-col gap-2">
-                      <Label className="text-sm font-semibold">
-                        Bildirgini yangilaganingiz haqida habar beraylikmi?
-                      </Label>
-                      <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
-                          <Checkbox
-                            id="qayta_yuklandi"
-                            checked={form.qayta_yuklandi}
-                            onCheckedChange={(value) =>
-                              setForm({ ...form, qayta_yuklandi: value })
-                            }
-                          />
-                          <label
-                            htmlFor="qayta_yuklandi"
-                            className="text-sm cursor-pointer select-none"
-                          >
-                            Ha, xabar bering
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    ""
-                  )}
 
                   {/* Submit Button */}
                   <Button
-                    // onClick={handleSubmit}
+                    onClick={bajarishArizani}
                     disabled={isLoading}
                     className="bg-green-600 hover:bg-green-700 text-white w-full h-11 font-semibold text-base"
                   >
@@ -649,73 +608,86 @@ export default function Aplication_Detail() {
             {isLoading ? (
               <Skeleton className={"w-full h-70"} />
             ) : (
-              <Card className="border-0 shadow-md-light  backdrop-blur-sm overflow-hidden">
-                <div className="bg-gradient-to-r from-accent/10 to-primary/5 p-6 border-b border-border/40">
-                  <h2 className="text-lg font-bold text-foreground">Amallar</h2>
-                  {data?.status == "qaytarildi" ||
-                  data?.status == "qabul qilindi" ? (
-                    <p className="text-gray-500 text-sm">
-                      Amalyotni bajara olmaysiz. Faqat Admin murojaat
-                      qilishingiz mumkin!
-                    </p>
-                  ) : (
-                    ""
-                  )}
-                </div>
-                <div className="p-6 space-y-3">
-                  {data?.status == "qabul qilindi" ? (
-                    <Button
-                      className="bg-blue-600 hover:bg-blue-700 text-white w-full h-10 font-semibold text-base flex items-center gap-2 justify-center"
-                      onClick={handeOpen2Modal}
-                    >
-                      {ArizaQabuliLoading ? (
-                        <span className="flex items-center justify-center gap-1.5">
-                          <Loader2 className="h-5 w-5 animate-spin" /> Arizani
-                          tugatish
-                        </span>
+              <>
+                {data?.status == "bajarilgan" ? (
+                  <Card className="border-0 shadow-md-light bg-green-600 hover:bg-green-500 backdrop-blur-sm overflow-hidden duration-300">
+                    <h1 className="text-center text-2xl font-bold flex justify-center items-center gap-2">
+                      <CheckCircle2 className="h-6 w-6 text-white" /> Ariza
+                      bajarilgan
+                    </h1>
+                  </Card>
+                ) : (
+                  <Card className="border-0 shadow-md-light  backdrop-blur-sm overflow-hidden">
+                    <div className="bg-gradient-to-r from-accent/10 to-primary/5 p-6 border-b border-border/40">
+                      <h2 className="text-lg font-bold text-foreground">
+                        Amallar
+                      </h2>
+                      {data?.status == "qaytarildi" ||
+                      data?.status == "qabul qilindi" ? (
+                        <p className="text-gray-500 text-sm">
+                          Amalyotni bajara olmaysiz. Faqat Admin murojaat
+                          qilishingiz mumkin!
+                        </p>
                       ) : (
-                        <span className="flex items-center justify-center gap-1.5">
-                          <CheckCircle2 className="h-5 w-5" /> Arizani qabul
-                          qilish
-                        </span>
+                        ""
                       )}
-                    </Button>
-                  ) : (
-                    <Button
-                      className="bg-green-600 hover:bg-green-700 text-white w-full h-10 font-semibold text-base flex items-center gap-2 justify-center"
-                      onClick={addQabulQilishArizani}
-                      disabled={
-                        ArizaQabuliLoading ||
-                        data?.status == "qaytarildi" ||
-                        data?.status == "qabul qilindi"
-                      }
-                    >
-                      {ArizaQabuliLoading ? (
-                        <span className="flex items-center justify-center gap-1.5">
-                          <Loader2 className="h-5 w-5 animate-spin" /> Ariza
-                          qabul qilinmoqda
-                        </span>
+                    </div>
+                    <div className="p-6 space-y-3">
+                      {data?.status == "qabul qilindi" ? (
+                        <Button
+                          className="bg-blue-600 hover:bg-blue-700 text-white w-full h-10 font-semibold text-base flex items-center gap-2 justify-center"
+                          onClick={handeOpen2Modal}
+                        >
+                          {ArizaQabuliLoading ? (
+                            <span className="flex items-center justify-center gap-1.5">
+                              <Loader2 className="h-5 w-5 animate-spin" />{" "}
+                              Arizani tugatish
+                            </span>
+                          ) : (
+                            <span className="flex items-center justify-center gap-1.5">
+                              <CheckCircle2 className="h-5 w-5" /> Arizani qabul
+                              qilish
+                            </span>
+                          )}
+                        </Button>
                       ) : (
-                        <span className="flex items-center justify-center gap-1.5">
-                          <CheckCircle2 className="h-5 w-5" /> Arizani qabul
-                          qilish
-                        </span>
+                        <Button
+                          className="bg-green-600 hover:bg-green-700 text-white w-full h-10 font-semibold text-base flex items-center gap-2 justify-center"
+                          onClick={addQabulQilishArizani}
+                          disabled={
+                            ArizaQabuliLoading ||
+                            data?.status == "qaytarildi" ||
+                            data?.status == "qabul qilindi"
+                          }
+                        >
+                          {ArizaQabuliLoading ? (
+                            <span className="flex items-center justify-center gap-1.5">
+                              <Loader2 className="h-5 w-5 animate-spin" /> Ariza
+                              qabul qilinmoqda
+                            </span>
+                          ) : (
+                            <span className="flex items-center justify-center gap-1.5">
+                              <CheckCircle2 className="h-5 w-5" /> Arizani qabul
+                              qilish
+                            </span>
+                          )}
+                        </Button>
                       )}
-                    </Button>
-                  )}
 
-                  <Button
-                    className="bg-red-600 hover:bg-red-700 text-white w-full h-10 font-semibold text-base flex items-center gap-2 justify-center"
-                    onClick={handleOpenModal}
-                    disabled={
-                      data?.status == "qaytarildi" ||
-                      data?.status == "qabul qilindi"
-                    }
-                  >
-                    <XCircle className="h-5 w-5" /> Qaytarish
-                  </Button>
-                </div>
-              </Card>
+                      <Button
+                        className="bg-red-600 hover:bg-red-700 text-white w-full h-10 font-semibold text-base flex items-center gap-2 justify-center"
+                        onClick={handleOpenModal}
+                        disabled={
+                          data?.status == "qaytarildi" ||
+                          data?.status == "qabul qilindi"
+                        }
+                      >
+                        <XCircle className="h-5 w-5" /> Qaytarish
+                      </Button>
+                    </div>
+                  </Card>
+                )}
+              </>
             )}
 
             {isLoading ? (

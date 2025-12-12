@@ -106,7 +106,7 @@ export default function SettingsPanel() {
         {/* LOADING STYLE */}
         <div className="flex flex-row justify-between items-center space-y-1">
           <span className="flex items-center gap-2 text-sm font-medium">
-            <Loader2 size={16} /> {t("3_20251120")}
+            <Loader2 className="animate-spin" size={16} /> {t("3_20251120")}
           </span>
           <Select value={loadingStyle} onValueChange={setLoadingStyle}>
             <SelectTrigger>

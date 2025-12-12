@@ -14,6 +14,9 @@ const baseQueryWithReAuth = async (args, api, extraOptions) => {
   if (result?.error?.status === 403) {
     window.location.pathname = "/no-token-and-go-login";
   }
+  if (result?.error?.status === 500) {
+    window.location.pathname = "/no-token-and-go-login";
+  }
   return result;
 };
 export const api = createApi({
@@ -134,10 +137,18 @@ export const api = createApi({
       }),
       invalidatesTags: ["MainTag"],
     }),
+    Coming_App_Done: builder.mutation({
+      query: ({ body }) => ({
+        url: "/kelgan-arizalar/status_ozgartirish/",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
   }),
 });
-
 export const {
+  useComing_App_DoneMutation,
   useComing_App_qabul_qilindiMutation,
   useComing_Application_DetailQuery,
   useDeletePhotoMutation,

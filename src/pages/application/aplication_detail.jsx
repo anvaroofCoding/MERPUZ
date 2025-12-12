@@ -97,7 +97,6 @@ export default function ApplicationDetailPage() {
       setCurrent(api.selectedScrollSnap() + 1);
     });
   }, [api]);
-
   const aplication_clear = () => {
     setForm({
       comment: "",
@@ -108,7 +107,6 @@ export default function ApplicationDetailPage() {
       qayta_yuklandi: false,
     });
   };
-
   const { data, isLoading } = useAplication_detailsQuery(id);
   const { data: OptionTuzilma, isLoading: OptionTuzilmaLoader } =
     useOptionTuzilmaQuery();
@@ -128,6 +126,7 @@ export default function ApplicationDetailPage() {
       bildirgi: "",
     });
   }, [data, pass]);
+  console.log(data);
 
   const handlePhotoUpload = (e) => {
     const files = Array.from(e.target.files);
