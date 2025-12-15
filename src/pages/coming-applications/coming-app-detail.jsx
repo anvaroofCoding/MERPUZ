@@ -39,6 +39,7 @@ import {
   Eye,
   EyeOff,
   FileText,
+  FolderDown,
   HelpCircle,
   ImageIcon,
   Loader,
@@ -60,6 +61,7 @@ export default function Aplication_Detail() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [expandedComment, setExpandedComment] = useState(false);
   const { data, isLoading } = useComing_Application_DetailQuery(id);
+  console.log(data);
   const [open, setOpen] = useState(false);
   const [open2, setOpen2] = useState(false);
   const [form, setForm] = useState({
@@ -73,9 +75,7 @@ export default function Aplication_Detail() {
     parol: "",
     ilovalar: "",
     akt_file: "",
-    holat: "bajarilgan",
   });
-  console.log(done);
   const [form2, setForm2] = useState({
     comment: "",
     ariza: id,
@@ -103,16 +103,16 @@ export default function Aplication_Detail() {
   const [ArizaniBajarish] = useComing_App_DoneMutation();
   const [fileSize, setFileSize] = useState(null);
   useEffect(() => {
-    if (!data?.akt_file) return;
+    if (!data?.bildirgi) return;
 
-    fetch(data.akt_file, { method: "HEAD" })
+    fetch(data.bildirgi, { method: "HEAD" })
       .then((res) => res.headers.get("content-length"))
       .then((bytes) => {
         if (bytes) {
           setFileSize((bytes / (1024 * 1024)).toFixed(2));
         }
       });
-  }, [data?.akt_file]);
+  }, [data?.bildirgi]);
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("uz-UZ", {
       year: "numeric",
@@ -150,17 +150,16 @@ export default function Aplication_Detail() {
   async function bajarishArizani(e) {
     e.preventDefault();
 
-    // done object ichidan FormData yasaymiz
-    const formData = new FormData();
-    formData.append("akt_file", done.akt_file);
-    formData.append("ariza", done.ariza);
-    formData.append("comment", done.comment);
-    formData.append("holat", done.holat);
-    formData.append("ilovalar", done.ilovalar);
-    formData.append("parol", done.parol);
+    const body = new FormData();
+    body.append("akt_file", done?.akt_file);
+    body.append("ariza", done?.ariza);
+    body.append("comment", done?.comment);
+    body.append("holat", done?.holat);
+    body.append("ilovalar", done?.ilovalar);
+    body.append("parol", done?.parol);
 
     try {
-      toast.promise(ArizaniBajarish({ body: formData }).unwrap(), {
+      toast.promise(ArizaniBajarish({ body }).unwrap(), {
         loading: "Bajarilmoqda...",
         success: "Ariza muvaffaqiyatli bajarildi!",
         error: "Xatolik!",
@@ -611,7 +610,7 @@ export default function Aplication_Detail() {
               <>
                 {data?.status == "bajarilgan" ? (
                   <Card className="border-0 shadow-md-light bg-green-600 hover:bg-green-500 backdrop-blur-sm overflow-hidden duration-300">
-                    <h1 className="text-center text-2xl font-bold flex justify-center items-center gap-2">
+                    <h1 className="text-center text-2xl font-bold flex justify-center items-center gap-2 text-white">
                       <CheckCircle2 className="h-6 w-6 text-white" /> Ariza
                       bajarilgan
                     </h1>
@@ -645,8 +644,8 @@ export default function Aplication_Detail() {
                             </span>
                           ) : (
                             <span className="flex items-center justify-center gap-1.5">
-                              <CheckCircle2 className="h-5 w-5" /> Arizani qabul
-                              qilish
+                              <CheckCircle2 className="h-5 w-5" /> Arizani
+                              bajarish
                             </span>
                           )}
                         </Button>
@@ -703,17 +702,6 @@ export default function Aplication_Detail() {
                   <CardContent>
                     <div>
                       {data?.kelganlar?.map((item, index) => {
-                        const date = new Date(item?.sana);
-                        const options = {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          second: "2-digit",
-                          hour12: false,
-                        };
-
                         const displayStatus =
                           index === 0 ? "jarayonda" : item?.status;
 
@@ -727,8 +715,7 @@ export default function Aplication_Detail() {
                           >
                             <AccordionItem value="item-1">
                               <AccordionTrigger className="flex flex-row">
-                                {index + 1}. {item?.created_by}{" "}
-                                {date.toLocaleString("uz-UZ", options)}
+                                {index + 1}. {item?.created_by} {item?.sana}
                               </AccordionTrigger>
 
                               <AccordionContent className="flex flex-col gap-4 text-balance">
@@ -756,6 +743,29 @@ export default function Aplication_Detail() {
                                 </Badge>
 
                                 <p>{item?.comment}</p>
+                                {item?.akt_file ? (
+                                  <a
+                                    href={item?.akt_file}
+                                    target="_blank"
+                                    className="underline text-blue-800 flex items-center gap-2"
+                                  >
+                                    <FolderDown /> Akt faylni yuklab olish
+                                  </a>
+                                ) : (
+                                  ""
+                                )}
+                                {item?.ilovalar ? (
+                                  <a
+                                    href={item?.ilovalar}
+                                    target="_blank"
+                                    className="underline text-blue-800 flex items-center gap-2"
+                                  >
+                                    <FolderDown />
+                                    Ilova faylini yuklab olish
+                                  </a>
+                                ) : (
+                                  ""
+                                )}
                               </AccordionContent>
                             </AccordionItem>
                           </Accordion>

@@ -55,6 +55,7 @@ import {
   Eye,
   EyeOff,
   FilePenLine,
+  FolderDown,
   Loader,
   Loader2,
   MessageCircleX,
@@ -108,6 +109,7 @@ export default function ApplicationDetailPage() {
     });
   };
   const { data, isLoading } = useAplication_detailsQuery(id);
+  console.log(data);
   const { data: OptionTuzilma, isLoading: OptionTuzilmaLoader } =
     useOptionTuzilmaQuery();
   const [DeleteAplication, { isLoading: DeleteLoading }] =
@@ -643,6 +645,29 @@ export default function ApplicationDetailPage() {
                               </Badge>
 
                               <p>{item?.comment}</p>
+                              {item?.akt_file ? (
+                                <a
+                                  href={item?.akt_file}
+                                  target="_blank"
+                                  className="underline text-blue-800 flex items-center gap-2"
+                                >
+                                  <FolderDown /> Akt faylni yuklab olish
+                                </a>
+                              ) : (
+                                ""
+                              )}
+                              {item?.ilovalar ? (
+                                <a
+                                  href={item?.ilovalar}
+                                  target="_blank"
+                                  className="underline text-blue-800 flex items-center gap-2"
+                                >
+                                  <FolderDown />
+                                  Ilova faylini yuklab olish
+                                </a>
+                              ) : (
+                                ""
+                              )}
                             </AccordionContent>
                           </AccordionItem>
                         </Accordion>

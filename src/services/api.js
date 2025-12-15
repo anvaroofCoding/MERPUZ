@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 const baseQuery = fetchBaseQuery({
-  baseUrl: "https://pprs-7o08.onrender.com/api",
+  baseUrl: "http://88.88.150.151:8090/api",
   prepareHeaders: (headers) => {
     const token = localStorage.getItem("access");
     if (token) {
@@ -139,7 +139,7 @@ export const api = createApi({
     }),
     Coming_App_Done: builder.mutation({
       query: ({ body }) => ({
-        url: "/kelgan-arizalar/status_ozgartirish/",
+        url: "/kelgan-arizalar-create/",
         method: "POST",
         body,
       }),
