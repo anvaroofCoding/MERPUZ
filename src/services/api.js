@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://88.88.150.151:8090/api",
+  baseUrl: "https://pprs-7o08.onrender.com/api",
   prepareHeaders: (headers) => {
     const token = localStorage.getItem("access");
     if (token) {
@@ -15,7 +15,10 @@ const baseQueryWithReAuth = async (args, api, extraOptions) => {
     window.location.pathname = "/no-token-and-go-login";
   }
   if (result?.error?.status === 500) {
-    window.location.pathname = "/no-token-and-go-login";
+    window.location.pathname = "/Error-500";
+  }
+  if (result?.error?.status === 401) {
+    window.location.pathname = "/Error-401";
   }
   return result;
 };

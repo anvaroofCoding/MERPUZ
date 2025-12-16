@@ -1,4 +1,6 @@
 import Login from "@/auth/login";
+import Error401 from "@/Errors/401/error-401";
+import Error500 from "@/Errors/500/Error-500";
 import Sidebar_Shadcn from "@/main/main-sidebar-shadcn.ui/sidebar_shadcn";
 import Applications from "@/pages/application/aplication";
 import Aplication_Detail from "@/pages/application/aplication_detail";
@@ -47,4 +49,6 @@ export const router = createBrowserRouter([
     ],
   },
   { path: "/no-token-and-go-login", element: <Login /> },
+  { path: "/Error-500", element: <Error500 /> },
+  { path: "/Error-401", element: <Error401 /> },
 ]);
