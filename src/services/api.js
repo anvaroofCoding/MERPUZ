@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 const baseQuery = fetchBaseQuery({
-  baseUrl: "https://pprs-7o08.onrender.com/api",
+  baseUrl: "http://88.88.150.151:8090/api",
   prepareHeaders: (headers) => {
     const token = localStorage.getItem("access");
     if (token) {
@@ -11,13 +11,18 @@ const baseQuery = fetchBaseQuery({
 });
 const baseQueryWithReAuth = async (args, api, extraOptions) => {
   const result = await baseQuery(args, api, extraOptions);
-  if (result?.error?.status === 403) {
-    window.location.pathname = "/no-token-and-go-login";
+  if (result?.error?.status === 401) {
+    const currentPath = window.location.pathname;
+
+    // Login sahifasining o'zida bo'lsa redirect qilmaymiz
+    if (currentPath !== "/no-token-and-go-login") {
+      window.location.replace("/no-token-and-go-login");
+    }
   }
   if (result?.error?.status === 500) {
     window.location.pathname = "/Error-500";
   }
-  if (result?.error?.status === 401) {
+  if (result?.error?.status === 403) {
     window.location.pathname = "/Error-401";
   }
   return result;
@@ -148,9 +153,32 @@ export const api = createApi({
       }),
       invalidatesTags: ["MainTag"],
     }),
+    Created_PPR: builder.query({
+      query: () => `/ppr-turi`,
+      providesTags: ["MainTag"],
+    }),
+    Created_PPR_Post: builder.mutation({
+      query: ({ body }) => ({
+        url: "/ppr-turi/",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    Created_PPR_Edit: builder.mutation({
+      query: ({ body, id }) => ({
+        url: `/ppr-turi/${id}/`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
   }),
 });
 export const {
+  useCreated_PPR_EditMutation,
+  useCreated_PPR_PostMutation,
+  useCreated_PPRQuery,
   useComing_App_DoneMutation,
   useComing_App_qabul_qilindiMutation,
   useComing_Application_DetailQuery,

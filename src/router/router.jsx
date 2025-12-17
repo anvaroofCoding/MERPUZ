@@ -6,6 +6,7 @@ import Applications from "@/pages/application/aplication";
 import Aplication_Detail from "@/pages/application/aplication_detail";
 import ComingAppDetail from "@/pages/coming-applications/coming-app-detail";
 import Coming_Applications from "@/pages/coming-applications/coming-applications";
+import Created_PPR from "@/pages/Created-PPR/created-ppr";
 import One_UseFul_Person from "@/pages/Created_Profile/one_useful_person";
 import Useful_Person from "@/pages/Created_Profile/useful_person";
 import Dashboard from "@/pages/dashboard/dashboard";
@@ -45,6 +46,10 @@ export const router = createBrowserRouter([
       {
         path: "/Kelgan-Arizalar/:MainTitle/:SubTitle/:than_title/:id",
         element: <ComingAppDetail />,
+      },
+      {
+        path: "/PPRlar/:MainTitle/:SubTitle",
+        element: <Created_PPR />,
       },
     ],
   },

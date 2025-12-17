@@ -95,8 +95,8 @@ export function AppSidebar({ ...props }) {
         icon: NotebookPen,
         items: [
           {
-            title: t("27_20251120"),
-            url: "#",
+            title: "PPR qo'shish",
+            url: "PPRlar",
           },
           {
             title: t("28_20251120"),
@@ -115,7 +115,7 @@ export function AppSidebar({ ...props }) {
           },
           {
             title: t("31_20251120"),
-            url: "#",
+            url: "PPRlar",
           },
           {
             title: t("32_20251120"),
