@@ -4,6 +4,16 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,19 +59,22 @@ import {
   Share2,
   Upload,
   User,
+  X,
   XCircle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 export default function Aplication_Detail() {
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [openAcceptConfirm, setOpenAcceptConfirm] = useState(false);
+  const [openFinishConfirm, setOpenFinishConfirm] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
   const [selectedImage, setSelectedImage] = useState(null);
   const [expandedComment, setExpandedComment] = useState(false);
   const { data, isLoading } = useComing_Application_DetailQuery(id);
-  console.log(data);
   const [open, setOpen] = useState(false);
   const [open2, setOpen2] = useState(false);
   const [form, setForm] = useState({
@@ -220,13 +233,13 @@ export default function Aplication_Detail() {
                 </h1>
               )}
 
-              <p className="text-muted-foreground mt-1">
-                {isLoading ? (
-                  <Skeleton className={"h-5 w-60 lg:w-60"} />
-                ) : (
+              {isLoading ? (
+                <Skeleton className={"h-5 w-60 lg:w-60"} />
+              ) : (
+                <p className="text-muted-foreground mt-1">
                   <>Yaratuvchi {data?.created_by}</>
-                )}
-              </p>
+                </p>
+              )}
             </div>
           </div>
           {isLoading ? (
@@ -360,23 +373,33 @@ export default function Aplication_Detail() {
                   </div>
 
                   {/* Submit Button */}
-                  <Button
-                    onClick={bajarishArizani}
-                    disabled={isLoading}
-                    className="bg-green-600 hover:bg-green-700 text-white w-full h-11 font-semibold text-base"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader size={18} className="animate-spin" />
-                        Yuborilmoqda...
-                      </>
-                    ) : (
-                      <>
-                        <Send size={18} />
-                        O'zgarishlarni saqlash
-                      </>
-                    )}
-                  </Button>
+                  <div className="grid lg:grid-cols-2 grid-cols-1 gap-5">
+                    <Button
+                      onClick={() => setOpen2(false)}
+                      disabled={isLoading}
+                      className="bg-red-600 hover:bg-red-700 text-white w-full h-11 font-semibold text-base"
+                    >
+                      <X size={18} />
+                      Bekor qilish
+                    </Button>
+                    <Button
+                      onClick={bajarishArizani}
+                      disabled={isLoading}
+                      className="bg-green-600 hover:bg-green-700 text-white w-full h-11 font-semibold text-base"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader size={18} className="animate-spin" />
+                          Yuborilmoqda...
+                        </>
+                      ) : (
+                        <>
+                          <Send size={18} />
+                          O'zgarishlarni saqlash
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -632,57 +655,151 @@ export default function Aplication_Detail() {
                       )}
                     </div>
                     <div className="p-6 space-y-3">
-                      {data?.status == "qabul qilindi" ? (
+                      {data?.status === "qabul qilindi" ? (
                         <Button
                           className="bg-blue-600 hover:bg-blue-700 text-white w-full h-10 font-semibold text-base flex items-center gap-2 justify-center"
-                          onClick={handeOpen2Modal}
+                          onClick={() => setOpenFinishConfirm(true)}
+                          disabled={ArizaQabuliLoading}
                         >
                           {ArizaQabuliLoading ? (
-                            <span className="flex items-center justify-center gap-1.5">
-                              <Loader2 className="h-5 w-5 animate-spin" />{" "}
+                            <span className="flex items-center gap-1.5">
+                              <Loader2 className="h-5 w-5 animate-spin" />
                               Arizani tugatish
                             </span>
                           ) : (
-                            <span className="flex items-center justify-center gap-1.5">
-                              <CheckCircle2 className="h-5 w-5" /> Arizani
-                              bajarish
+                            <span className="flex items-center gap-1.5">
+                              <CheckCircle2 className="h-5 w-5" />
+                              Arizani bajarish
                             </span>
                           )}
                         </Button>
                       ) : (
                         <Button
                           className="bg-green-600 hover:bg-green-700 text-white w-full h-10 font-semibold text-base flex items-center gap-2 justify-center"
-                          onClick={addQabulQilishArizani}
+                          onClick={() => setOpenAcceptConfirm(true)}
                           disabled={
                             ArizaQabuliLoading ||
-                            data?.status == "qaytarildi" ||
-                            data?.status == "qabul qilindi"
+                            data?.status === "qaytarildi" ||
+                            data?.status === "qabul qilindi"
                           }
                         >
                           {ArizaQabuliLoading ? (
-                            <span className="flex items-center justify-center gap-1.5">
-                              <Loader2 className="h-5 w-5 animate-spin" /> Ariza
-                              qabul qilinmoqda
+                            <span className="flex items-center gap-1.5">
+                              <Loader2 className="h-5 w-5 animate-spin" />
+                              Ariza qabul qilinmoqda
                             </span>
                           ) : (
-                            <span className="flex items-center justify-center gap-1.5">
-                              <CheckCircle2 className="h-5 w-5" /> Arizani qabul
-                              qilish
+                            <span className="flex items-center gap-1.5">
+                              <CheckCircle2 className="h-5 w-5" />
+                              Arizani qabul qilish
                             </span>
                           )}
                         </Button>
                       )}
 
+                      <AlertDialog
+                        open={openAcceptConfirm}
+                        onOpenChange={setOpenAcceptConfirm}
+                      >
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Arizani qabul qilasizmi?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Ariza qabul qilingandan so‘ng, u ish jarayoniga
+                              o‘tadi va bekor qilish cheklanishi mumkin.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+
+                            <AlertDialogAction
+                              className="bg-green-600 hover:bg-green-700"
+                              onClick={() => {
+                                setOpenAcceptConfirm(false);
+                                addQabulQilishArizani();
+                              }}
+                            >
+                              Ha, qabul qilish
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+
+                      <AlertDialog
+                        open={openFinishConfirm}
+                        onOpenChange={setOpenFinishConfirm}
+                      >
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Arizani yakunlaysizmi?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Ushbu amal bilan ariza to‘liq bajarilgan holatga
+                              o‘tadi va qayta o‘zgartirib bo‘lmaydi.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+
+                            <AlertDialogAction
+                              className="bg-blue-600 hover:bg-blue-700"
+                              onClick={() => {
+                                setOpenFinishConfirm(false);
+                                handeOpen2Modal();
+                              }}
+                            >
+                              Ha, yakunlash
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+
                       <Button
                         className="bg-red-600 hover:bg-red-700 text-white w-full h-10 font-semibold text-base flex items-center gap-2 justify-center"
-                        onClick={handleOpenModal}
+                        onClick={() => setOpenConfirm(true)}
                         disabled={
-                          data?.status == "qaytarildi" ||
-                          data?.status == "qabul qilindi"
+                          data?.status === "qaytarildi" ||
+                          data?.status === "qabul qilindi"
                         }
                       >
-                        <XCircle className="h-5 w-5" /> Qaytarish
+                        <XCircle className="h-5 w-5" />
+                        Qaytarish
                       </Button>
+
+                      {/* CONFIRM MODAL */}
+                      <AlertDialog
+                        open={openConfirm}
+                        onOpenChange={setOpenConfirm}
+                      >
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Rostdan ham qaytarmoqchimisiz?
+                            </AlertDialogTitle>
+
+                            <AlertDialogDescription>
+                              Ushbu amal bekor qilinmaydi. Ariza qaytarilgan
+                              holatga o‘tadi.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+
+                            <AlertDialogAction
+                              className="bg-red-600 hover:bg-red-700"
+                              onClick={handleOpenModal}
+                            >
+                              Ha, qaytarish
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </Card>
                 )}

@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://88.88.150.151:8090/api",
+  baseUrl: "https://pprs-7o08.onrender.com/api",
   prepareHeaders: (headers) => {
     const token = localStorage.getItem("access");
     if (token) {
@@ -13,7 +13,6 @@ const baseQueryWithReAuth = async (args, api, extraOptions) => {
   const result = await baseQuery(args, api, extraOptions);
   if (result?.error?.status === 401) {
     const currentPath = window.location.pathname;
-
     // Login sahifasining o'zida bo'lsa redirect qilmaymiz
     if (currentPath !== "/no-token-and-go-login") {
       window.location.replace("/no-token-and-go-login");
@@ -173,9 +172,53 @@ export const api = createApi({
       }),
       invalidatesTags: ["MainTag"],
     }),
+    Obyekt: builder.query({
+      query: ({ search }) => ({
+        url: `/obyekt/?search=${search}`,
+      }),
+      providesTags: ["MainTag"],
+    }),
+    Obyekt_post: builder.mutation({
+      query: ({ body }) => ({
+        url: "/obyekt/",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    ObyektPostLocations: builder.mutation({
+      query: ({ body }) => ({
+        url: "/obyekt-locations/",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    EditObyektlar: builder.mutation({
+      query: ({ body, id }) => ({
+        url: `/obyekt-locations/${id}/`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    ME: builder.query({
+      query: () => "/me/",
+      providesTags: ["MainTag"],
+    }),
+    PprMonth: builder.query({
+      query: () => "/ppr-jadval/oylik/",
+      providesTags: ["MainTag"],
+    }),
   }),
 });
 export const {
+  usePprMonthQuery,
+  useMEQuery,
+  useEditObyektlarMutation,
+  useObyektPostLocationsMutation,
+  useObyekt_postMutation,
+  useObyektQuery,
   useCreated_PPR_EditMutation,
   useCreated_PPR_PostMutation,
   useCreated_PPRQuery,

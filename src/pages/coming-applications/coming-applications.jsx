@@ -130,10 +130,7 @@ export default function Coming_Applications() {
     setShow(false);
     aplication_clear();
   };
-  const handleOpenEdit = (row) => {
-    setEditData(row);
-    setEditModal(true);
-  };
+
   const totalPages = Math.ceil((data?.count || 0) / limit);
   useEffect(() => {
     if (isError) {

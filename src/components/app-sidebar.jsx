@@ -24,18 +24,19 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { useRegisterQuery } from "@/services/api";
+import { useMEQuery } from "@/services/api";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 export function AppSidebar({ ...props }) {
-  const { data: supper, isLoading } = useRegisterQuery();
+  const navigate = useNavigate();
+  const token = localStorage.getItem("access");
+  if (!token) {
+    navigate("/no-token-and-go-login");
+  }
+  const { data: supper, isLoading } = useMEQuery();
   const { t } = useTranslation();
   const data = {
-    user: {
-      name: "islom Anvarov",
-      email: "Web developer",
-      avatar: "/me.jfif",
-    },
     teams: [
       {
         name: "Acme Inc",
@@ -95,12 +96,12 @@ export function AppSidebar({ ...props }) {
         icon: NotebookPen,
         items: [
           {
-            title: "PPR qo'shish",
-            url: "PPRlar",
+            title: "Yillik reja",
+            url: "yil",
           },
           {
-            title: t("28_20251120"),
-            url: "#",
+            title: "Oylik reja",
+            url: "oy",
           },
         ],
       },
@@ -110,16 +111,12 @@ export function AppSidebar({ ...props }) {
         icon: ListPlus,
         items: [
           {
-            title: t("30_20251120"),
-            url: "#",
-          },
-          {
             title: t("31_20251120"),
             url: "PPRlar",
           },
           {
             title: t("32_20251120"),
-            url: "#",
+            url: "Obyektlar",
           },
         ],
       },
@@ -154,6 +151,11 @@ export function AppSidebar({ ...props }) {
         name: "Foydalanuvchilar",
         url: "/foydalanuvchilar",
         icon: Users,
+      },
+      {
+        name: "Dastur haqida",
+        url: "/Programm",
+        icon: Settings2,
       },
       {
         name: t("38_20251120"),

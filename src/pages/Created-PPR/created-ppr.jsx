@@ -53,6 +53,7 @@ import {
   useOptionTuzilmaQuery,
 } from "@/services/api";
 import {
+  CloudDownload,
   FilePlusCorner,
   MessageCircleX,
   MoreVertical,
@@ -233,7 +234,7 @@ export default function Created_PPR() {
             {/* Form Content */}
             <div className="flex flex-col gap-4 py-6">
               {/* NOMI va QISQACHA NOMI */}
-              <div className="grid grid-cols-2 gap-5">
+              <div className="grid xl:grid-cols-2 grid-cols-1 gap-5">
                 <div className="flex flex-col gap-1">
                   <Label>Nomi</Label>
                   <Input
@@ -256,7 +257,7 @@ export default function Created_PPR() {
               </div>
 
               {/* DAVRIYLIGI va VAQTI */}
-              <div className="grid grid-cols-2 gap-5">
+              <div className="grid xl:grid-cols-2 grid-cols-1 gap-5">
                 <div className="flex flex-col gap-1">
                   <Label>Davriyligi misol uchun (10)</Label>
                   <Input
@@ -590,6 +591,13 @@ export default function Created_PPR() {
                           }}
                         >
                           <Pencil /> Tahrirlash
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            return (window.location.href = item.file);
+                          }}
+                        >
+                          <CloudDownload /> Faylni yuklab olish
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

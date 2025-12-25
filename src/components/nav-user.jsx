@@ -27,13 +27,10 @@ import { Link } from "react-router-dom";
 import { Skeleton } from "./ui/skeleton";
 
 export function NavUser({ data, isLoading }) {
-  // const navigate = useNavigate();
   const { isMobile } = useSidebar();
-  const user = Array.isArray(data) && data.length ? data[0] : null;
-  const MainTitle = "Mening profilim";
-  const SubTitle = user?.username;
-  const count = data?.length;
 
+  const MainTitle = "Mening profilim";
+  const count = data?.length;
   const exit = () => {
     localStorage.removeItem("access");
     localStorage.removeItem("refresh");
@@ -204,17 +201,19 @@ export function NavUser({ data, isLoading }) {
                   // haqiqiy kontent
                   <>
                     <Avatar className="h-10 w-8 rounded-lg">
-                      <AvatarImage src={user?.photo} alt={user?.username} />
+                      <AvatarImage src={data?.photo} alt={data?.username} />
                       <AvatarFallback className="rounded-lg">
-                        {user?.username?.charAt(0) ?? "CN"}
+                        {data?.username?.charAt(0) ?? "CN"}
                       </AvatarFallback>
                     </Avatar>
 
                     <div className="grid flex-1 text-left text-sm leading-tight mx-2">
                       <span className="truncate font-medium">
-                        {user?.username}
+                        {data?.username}
                       </span>
-                      <span className="truncate text-xs">{user?.rahbari}</span>
+                      <span className="truncate text-xs">
+                        {data?.faoliyati}
+                      </span>
                     </div>
 
                     <ChevronsUpDown className="ml-auto size-4" />
@@ -243,17 +242,17 @@ export function NavUser({ data, isLoading }) {
                   ) : (
                     <>
                       <Avatar className="h-10 w-8 rounded-lg">
-                        <AvatarImage src={user?.photo} alt={user?.username} />
+                        <AvatarImage src={data?.photo} alt={data?.username} />
                         <AvatarFallback className="rounded-lg">
-                          {user?.username?.charAt(0) ?? "CN"}
+                          {data?.username?.charAt(0) ?? "CN"}
                         </AvatarFallback>
                       </Avatar>
                       <div className="grid flex-1 text-left text-sm leading-tight">
                         <span className="truncate font-medium">
-                          {user?.username}
+                          {data?.username}
                         </span>
                         <span className="truncate text-xs">
-                          {user?.rahbari}
+                          {data?.faoliyati}
                         </span>
                       </div>
                     </>
@@ -293,7 +292,7 @@ export function NavUser({ data, isLoading }) {
                   </div>
                 ) : (
                   <>
-                    <Link to={`/me/${MainTitle}/${SubTitle}/${user?.id}`}>
+                    <Link to={`/me/${MainTitle}/${data?.username}/${data?.id}`}>
                       <DropdownMenuItem>
                         <BadgeCheck className="mr-2" />
                         Profil
