@@ -144,7 +144,14 @@ export function Post_Useful_Person() {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-2xl w-full">
+      <DialogContent
+        className="  w-[95vw]
+    sm:max-w-2xl
+    max-h-[90vh]
+    overflow-hidden
+    flex
+    flex-col"
+      >
         <DialogHeader>
           <DialogTitle>Foydalanuvchini qo'shish</DialogTitle>
           <DialogDescription>
@@ -154,7 +161,7 @@ export function Post_Useful_Person() {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4 mt-4">
+        <div className="flex-1 overflow-y-auto pr-2 mt-4 flex flex-col gap-4">
           <div className="flex flex-col gap-1">
             <Label htmlFor="username" className="mb-1">
               Foydalanuvchi nomi
@@ -346,7 +353,7 @@ export function Post_Useful_Person() {
           </div>
         </div>
 
-        <DialogFooter className="mt-6 flex justify-end gap-2">
+        <DialogFooter className="mt-4 flex justify-end gap-2 sticky bottom-0 bg-background pt-3 ">
           <Button type="submit" onClick={addUser}>
             {isLoading ? (
               <span className="flex items-center justify-center gap-3">
