@@ -17,6 +17,7 @@ import YandexMapEdit from "@/pages/Obyekt/address_edit";
 import Obyekt from "@/pages/Obyekt/obyekt";
 import YandexMapview from "@/pages/Obyekt/viewAddress";
 import PprMonth from "@/pages/ppr.month/ppr.month";
+import PprMonthDetails from "@/pages/ppr.month/ppr.month.details";
 import PprYears from "@/pages/ppr_years/ppr.years";
 import SettingsPanel from "@/pages/setting/setting";
 import { createBrowserRouter } from "react-router-dom";
@@ -81,6 +82,10 @@ export const router = createBrowserRouter([
       {
         path: "/oy/:MainTitle/:SubTitle",
         element: <PprMonth />,
+      },
+      {
+        path: "/oy/:MainTitle/:SubTitle/:than_title/:id",
+        element: <PprMonthDetails />,
       },
     ],
   },

@@ -9,6 +9,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -20,210 +28,89 @@ import {
 } from "@/components/ui/table";
 import { useRegisterQuery } from "@/services/api";
 import { IconCircleCheckFilled, IconLoader } from "@tabler/icons-react";
-import {
-  ChevronDown,
-  Eye,
-  MoreVertical,
-  Search,
-  UserRoundPen,
-} from "lucide-react";
-import { useState } from "react";
+import { Eye, MoreVertical, Search, UserRoundPen } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Edit_Useful_Person } from "./edit_useful_person";
 import { Post_Useful_Person } from "./post_useful_person";
 
 export default function Useful_Person() {
   const navigate = useNavigate();
-  const [editModal, setEditModal] = useState(false);
-  const [editData, setEditData] = useState("");
-  const { data, isLoading } = useRegisterQuery();
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("all");
-  const filtered = data?.filter((item) => {
-    // search uchun username va rahbar
-    const matchesSearch =
-      item.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (item.rahbari &&
-        item.rahbari.toLowerCase().includes(searchTerm.toLowerCase()));
-
-    // status filter: select qiymati string bo‘ladi, lekin item.status boolean
-    const matchesStatus =
-      statusFilter === "all" || item.status === (statusFilter === "true");
-
-    // rol filter
-    const matchesRole = sortBy === "all" || item.role === sortBy;
-
-    return matchesSearch && matchesStatus && matchesRole;
+  const [page, setPage] = useState(1);
+  const pageSize = 30;
+  const [editModal, setEditModal] = useState(false);
+  const [editData, setEditData] = useState(null);
+  const { data, isLoading } = useRegisterQuery({
+    page,
+    limit: pageSize,
+    search: searchTerm,
   });
-
-  const handleOpenEdit = (row) => {
-    setEditData(row); // shu user ma'lumotlarini yuboramiz
-    setEditModal(true); // modalni ochamiz
-  };
-
+  console.log(data);
+  const totalPages = Math.ceil((data?.count || 0) / pageSize);
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
   return (
-    <div className="w-full">
-      {/* Controls Section */}
-      <div className="flex flex-col xl:flex-row w-full gap-4 mb-4">
-        {/* Search Bar */}
+    <div className="w-full space-y-4">
+      {/* TOP */}
+      <div className="flex gap-3">
         <div className="relative w-full">
-          <Search className="absolute left-3 top-4.5 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Foydalanuvchi nomi va FIO bo'yicha qidiring..."
-            className="pl-10 bg-card border-border"
+            className="pl-9"
+            placeholder="Foydalanuvchi qidirish..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            autoComplete="off"
           />
         </div>
-
-        {/* Filters and Sort */}
-        <div className="flex flex-row gap-3">
-          {/* Status Filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="gap-2 border-border bg-card hover:bg-card/80"
-              >
-                Status
-                <ChevronDown className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              className="bg-card border-border"
-            >
-              <DropdownMenuItem onClick={() => setStatusFilter("all")}>
-                Barchasi
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("true")}>
-                Faol
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("false")}>
-                Faol emas
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Sort Filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="gap-2 border-border bg-card hover:bg-card/80"
-              >
-                Rol
-                <ChevronDown className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              className="bg-card border-border"
-            >
-              <DropdownMenuItem onClick={() => setSortBy("all")}>
-                Barchasi
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("tarkibiy")}>
-                Tarkibiy tuzilmalar
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("bekat")}>
-                Bekatlar
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <Post_Useful_Person />
-        </div>
+        <Post_Useful_Person />
       </div>
 
-      {/* Table */}
-      <div className="border border-border rounded-lg bg-card overflow-hidden">
+      {/* TABLE */}
+      <div className="border rounded-lg overflow-hidden">
         <Table>
-          <TableHeader className="bg-muted/50 border-none">
-            <TableRow className="hover:bg-transparent border-none">
-              <TableHead className="w-[12.5%] font-semibold">FIO</TableHead>
-              <TableHead className="w-[12.5%] font-semibold">
-                Foydalanuvchi nomi
-              </TableHead>
-              <TableHead className="w-[12.5%] font-semibold">Rol</TableHead>
-              <TableHead className="w-[12.5%] font-semibold">Status</TableHead>
-              <TableHead className="w-[12.5%] font-semibold">
-                Tarkibiy tuzilma
-              </TableHead>
-              <TableHead className="w-[12.5%] font-semibold">
-                Bekatlar
-              </TableHead>
-              <TableHead className="w-[12.5%] font-semibold">
-                Faoliyati
-              </TableHead>
-              <TableHead className="w-[3%] text-right font-semibold">
-                Amallar
-              </TableHead>
+          <TableHeader>
+            <TableRow>
+              <TableHead>FIO</TableHead>
+              <TableHead>Username</TableHead>
+              <TableHead>Rol</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Faoliyati</TableHead>
+              <TableHead className="text-right">Amallar</TableHead>
             </TableRow>
           </TableHeader>
+
           <TableBody>
             {isLoading ? (
-              [...Array(30)].map((_, index) => (
-                <TableRow key={index} className="border-none">
-                  <TableCell>
-                    <Skeleton className="w-full h-6 rounded" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="w-full h-6 rounded" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="w-full h-6 rounded" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="w-full h-6 rounded" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="w-full h-6 rounded" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="w-full h-6 rounded" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="w-full h-6 rounded" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="w-8 h-8 rounded" />
-                  </TableCell>
+              [...Array(30)].map((_, i) => (
+                <TableRow key={i}>
+                  {[...Array(8)].map((_, j) => (
+                    <TableCell key={j}>
+                      <Skeleton className="h-5 w-full" />
+                    </TableCell>
+                  ))}
                 </TableRow>
               ))
-            ) : filtered?.length > 0 ? (
-              filtered.map((item, index) => (
-                <TableRow
-                  key={item.id}
-                  className={`border-b border-border hover:bg-muted/50 transition-colors ${
-                    index % 2 === 0 ? "bg-background/50" : "bg-background"
-                  }`}
-                >
-                  <TableCell className="font-medium text-foreground truncate flex items-center gap-2">
+            ) : data?.results?.length ? (
+              data.results.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="flex items-center gap-2">
                     <Avatar>
-                      <AvatarImage src={item?.photo} alt={item?.rahbari} />
-                      <AvatarFallback>{`${item?.username?.charAt(
-                        0,
-                      )}${item?.username?.charAt(
-                        item.username.length - 1,
-                      )}`}</AvatarFallback>
+                      <AvatarImage src={item.photo} />
+                      <AvatarFallback>{item.username?.[0]}</AvatarFallback>
                     </Avatar>
-                    {item?.rahbari}
+                    {item.rahbari}
                   </TableCell>
-                  <TableCell className="font-medium text-foreground truncate">
-                    {item?.username}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm truncate">
-                    {item?.role == "tarkibiy" ? "Tarkibiy tuzilma" : "Bekat"}
-                  </TableCell>
+
+                  <TableCell>{item.username}</TableCell>
+                  <TableCell>{item.role}</TableCell>
+
                   <TableCell>
-                    <Badge
-                      variant="outline"
-                      className="text-muted-foreground px-1.5"
-                    >
-                      {item.status === true ? (
-                        <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+                    <Badge variant="outline">
+                      {item.status ? (
+                        <IconCircleCheckFilled className="text-green-500" />
                       ) : (
                         <IconLoader />
                       )}
@@ -231,62 +118,39 @@ export default function Useful_Person() {
                     </Badge>
                   </TableCell>
 
-                  <TableCell className="text-sm text-muted-foreground">
-                    {item?.tarkibiy_tuzilma || "-"}
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {item?.bekat_nomi || "-"}
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {item.faoliyati?.length > 40
-                      ? item.faoliyati.slice(0, 40) + "..."
-                      : item.faoliyati}
-                  </TableCell>
-                  {item.tarkibiy_tuzilma || item.bekat_nomi ? (
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 hover:bg-muted"
-                          >
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="end"
-                          className="bg-card border-border w-48"
+                  <TableCell>{item.faoliyati || "-"}</TableCell>
+
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() =>
+                            navigate(`${item.username}/${item.id}`)
+                          }
                         >
-                          <DropdownMenuItem
-                            onClick={() => {
-                              const than_title = item?.username;
-                              navigate(`${than_title}/${item?.id}`);
-                            }}
-                          >
-                            <Eye /> Ko'rish
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleOpenEdit(item)}
-                          >
-                            <UserRoundPen /> Tahrirlash
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  ) : (
-                    <TableCell className="text-right">
-                      <span>Admin</span>
-                    </TableCell>
-                  )}
+                          <Eye /> Ko‘rish
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setEditData(item);
+                            setEditModal(true);
+                          }}
+                        >
+                          <UserRoundPen /> Tahrirlash
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={8}
-                  className="text-center py-8 text-muted-foreground"
-                >
+                <TableCell colSpan={8} className="text-center py-8">
                   <EmptyOutline />
                 </TableCell>
               </TableRow>
@@ -294,11 +158,43 @@ export default function Useful_Person() {
           </TableBody>
         </Table>
       </div>
-      {/* edit amali */}
+
+      {/* PAGINATION */}
+      {totalPages > 1 && (
+        <Pagination className="justify-end">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                disabled={page === 1}
+              />
+            </PaginationItem>
+
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <PaginationItem key={i}>
+                <PaginationLink
+                  isActive={page === i + 1}
+                  onClick={() => setPage(i + 1)}
+                >
+                  {i + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+                disabled={page === totalPages}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
+
       <Edit_Useful_Person
-        data={editData}
         open={editModal}
         setOpen={setEditModal}
+        data={editData}
       />
     </div>
   );

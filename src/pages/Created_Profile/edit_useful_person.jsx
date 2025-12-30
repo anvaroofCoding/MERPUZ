@@ -18,10 +18,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useEditRegisterMutation } from "@/services/api";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+
 export function Edit_Useful_Person({ data, open, setOpen }) {
+  const [showPassword, setShowPassword] = useState(false);
+
   const [form, setForm] = useState({
     username: "",
     password: "",
@@ -31,8 +34,11 @@ export function Edit_Useful_Person({ data, open, setOpen }) {
     faoliyati: "",
     rahbari: "",
     passport_seriya: "",
-    status: "",
+    status: true,
   });
+
+  const [editRegister, { isLoading }] = useEditRegisterMutation();
+
   useEffect(() => {
     if (data) {
       setForm({
@@ -43,53 +49,12 @@ export function Edit_Useful_Person({ data, open, setOpen }) {
         tuzilma_nomi: data.tarkibiy_tuzilma || "",
         faoliyati: data.faoliyati || "",
         rahbari: data.rahbari || "",
-        passport_seriya: data.passport_seriya || true,
-        status: data.status ?? true, // agar boolean bo‘lsa
+        passport_seriya: data.passport_seriya || "",
+        status: data.status ?? true,
       });
     }
   }, [data]);
-  const [editRegister, { isLoading, isError, error }] =
-    useEditRegisterMutation();
-  const clearForm = () => {
-    setForm({
-      username: "",
-      password: "",
-      role: "",
-      bekat_nomi: "",
-      tuzilma_nomi: "",
-      faoliyati: "",
-      rahbari: "",
-      passport_seriya: "",
-      status: true,
-    });
-  };
-  const addUser = async (e) => {
-    e.preventDefault();
-    const body = new FormData();
-    Object.entries(form).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        body.append(key, value);
-      }
-    });
-    try {
-      await toast.promise(editRegister({ body, id: data?.id }).unwrap(), {
-        loading: "Saqlanmoqda...",
-        success: "Foydalanuvchi muvaffaqiyatli saqlandi!",
-        error: (err) => {
-          // console.error(err);
-          return `Xatolik yuz berdi: ${
-            err?.data?.detail || err.message
-          }. Qaytadan urinib ko'ring!`;
-        },
-      });
 
-      clearForm();
-      setOpen(false);
-    } catch (err) {
-      console.error(err);
-      clearForm();
-    }
-  };
   const stations = [
     "Beruniy",
     "Tinchlik",
@@ -142,204 +107,176 @@ export function Edit_Useful_Person({ data, open, setOpen }) {
     "Amir Temur xiyoboni",
     "Mustaqillik maydoni",
   ];
-  if (isError) {
-    console.log(error);
-  }
+
+  const submit = async (e) => {
+    e.preventDefault();
+
+    const body = new FormData();
+    Object.entries(form).forEach(([k, v]) => body.append(k, v ?? ""));
+
+    await toast.promise(editRegister({ id: data?.id, body }).unwrap(), {
+      loading: "Saqlanmoqda...",
+      success: "Foydalanuvchi muvaffaqiyatli saqlandi",
+      error: "Xatolik yuz berdi",
+    });
+
+    setOpen(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-2xl w-full">
+      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Foydalanuvchini ma'lumotlarni tahrirlash</DialogTitle>
+          <DialogTitle>Foydalanuvchini tahrirlash</DialogTitle>
           <DialogDescription>
-            Barcha ma'lumotlarni qayta yangilash imkoniyati bor. Faqat siz
-            bergan dostupga ko'ra dasturdan foydalana oladi, unutmang!
+            Quyidagi ma’lumotlarni yangilashingiz mumkin
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4 mt-4">
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="username" className="mb-1">
-              Foydalanuvchi nomi
-            </Label>
-            <Input
-              id="username"
-              placeholder="Foydalanuvchi nomini yozing"
-              required
-              className="w-full"
-              value={form.username}
-              onChange={(e) => setForm({ ...form, username: e.target.value })}
-            />
-          </div>
+        <form
+          onSubmit={submit}
+          className="flex-1 overflow-y-auto pr-2 space-y-5"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* USERNAME */}
+            <div className="space-y-1">
+              <Label>Foydalanuvchi nomi</Label>
+              <Input
+                className="h-10"
+                value={form.username}
+                onChange={(e) => setForm({ ...form, username: e.target.value })}
+              />
+            </div>
 
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="rahbari" className="mb-1">
-              FIO
-            </Label>
-            <Input
-              id="rahbari"
-              placeholder="FIOni yozing"
-              required
-              className="w-full"
-              value={form.rahbari}
-              onChange={(e) => setForm({ ...form, rahbari: e.target.value })}
-            />
-          </div>
+            {/* FIO */}
+            <div className="space-y-1">
+              <Label>FIO</Label>
+              <Input
+                className="h-10"
+                value={form.rahbari}
+                onChange={(e) => setForm({ ...form, rahbari: e.target.value })}
+              />
+            </div>
 
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="passport_seriya" className="mb-1">
-              Pasport seriya (AB1234567)
-            </Label>
-            <Input
-              id="passport_seriya"
-              placeholder="Pasport seriyani yozing"
-              required
-              className="w-full"
-              value={form.passport_seriya}
-              onChange={(e) =>
-                setForm({ ...form, passport_seriya: e.target.value })
-              }
-            />
-          </div>
+            {/* PASSWORD */}
+            <div className="space-y-1 ">
+              <Label>Yangi parol (ixtiyoriy)</Label>
+              <div className="relative ">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  className="h-10 pr-10 border-red-500"
+                  value={form.password}
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
 
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="password" className="mb-1">
-              Parolni yozishingiz shart! Yoki yangi parolni
-            </Label>
-            <Input
-              id="password"
-              placeholder="Parolni yozing"
-              required
-              type="password"
-              className="w-full"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-            />
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="role" className="mb-1">
-              Rol
-            </Label>
-
-            <Select
-              value={form.role}
-              onValueChange={(value) => setForm({ ...form, role: value })}
-            >
-              <SelectTrigger id="role" className="w-full">
-                <SelectValue placeholder="Rolni tanlang" />
-              </SelectTrigger>
-
-              <SelectContent>
-                <SelectItem value="bekat">Bekat rahbari</SelectItem>
-                <SelectItem value="tarkibiy">
-                  Tarkibiy tuzilma rahbari
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {form.role == "bekat" ? (
-            <div className="flex flex-col gap-1">
-              <Label htmlFor="bekat_nomi" className="mb-1">
-                Bekat nomi
-              </Label>
-
+            {/* ROLE */}
+            <div className="space-y-1">
+              <Label>Rol</Label>
               <Select
-                value={form.bekat_nomi}
-                onValueChange={(value) =>
-                  setForm({ ...form, bekat_nomi: value })
+                value={form.role}
+                onValueChange={(v) =>
+                  setForm({
+                    ...form,
+                    role: v,
+                    bekat_nomi: "",
+                    tuzilma_nomi: "",
+                  })
                 }
               >
-                <SelectTrigger id="role" className="w-full">
-                  <SelectValue placeholder="Bekatni tanlang" />
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder="Rolni tanlang" />
                 </SelectTrigger>
-
                 <SelectContent>
-                  <SelectItem value="yo'q">Bekatni o'chirish</SelectItem>
-                  {stations?.map((item) => {
-                    return (
-                      <SelectItem key={item} value={item}>
-                        {item}
-                      </SelectItem>
-                    );
-                  })}
+                  <SelectItem value="bekat">Bekat rahbari</SelectItem>
+                  <SelectItem value="tarkibiy">
+                    Tarkibiy tuzilma rahbari
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
-          ) : (
-            <div className="flex flex-col gap-1">
-              <Label htmlFor="tuzilma_nomi" className="mb-1">
-                Tarkibiy tuzilma nomi
-              </Label>
+
+            {/* CONDITIONAL */}
+            {form.role === "bekat" && (
+              <div className="space-y-1">
+                <Label>Bekat</Label>
+                <Select
+                  value={form.bekat_nomi || "none"} // default value "none"
+                  onValueChange={(v) =>
+                    setForm({ ...form, bekat_nomi: v === "none" ? "" : v })
+                  }
+                >
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Bekatni tanlang" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Bekatni o‘chirish</SelectItem>
+                    {stations.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/* FAOLIYATI */}
+            <div className="space-y-1">
+              <Label>Faoliyati</Label>
               <Input
-                id="tuzilma_nomi"
-                placeholder="Tarkibiy tuzilma nomini yozing"
-                required
-                className="w-full"
-                disabled={!form.role}
-                value={form.tuzilma_nomi}
+                className="h-10"
+                value={form.faoliyati}
                 onChange={(e) =>
-                  setForm({ ...form, tuzilma_nomi: e.target.value })
+                  setForm({ ...form, faoliyati: e.target.value })
                 }
               />
             </div>
-          )}
-
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="faoliyati" className="mb-1">
-              Faolyati
-            </Label>
-            <Input
-              id="faoliyati"
-              placeholder="Faoliyatini yozing"
-              required
-              className="w-full"
-              value={form.faoliyati}
-              onChange={(e) => setForm({ ...form, faoliyati: e.target.value })}
-            />
           </div>
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="status">
-              Bu foydalanuvchini faollashtirasizmi?
-            </Label>
 
+          {/* STATUS */}
+          <div className="space-y-2">
+            <Label>Faollashtirasizmi?</Label>
             <RadioGroup
-              id="status"
-              defaultValue="true"
-              value={form.status ? "true" : "false"}
-              onValueChange={(value) =>
-                setForm({ ...form, status: value === "true" })
-              }
-              className="flex items-center gap-6"
+              value={String(form.status)}
+              onValueChange={(v) => setForm({ ...form, status: v === "true" })}
+              className="flex gap-6"
             >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="true" id="r1" />
-                <Label htmlFor="r1">Ha</Label>
+              <div className="flex items-center gap-2">
+                <RadioGroupItem value="true" />
+                <Label>Ha</Label>
               </div>
-
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="false" id="r2" />
-                <Label htmlFor="r2">Yo'q</Label>
+              <div className="flex items-center gap-2">
+                <RadioGroupItem value="false" />
+                <Label>Yo‘q</Label>
               </div>
             </RadioGroup>
           </div>
-        </div>
 
-        <DialogFooter className="mt-6 flex justify-end gap-2">
-          <Button type="submit" onClick={addUser}>
-            {isLoading ? (
-              <span className="flex items-center justify-center gap-3">
-                <span>Saqlanmoqda...</span>
-                <Loader2 className="animate-spin" />
-              </span>
-            ) : (
-              "Saqlash"
-            )}
-          </Button>
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Bekor qilish
-          </Button>
-        </DialogFooter>
+          <DialogFooter className="sticky bottom-0 bg-background pt-4">
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 animate-spin" />}
+              Saqlash
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
+              Bekor qilish
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

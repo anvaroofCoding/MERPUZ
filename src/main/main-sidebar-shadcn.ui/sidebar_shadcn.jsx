@@ -1,4 +1,5 @@
 import { AppSidebar } from "@/components/app-sidebar";
+import Example from "@/components/banner";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -75,8 +76,8 @@ export default function Sidebar_Shadcn() {
               </div>
               <Bell />
             </div>
+            <Example />
           </header>
-
           <div className="w-full h-full px-5 py-5">
             <Outlet />
           </div>

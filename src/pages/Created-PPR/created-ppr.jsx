@@ -246,13 +246,21 @@ export default function Created_PPR() {
 
                 <div className="flex flex-col gap-1">
                   <Label>Qisqacha nomi</Label>
-                  <Input
-                    placeholder="Masalan: PPR1"
+                  <Select
                     value={formEdit.qisqachanomi}
-                    onChange={(e) =>
-                      handleChanges("qisqachanomi", e.target.value)
-                    }
-                  />
+                    onValueChange={(val) => handleChanges("qisqachanomi", val)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Tanlang" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PPR-1">PPR-1</SelectItem>
+                      <SelectItem value="PPR-2">PPR-2</SelectItem>
+                      <SelectItem value="PPR-3">PPR-3</SelectItem>
+                      <SelectItem value="PPR-4">PPR-4</SelectItem>
+                      <SelectItem value="PPR-5">PPR-5</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -393,14 +401,24 @@ export default function Created_PPR() {
                   onChange={(e) => handleChange("nomi", e.target.value)}
                 />
               </div>
-              {/* QISQACHA NOMI */}
+
               <div className="flex flex-col gap-1">
                 <Label>Qisqacha nomi</Label>
-                <Input
-                  placeholder="Masalan: PPR1"
+                <Select
                   value={form.qisqachanomi}
-                  onChange={(e) => handleChange("qisqachanomi", e.target.value)}
-                />
+                  onValueChange={(val) => handleChange("qisqachanomi", val)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Tanlang" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PPR-1">PPR-1</SelectItem>
+                    <SelectItem value="PPR-2">PPR-2</SelectItem>
+                    <SelectItem value="PPR-3">PPR-3</SelectItem>
+                    <SelectItem value="PPR-4">PPR-4</SelectItem>
+                    <SelectItem value="PPR-5">PPR-5</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 

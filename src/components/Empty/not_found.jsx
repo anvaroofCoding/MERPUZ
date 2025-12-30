@@ -11,17 +11,26 @@ import {
 
 export function EmptyOutline() {
   return (
-    <Empty className="border border-dashed">
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <IconCloud />
+    <Empty className="border border-dashed rounded-xl bg-muted/30 p-6 sm:p-10">
+      <EmptyHeader className="text-center space-y-3">
+        <EmptyMedia
+          variant="icon"
+          className="mx-auto w-12 h-12 sm:w-14 sm:h-14"
+        >
+          <IconCloud className="w-full h-full text-muted-foreground" />
         </EmptyMedia>
-        <EmptyTitle>Ma'lumotlar topilmadi</EmptyTitle>
-        <EmptyDescription>
-          404 xatoligi va qaytadan urinishingizni so'raymiz!
+
+        <EmptyTitle className="text-lg sm:text-xl">
+          Hozircha ma’lumot yo‘q
+        </EmptyTitle>
+
+        <EmptyDescription className="text-sm sm:text-base max-w-md mx-auto">
+          Bu sahifa bosh sahifa hisoblanadi. Ma’lumotlar qo‘shilgach, ular shu
+          yerda ko‘rinadi.
         </EmptyDescription>
       </EmptyHeader>
-      <EmptyContent></EmptyContent>
+
+      <EmptyContent />
     </Empty>
   );
 }

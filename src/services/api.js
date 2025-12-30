@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 const baseQuery = fetchBaseQuery({
-  baseUrl: "https://pprs-7o08.onrender.com/api",
+  baseUrl: "http://88.88.150.151:9000/api",
   prepareHeaders: (headers) => {
     const token = localStorage.getItem("access");
     if (token) {
@@ -42,7 +42,14 @@ export const api = createApi({
       }),
     }),
     register: builder.query({
-      query: () => "/register/",
+      query: ({ page, limit, search }) => ({
+        url: "register/",
+        params: {
+          page,
+          limit,
+          search: search || undefined,
+        },
+      }),
       providesTags: ["MainTag"],
     }),
     AddRegister: builder.mutation({
@@ -210,9 +217,40 @@ export const api = createApi({
       query: () => "/ppr-jadval/oylik/",
       providesTags: ["MainTag"],
     }),
+    AddPPRJadval: builder.mutation({
+      query: ({ body }) => ({
+        url: "/ppr-jadval/",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    PprMonthDetails: builder.query({
+      query: (id) => `/ppr-jadval/${id}/`,
+      providesTags: ["MainTag"],
+    }),
+    EditPPRMOnth: builder.mutation({
+      query: ({ body, id }) => ({
+        url: `/ppr-jadval/${id}/`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    deletePPRMonth: builder.mutation({
+      query: (id) => ({
+        url: `/ppr-jadval/${id}/`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
   }),
 });
 export const {
+  useDeletePPRMonthMutation,
+  useEditPPRMOnthMutation,
+  usePprMonthDetailsQuery,
+  useAddPPRJadvalMutation,
   usePprMonthQuery,
   useMEQuery,
   useEditObyektlarMutation,

@@ -53,7 +53,6 @@ import {
   FilePlusCorner,
   Loader,
   MessageCircleX,
-  MoreVertical,
   Search,
   Send,
   Upload,
@@ -61,7 +60,6 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Edit_Useful_Person } from "../Created_Profile/edit_useful_person";
 
 export default function Applications() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -70,8 +68,6 @@ export default function Applications() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const limit = 50;
-  const [editModal, setEditModal] = useState(false);
-  const [editData, setEditData] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [show, setShow] = useState(false);
   const [form, setForm] = useState({
@@ -135,10 +131,7 @@ export default function Applications() {
     setShow(false);
     aplication_clear();
   };
-  const handleOpenEdit = (row) => {
-    setEditData(row);
-    setEditModal(true);
-  };
+
   const totalPages = Math.ceil((data?.count || 0) / limit);
   useEffect(() => {
     if (isError) {
@@ -488,26 +481,17 @@ export default function Applications() {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 hover:bg-muted"
-                        >
-                          <MoreVertical className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent
-                        align="end"
-                        className="bg-card border-border w-48"
-                      >
-                        <DropdownMenuItem
+                          className={
+                            "bg-transparent hover:bg-transparent hover:text-gray-300 duration-200"
+                          }
                           onClick={() => {
                             const than_title = item?.tuzilma_nomi;
                             navigate(`${than_title}/${item?.id}`);
                           }}
                         >
-                          <Eye /> Ko'rish
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
+                          <Eye />
+                        </Button>
+                      </DropdownMenuTrigger>
                     </DropdownMenu>
                   </TableCell>
                 </TableRow>
@@ -526,11 +510,6 @@ export default function Applications() {
         </Table>
       </div>
       {/* edit amali */}
-      <Edit_Useful_Person
-        data={editData}
-        open={editModal}
-        setOpen={setEditModal}
-      />
       {data?.results?.length > 0 ? (
         <div className="py-5">
           <Pagination>
