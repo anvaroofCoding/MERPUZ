@@ -1,135 +1,120 @@
-import { Moon, Settings, Sun } from "lucide-react";
+import { Loader2, Moon, Settings, Sun, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function SettingsFloatingPanel() {
-  /* PANEL OPEN */
   const [open, setOpen] = useState(false);
+  const [isChangingTheme, setIsChangingTheme] = useState(false); // Loading holati
 
-  /* 🌙 DARK MODE */
-  const [darkMode, setDarkMode] = useState(
-    typeof window !== "undefined" && localStorage.getItem("theme") === "dark",
-  );
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("theme") === "dark";
+    }
+    return false;
+  });
+
+  // 🌙 Tema o'zgartirish funksiyasi (Loading bilan)
+  const toggleTheme = (isDark) => {
+    if (isDark === darkMode) return;
+
+    setIsChangingTheme(true); // Loadingni yoqish
+
+    // Brauzerga render qilish uchun ozgina vaqt beramiz (Macro-task)
+    setTimeout(() => {
+      setDarkMode(isDark);
+
+      // Temani qo'llash biroz vaqt olishi mumkin, shuning uchun
+      // loadingni darhol o'chirmaymiz
+      setTimeout(() => {
+        setIsChangingTheme(false);
+      }, 400); // 400ms silliq o'tish uchun yetarli
+    }, 50);
+  };
 
   useEffect(() => {
+    const root = window.document.documentElement;
     if (darkMode) {
-      document.documentElement.classList.add("dark");
+      root.classList.add("dark");
       localStorage.setItem("theme", "dark");
     } else {
-      document.documentElement.classList.remove("dark");
+      root.classList.remove("dark");
       localStorage.setItem("theme", "light");
     }
   }, [darkMode]);
 
-  /* 🌍 LANGUAGE */
-  const [langs, setLang] = useState(() =>
-    typeof window !== "undefined"
-      ? localStorage.getItem("language") || "uz"
-      : "uz",
-  );
-
-  useEffect(() => {
-    localStorage.setItem("language", langs);
-  }, [langs]);
-
   return (
     <>
-      {/* 🔘 FLOATING ICON BUTTON */}
+      {/* 🌀 FULL SCREEN LOADING OVERLAY */}
+      {isChangingTheme && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background/80 backdrop-blur-md animate-in fade-in duration-200">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <p className="mt-4 text-sm font-medium animate-pulse">
+            Tema yangilanmoqda...
+          </p>
+        </div>
+      )}
+
+      {/* 🔘 FLOATING BUTTON */}
       <button
         onClick={() => setOpen(true)}
-        className="
-          fixed bottom-5 right-5 z-50
-          h-12 w-12 rounded-full
-          bg-primary text-primary-foreground
-          flex items-center justify-center
-          shadow-lg active:scale-95 transition
-        "
+        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-2xl active:scale-90 transition-transform"
       >
-        <Settings className="h-6 w-6" />
+        <Settings className="h-7 w-7" />
       </button>
 
       {/* 🌫 BACKDROP */}
-      {open && (
-        <div
-          onClick={() => setOpen(false)}
-          className="fixed inset-0 bg-black/40 z-40"
-        />
-      )}
+      <div
+        onClick={() => setOpen(false)}
+        className={`fixed inset-0 bg-black/30 backdrop-blur-sm z-40 transition-opacity ${
+          open ? "opacity-100 visible" : "opacity-0 invisible"
+        }`}
+      />
 
       {/* 📱 SLIDE PANEL */}
-      <div
-        className={`
-          fixed top-0 left-0 z-50 h-full w-64
-          bg-background shadow-xl
-          transform transition-transform duration-300
-          ${open ? "translate-x-0" : "-translate-x-full"}
-        `}
+      <aside
+        className={`fixed top-0 right-0 z-50 h-full w-72 bg-background shadow-2xl transform transition-transform duration-300 ease-out will-change-transform ${
+          open ? "translate-x-0" : "translate-x-full"
+        }`}
       >
-        {/* HEADER */}
-        <div className="px-4 py-4 border-b text-sm font-semibold">
-          Sozlamalar
+        <div className="flex items-center justify-between px-5 py-4 border-b">
+          <span className="font-bold">Sozlamalar</span>
+          <button onClick={() => setOpen(false)}>
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
-        {/* CONTENT */}
-        <div className="p-4 space-y-6">
-          {/* 🌙 DARK MODE ICON TOGGLE */}
-          <div>
-            <p className="text-xs text-muted-foreground mb-2">Tema</p>
-            <div className="flex gap-3">
+        <div className="p-6 space-y-8">
+          {/* TEMA SELECTION */}
+          <section>
+            <label className="text-sm font-medium text-muted-foreground block mb-3">
+              Interfeys rejimi
+            </label>
+            <div className="grid grid-cols-2 gap-2 p-1 bg-muted rounded-lg">
               <button
-                onClick={() => setDarkMode(false)}
-                className={`h-10 w-10 rounded-full flex items-center justify-center
-                  ${
-                    !darkMode
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
-                  }`}
+                onClick={() => toggleTheme(false)}
+                className={`flex items-center justify-center gap-2 py-2 rounded-md transition-all ${
+                  !darkMode
+                    ? "bg-background shadow text-primary"
+                    : "text-muted-foreground"
+                }`}
               >
-                <Sun className="h-5 w-5" />
+                <Sun className="h-4 w-4" />{" "}
+                <span className="text-sm font-medium">Yorug'</span>
               </button>
-
               <button
-                onClick={() => setDarkMode(true)}
-                className={`h-10 w-10 rounded-full flex items-center justify-center
-                  ${
-                    darkMode ? "bg-primary text-primary-foreground" : "bg-muted"
-                  }`}
+                onClick={() => toggleTheme(true)}
+                className={`flex items-center justify-center gap-2 py-2 rounded-md transition-all ${
+                  darkMode
+                    ? "bg-background shadow text-primary"
+                    : "text-muted-foreground"
+                }`}
               >
-                <Moon className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* 🌍 LANGUAGE FLAGS */}
-          <div>
-            <p className="text-xs text-muted-foreground mb-2">Til</p>
-            <div className="flex gap-3 text-xl">
-              <button
-                onClick={() => setLang("uz")}
-                className={`h-10 w-10 rounded-full
-                  ${langs === "uz" ? "bg-primary/20" : "bg-muted"}`}
-              >
-                🇺🇿
-              </button>
-
-              <button
-                onClick={() => setLang("ru")}
-                className={`h-10 w-10 rounded-full
-                  ${langs === "ru" ? "bg-primary/20" : "bg-muted"}`}
-              >
-                🇷🇺
-              </button>
-
-              <button
-                onClick={() => setLang("en")}
-                className={`h-10 w-10 rounded-full
-                  ${langs === "en" ? "bg-primary/20" : "bg-muted"}`}
-              >
-                🇺🇸
+                <Moon className="h-4 w-4" />{" "}
+                <span className="text-sm font-medium">Tungi</span>
               </button>
             </div>
-          </div>
+          </section>
         </div>
-      </div>
+      </aside>
     </>
   );
 }

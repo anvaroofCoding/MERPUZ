@@ -32,7 +32,7 @@ const Toaster = ({ ...props }) => {
   const iosStyle = isDark
     ? {
         // DARK MODE → light-translucent
-        "--normal-bg": "rgba(133, 119, 119, 0.1)",
+        "--normal-bg": "rgba(0, 0, 0, 0.39)",
         "--normal-border": "rgba(190, 177, 177, 0.19)",
         "--normal-text": "rgba(255, 255, 255, 0.95)",
         "--border-radius": "18px",

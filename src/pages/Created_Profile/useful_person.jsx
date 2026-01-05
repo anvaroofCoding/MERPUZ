@@ -26,12 +26,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useRegisterQuery } from "@/services/api";
+import { useMEQuery, useRegisterQuery } from "@/services/api";
 import { IconCircleCheckFilled, IconLoader } from "@tabler/icons-react";
 import { Eye, MoreVertical, Search, UserRoundPen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Edit_Useful_Person } from "./edit_useful_person";
+import { ForAdmin_Post_Bolum_Useful_Person } from "./For.admin_Post_Bolum_useful_person";
+import { Post_Bolum_Useful_Person } from "./post_bolum_useful_person";
 import { Post_Useful_Person } from "./post_useful_person";
 
 export default function Useful_Person() {
@@ -46,11 +48,27 @@ export default function Useful_Person() {
     limit: pageSize,
     search: searchTerm,
   });
-  console.log(data);
+  const { data: me, isLoading: MeLoading } = useMEQuery();
   const totalPages = Math.ceil((data?.count || 0) / pageSize);
   useEffect(() => {
     setPage(1);
   }, [searchTerm]);
+  const renderRole = (role) => {
+    switch (role) {
+      case "admin":
+        return "Admin";
+      case "monitoring":
+        return "Monitoring";
+      case "tarkibiy":
+        return "Tarkibiy Tuzilma Rahbari";
+      case "bekat":
+        return "Bekat Rahbari";
+      case "bolim":
+        return "Xodim";
+      default:
+        return "Noma'lum";
+    }
+  };
   return (
     <div className="w-full space-y-4">
       {/* TOP */}
@@ -65,7 +83,17 @@ export default function Useful_Person() {
             autoComplete="off"
           />
         </div>
-        <Post_Useful_Person />
+        {me?.role == "admin" ? <Post_Useful_Person /> : ""}
+        {me?.role == "tarkibiy" ? (
+          <Post_Bolum_Useful_Person id={me?.tarkibiy_tuzilma_id} />
+        ) : (
+          ""
+        )}
+        {me?.role == "admin" ? (
+          <ForAdmin_Post_Bolum_Useful_Person id={me?.tarkibiy_tuzilma_id} />
+        ) : (
+          ""
+        )}
       </div>
 
       {/* TABLE */}
@@ -73,9 +101,9 @@ export default function Useful_Person() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Foydalanuvchi nomi</TableHead>
               <TableHead>FIO</TableHead>
-              <TableHead>Username</TableHead>
-              <TableHead>Rol</TableHead>
+              <TableHead>Roli</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Faoliyati</TableHead>
               <TableHead className="text-right">Amallar</TableHead>
@@ -83,7 +111,7 @@ export default function Useful_Person() {
           </TableHeader>
 
           <TableBody>
-            {isLoading ? (
+            {isLoading || MeLoading ? (
               [...Array(30)].map((_, i) => (
                 <TableRow key={i}>
                   {[...Array(8)].map((_, j) => (
@@ -94,18 +122,18 @@ export default function Useful_Person() {
                 </TableRow>
               ))
             ) : data?.results?.length ? (
-              data.results.map((item) => (
+              data?.results.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell className="flex items-center gap-2">
                     <Avatar>
                       <AvatarImage src={item.photo} />
                       <AvatarFallback>{item.username?.[0]}</AvatarFallback>
                     </Avatar>
-                    {item.rahbari}
+                    {item?.username}
                   </TableCell>
 
-                  <TableCell>{item.username}</TableCell>
-                  <TableCell>{item.role}</TableCell>
+                  <TableCell>{item?.rahbari}</TableCell>
+                  <TableCell>{renderRole(item.role)}</TableCell>
 
                   <TableCell>
                     <Badge variant="outline">

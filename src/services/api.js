@@ -244,9 +244,32 @@ export const api = createApi({
       }),
       invalidatesTags: ["MainTag"],
     }),
+    addBolum: builder.mutation({
+      query: ({ body }) => ({
+        url: "/bolimlar/",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    editBolum: builder.mutation({
+      query: ({ body, id }) => ({
+        url: `/bolimlar/${id}/`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    Tarkibiy: builder.query({
+      query: () => "/tuzilma-nomi/",
+      providesTags: ["MainTag"],
+    }),
   }),
 });
 export const {
+  useTarkibiyQuery,
+  useEditBolumMutation,
+  useAddBolumMutation,
   useDeletePPRMonthMutation,
   useEditPPRMOnthMutation,
   usePprMonthDetailsQuery,

@@ -10,21 +10,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useEditRegisterMutation } from "@/services/api";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useEditBolumMutation, useEditRegisterMutation } from "@/services/api";
+import { Eye, EyeOff, Loader2, Send } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export function Edit_Useful_Person({ data, open, setOpen }) {
   const [showPassword, setShowPassword] = useState(false);
-
   const [form, setForm] = useState({
     username: "",
     password: "",
@@ -37,7 +29,10 @@ export function Edit_Useful_Person({ data, open, setOpen }) {
     status: true,
   });
 
-  const [editRegister, { isLoading }] = useEditRegisterMutation();
+  const [editRegister, { isLoading, isError: err1 }] =
+    useEditRegisterMutation();
+  const [EditBolum, { isLoading: bolumLoading, isError, error }] =
+    useEditBolumMutation();
 
   useEffect(() => {
     if (data) {
@@ -54,80 +49,94 @@ export function Edit_Useful_Person({ data, open, setOpen }) {
       });
     }
   }, [data]);
-
-  const stations = [
-    "Beruniy",
-    "Tinchlik",
-    "Chorsu",
-    "Gʻafur Gʻulom",
-    "Alisher Navoiy",
-    "Abdulla Qodiriy",
-    "Pushkin",
-    "Buyuk Ipak Yoʻli",
-    "Novza",
-    "Milliy bogʻ",
-    "Xalqlar doʻstligi",
-    "Chilonzor",
-    "Mirzo Ulugʻbek",
-    "Olmazor",
-    "Doʻstlik",
-    "Mashinasozlar",
-    "Toshkent",
-    "Oybek",
-    "Kosmonavtlar",
-    "Oʻzbekiston",
-    "Hamid Olimjon",
-    "Mingoʻrik",
-    "Yunus Rajabiy",
-    "Shahriston",
-    "Bodomzor",
-    "Minor",
-    "Turkiston",
-    "Yunusobod",
-    "Tuzel",
-    "Yashnobod",
-    "Texnopark",
-    "Sergeli",
-    "Choshtepa",
-    "Turon",
-    "Chinor",
-    "Yangiobod",
-    "Rohat",
-    "Oʻzgarish",
-    "Yangihayot",
-    "Qoʻyliq",
-    "Matonat",
-    "Qiyot",
-    "Tolariq",
-    "Xonobod",
-    "Quruvchilar",
-    "Olmos",
-    "Paxtakor",
-    "Qipchoq",
-    "Amir Temur xiyoboni",
-    "Mustaqillik maydoni",
-  ];
+  useEffect(() => {
+    if (err1) {
+      if (err1?.data?.username) {
+        toast.warning("Foydalanuvchi nomini yozmadingiz!");
+      }
+      if (err1?.data?.password) {
+        toast.warning("Parol yozmadingiz yozmadingiz!");
+      }
+      if (err1?.data?.rahbari) {
+        toast.warning("FIOni yozmadingiz!");
+      }
+      if (err1?.data?.faoliyati) {
+        toast.warning("Faoliyatini yozmadingiz!");
+      }
+    }
+  }, [err1]);
+  useEffect(() => {
+    if (isError) {
+      if (error?.data?.username) {
+        toast.warning("Foydalanuvchi nomini yozmadingiz!");
+      }
+      if (error?.data?.password) {
+        toast.warning("Parol yozmadingiz yozmadingiz!");
+      }
+      if (error?.data?.rahbari) {
+        toast.warning("FIOni yozmadingiz!");
+      }
+      if (error?.data?.faoliyati) {
+        toast.warning("Faoliyatini yozmadingiz!");
+      }
+    }
+  }, [error, isError]);
 
   const submit = async (e) => {
     e.preventDefault();
-
-    const body = new FormData();
-    Object.entries(form).forEach(([k, v]) => body.append(k, v ?? ""));
-
-    await toast.promise(editRegister({ id: data?.id, body }).unwrap(), {
-      loading: "Saqlanmoqda...",
-      success: "Foydalanuvchi muvaffaqiyatli saqlandi",
-      error: "Xatolik yuz berdi",
-    });
-
+    const Allbody = new FormData();
+    Object.entries(form).forEach(([k, v]) => Allbody.append(k, v ?? ""));
+    if (data?.role == "bolim") {
+      const bolimDate = new FormData();
+      bolimDate.append("tuzilma", data?.tarkibiy_tuzilma_id);
+      bolimDate.append("bolim_nomi", data?.bolim_nomi);
+      bolimDate.append("username", form.username);
+      bolimDate.append("password", form.password);
+      bolimDate.append("faoliyati", form.faoliyati);
+      bolimDate.append("rahbari", form.rahbari);
+      bolimDate.append("status", form.status);
+      await toast.promise(
+        EditBolum({ id: data?.bolim_id, body: bolimDate }).unwrap(),
+        {
+          loading: "Saqlanmoqda...",
+          success: "Foydalanuvchi muvaffaqiyatli saqlandi",
+          error: "Xatolik yuz berdi",
+        },
+      );
+    } else {
+      await toast.promise(
+        editRegister({ id: data?.id, body: Allbody }).unwrap(),
+        {
+          loading: "Saqlanmoqda...",
+          success: "Foydalanuvchi muvaffaqiyatli saqlandi",
+          error: "Xatolik yuz berdi",
+        },
+      );
+    }
     setOpen(false);
+  };
+  const renderRole = (role) => {
+    switch (role) {
+      case "admin":
+        return "Adminni";
+      case "monitoring":
+        return "Monitoringni";
+      case "tarkibiy":
+        return "Tarkibiy Tuzilma Rahbarini";
+      case "bekat":
+        return "Bekat Rahbarini";
+      case "bolim":
+        return "Xodimni";
+      default:
+        return "Noma'lum";
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Foydalanuvchini tahrirlash</DialogTitle>
+          <DialogTitle>{renderRole(data?.role)} tahrirlash</DialogTitle>
           <DialogDescription>
             Quyidagi ma’lumotlarni yangilashingiz mumkin
           </DialogDescription>
@@ -180,57 +189,6 @@ export function Edit_Useful_Person({ data, open, setOpen }) {
               </div>
             </div>
 
-            {/* ROLE */}
-            <div className="space-y-1">
-              <Label>Rol</Label>
-              <Select
-                value={form.role}
-                onValueChange={(v) =>
-                  setForm({
-                    ...form,
-                    role: v,
-                    bekat_nomi: "",
-                    tuzilma_nomi: "",
-                  })
-                }
-              >
-                <SelectTrigger className="h-10">
-                  <SelectValue placeholder="Rolni tanlang" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="bekat">Bekat rahbari</SelectItem>
-                  <SelectItem value="tarkibiy">
-                    Tarkibiy tuzilma rahbari
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* CONDITIONAL */}
-            {form.role === "bekat" && (
-              <div className="space-y-1">
-                <Label>Bekat</Label>
-                <Select
-                  value={form.bekat_nomi || "none"} // default value "none"
-                  onValueChange={(v) =>
-                    setForm({ ...form, bekat_nomi: v === "none" ? "" : v })
-                  }
-                >
-                  <SelectTrigger className="h-10">
-                    <SelectValue placeholder="Bekatni tanlang" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Bekatni o‘chirish</SelectItem>
-                    {stations.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
             {/* FAOLIYATI */}
             <div className="space-y-1">
               <Label>Faoliyati</Label>
@@ -264,8 +222,12 @@ export function Edit_Useful_Person({ data, open, setOpen }) {
           </div>
 
           <DialogFooter className="sticky bottom-0 bg-background pt-4">
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 animate-spin" />}
+            <Button type="submit" disabled={isLoading || bolumLoading}>
+              {isLoading || bolumLoading ? (
+                <Loader2 className="mr-1 animate-spin" />
+              ) : (
+                <Send className="mr-1" />
+              )}
               Saqlash
             </Button>
             <Button

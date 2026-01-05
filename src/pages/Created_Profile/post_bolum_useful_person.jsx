@@ -11,111 +11,47 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useAddRegisterMutation } from "@/services/api";
+import { useAddBolumMutation } from "@/services/api";
 import { Eye, EyeOff, Loader2, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export function Post_Useful_Person() {
+export function Post_Bolum_Useful_Person({ id }) {
   const [open, setOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
   const [form, setForm] = useState({
+    tuzilma: id,
+    bolim_nomi: "",
     username: "",
     password: "",
-    role: "",
-    bekat_nomi: "",
-    tuzilma_nomi: "",
-    birth_date: "",
     faoliyati: "",
     rahbari: "",
+    email: "",
+    birth_date: "",
     passport_seriya: "",
     status: true,
   });
-
-  const [addRegister, { isLoading }] = useAddRegisterMutation();
-
-  const stations = [
-    "Beruniy",
-    "Tinchlik",
-    "Chorsu",
-    "Gʻafur Gʻulom",
-    "Alisher Navoiy",
-    "Abdulla Qodiriy",
-    "Pushkin",
-    "Buyuk Ipak Yoʻli",
-    "Novza",
-    "Milliy bogʻ",
-    "Xalqlar doʻstligi",
-    "Chilonzor",
-    "Mirzo Ulugʻbek",
-    "Olmazor",
-    "Doʻstlik",
-    "Mashinasozlar",
-    "Toshkent",
-    "Oybek",
-    "Kosmonavtlar",
-    "Oʻzbekiston",
-    "Hamid Olimjon",
-    "Mingoʻrik",
-    "Yunus Rajabiy",
-    "Shahriston",
-    "Bodomzor",
-    "Minor",
-    "Turkiston",
-    "Yunusobod",
-    "Tuzel",
-    "Yashnobod",
-    "Texnopark",
-    "Sergeli",
-    "Choshtepa",
-    "Turon",
-    "Chinor",
-    "Yangiobod",
-    "Rohat",
-    "Oʻzgarish",
-    "Yangihayot",
-    "Qoʻyliq",
-    "Matonat",
-    "Qiyot",
-    "Tolariq",
-    "Xonobod",
-    "Quruvchilar",
-    "Olmos",
-    "Paxtakor",
-    "Qipchoq",
-    "Amir Temur xiyoboni",
-    "Mustaqillik maydoni",
-  ];
-
+  const [addBolum, { isLoading, isError, error }] = useAddBolumMutation();
   const clearForm = () =>
     setForm({
+      tuzilma: id,
+      bolim_nomi: "",
       username: "",
       password: "",
-      role: "",
-      bekat_nomi: "",
-      tuzilma_nomi: "",
-      birth_date: "",
       faoliyati: "",
       rahbari: "",
+      email: "",
+      birth_date: "",
       passport_seriya: "",
       status: true,
     });
-
   const addUser = async (e) => {
     e.preventDefault();
 
     const fd = new FormData();
     Object.entries(form).forEach(([k, v]) => fd.append(k, v ?? ""));
 
-    await toast.promise(addRegister(fd).unwrap(), {
+    await toast.promise(addBolum({ body: fd }).unwrap(), {
       loading: "Saqlanmoqda...",
       success: "Foydalanuvchi muvaffaqiyatli qo‘shildi",
       error: "Xatolik yuz berdi",
@@ -124,18 +60,18 @@ export function Post_Useful_Person() {
     clearForm();
     setOpen(false);
   };
-
+  if (isError) console.log(error);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline">
-          Rahbar <UserPlus />
+          Xodim <UserPlus />
         </Button>
       </DialogTrigger>
 
       <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Rahbar yaratish</DialogTitle>
+          <DialogTitle>Xodim yaratish</DialogTitle>
           <DialogDescription>
             Foydalanuvchi ma’lumotlarini to‘liq kiriting
           </DialogDescription>
@@ -188,65 +124,16 @@ export function Post_Useful_Person() {
               </div>
             </div>
 
-            {/* ROLE */}
             <div className="space-y-1">
-              <Label>Rol</Label>
-              <Select
-                value={form.role}
-                onValueChange={(v) =>
-                  setForm({
-                    ...form,
-                    role: v,
-                    bekat_nomi: "",
-                    tuzilma_nomi: "",
-                  })
+              <Label>Bo'lim nomi</Label>
+              <Input
+                className="h-10"
+                value={form.bolim_nomi}
+                onChange={(e) =>
+                  setForm({ ...form, bolim_nomi: e.target.value })
                 }
-              >
-                <SelectTrigger className="h-10">
-                  <SelectValue placeholder="Rolni tanlang" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="bekat">Bekat rahbari</SelectItem>
-                  <SelectItem value="tarkibiy">
-                    Tarkibiy tuzilma rahbari
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              />
             </div>
-
-            {/* CONDITIONAL */}
-            {form.role === "bekat" ? (
-              <div className="space-y-1">
-                <Label>Bekat</Label>
-                <Select
-                  value={form.bekat_nomi}
-                  onValueChange={(v) => setForm({ ...form, bekat_nomi: v })}
-                >
-                  <SelectTrigger className="h-10">
-                    <SelectValue placeholder="Bekatni tanlang" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {stations.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            ) : (
-              <div className="space-y-1">
-                <Label>Tarkibiy tuzilma</Label>
-                <Input
-                  className="h-10"
-                  disabled={!form.role}
-                  value={form.tuzilma_nomi}
-                  onChange={(e) =>
-                    setForm({ ...form, tuzilma_nomi: e.target.value })
-                  }
-                />
-              </div>
-            )}
 
             {/* FAOLIYATI */}
             <div className="space-y-1">
