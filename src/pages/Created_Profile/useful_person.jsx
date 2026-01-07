@@ -34,6 +34,7 @@ import { useNavigate } from "react-router-dom";
 import { Edit_Useful_Person } from "./edit_useful_person";
 import { ForAdmin_Post_Bolum_Useful_Person } from "./For.admin_Post_Bolum_useful_person";
 import { Post_Bolum_Useful_Person } from "./post_bolum_useful_person";
+import { Post_Monitoring_Useful_Person } from "./post_monitoring_useful_person";
 import { Post_Useful_Person } from "./post_useful_person";
 
 export default function Useful_Person() {
@@ -91,6 +92,11 @@ export default function Useful_Person() {
         )}
         {me?.role == "admin" ? (
           <ForAdmin_Post_Bolum_Useful_Person id={me?.tarkibiy_tuzilma_id} />
+        ) : (
+          ""
+        )}
+        {me?.role == "admin" ? (
+          <Post_Monitoring_Useful_Person id={me?.tarkibiy_tuzilma_id} />
         ) : (
           ""
         )}

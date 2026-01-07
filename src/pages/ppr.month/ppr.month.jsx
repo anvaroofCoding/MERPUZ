@@ -146,7 +146,7 @@ export default function PprMonth() {
   ======================= */
   return (
     <main className="min-h-screen bg-background">
-      <Card className="shadow-lg p-6">
+      <Card className="shadow-lg border-none bg-transparent ">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <Button

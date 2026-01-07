@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://88.88.150.151:9000/api",
+  baseUrl: "https://pprs-7o08.onrender.com/api",
   prepareHeaders: (headers) => {
     const token = localStorage.getItem("access");
     if (token) {
@@ -93,7 +93,7 @@ export const api = createApi({
       providesTags: ["MainTag"],
     }),
     AddAplication: builder.mutation({
-      query: (body) => ({
+      query: ({ body }) => ({
         url: "/ariza/",
         method: "POST",
         body,
@@ -264,9 +264,23 @@ export const api = createApi({
       query: () => "/tuzilma-nomi/",
       providesTags: ["MainTag"],
     }),
+    AddRegister2: builder.mutation({
+      query: ({ body }) => ({
+        url: "/register/",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    aplication2: builder.query({
+      query: ({ search = "" }) => `/ariza?search=${search}`,
+      providesTags: ["MainTag"],
+    }),
   }),
 });
 export const {
+  useAplication2Query,
+  useAddRegister2Mutation,
   useTarkibiyQuery,
   useEditBolumMutation,
   useAddBolumMutation,

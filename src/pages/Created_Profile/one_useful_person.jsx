@@ -93,10 +93,7 @@ export default function MensProfileCard() {
 
   return (
     <Card className="w-full shadow-2xl overflow-hidden">
-      <FollowerPointerCard
-        className={"xl:block hidden"}
-        title={<TitleComponent title={data?.username} avatar={data?.photo} />}
-      >
+      <FollowerPointerCard className={"xl:block hidden"} title={data?.username}>
         <CardContent className="p-4 md:p-8">
           {/* Header Section with Background Shading */}
           <section className=" rounded-lg p-4 md:p-8 mb-8 -mx-4 md:-mx-8 md:mx-0">
@@ -522,7 +519,7 @@ export default function MensProfileCard() {
                 )}
               </article>
 
-              {/* Edit Button */}     
+              {/* Edit Button */}
               {!isLoading && (
                 <div className="flex items-start w-full md:w-auto">
                   <Button
@@ -709,16 +706,3 @@ export default function MensProfileCard() {
     </Card>
   );
 }
-
-const TitleComponent = ({ title, avatar }) => (
-  <div className="flex items-center space-x-2">
-    <img
-      src={avatar}
-      height="20"
-      width="20"
-      alt="thumbnail"
-      className="rounded-full border-2 border-white"
-    />
-    <p className="text-bold">{title}</p>
-  </div>
-);

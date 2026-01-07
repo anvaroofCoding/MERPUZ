@@ -21,7 +21,6 @@ import PprMonthDetails from "@/pages/ppr.month/ppr.month.details";
 import PprYears from "@/pages/ppr_years/ppr.years";
 import SettingsPanel from "@/pages/setting/setting";
 import { createBrowserRouter } from "react-router-dom";
-
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -44,9 +43,10 @@ export const router = createBrowserRouter([
         element: <Applications />,
       },
       {
-        path: "/Arizalar/:MainTitle/:SubTitle/:than_title/:id",
+        path: "/Arizalar/:MainTitle/:SubTitle/:than_title/:id/",
         element: <Aplication_Detail />,
       },
+
       {
         path: "/Kelgan-Arizalar/:MainTitle/:SubTitle",
         element: <Coming_Applications />,
