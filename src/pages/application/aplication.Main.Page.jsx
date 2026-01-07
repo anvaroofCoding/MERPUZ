@@ -17,7 +17,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAplication_detailsQuery } from "@/services/api";
+import {
+  useAplication_detailsQuery,
+  useDeletePhotoMutation,
+} from "@/services/api";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {
   Calendar,
@@ -33,6 +36,7 @@ import {
 } from "lucide-react";
 
 import { useState } from "react";
+import { toast } from "sonner";
 
 const statusVariantMap = {
   "bajarilgan": "success",
@@ -43,9 +47,12 @@ const statusVariantMap = {
 
 export default function ApplicationMainPage({ id }) {
   const { data, isLoading } = useAplication_detailsQuery(id);
+  const [DeletePhotos, { isLoading: DeleteLoadingPhoto }] =
+    useDeletePhotoMutation();
   const [selectedImages, setSelectedImages] = useState([]);
   const [showImageModal, setShowImageModal] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
+  const [currentImageId, setCurrentImageId] = useState(null);
   const [showFileModal, setShowFileModal] = useState(false);
 
   if (isLoading || !data) {
@@ -113,6 +120,15 @@ export default function ApplicationMainPage({ id }) {
     } catch (error) {
       console.error("File download error:", error);
     }
+  };
+  const deletePhoto = () => {
+    toast.promise(DeletePhotos({ ids: [currentImageId] }).unwrap(), {
+      loading: "O'chirilmoqda...",
+      success: "Rasm muvaffaqiyatli o'chirildi!",
+      error: "Rasmni o'chirishda xatolik yuz berdi!",
+    });
+    setShowImageModal(false);
+    setCurrentImageId(null);
   };
 
   return (
@@ -299,6 +315,7 @@ export default function ApplicationMainPage({ id }) {
                         className="w-full h-24 object-cover rounded cursor-pointer border hover:opacity-80 transition-opacity"
                         onClick={() => {
                           setCurrentImage(r.rasm);
+                          setCurrentImageId(r.id);
                           setShowImageModal(true);
                         }}
                       />
@@ -339,13 +356,25 @@ export default function ApplicationMainPage({ id }) {
                   alt="modal rasm"
                   className="w-full h-auto rounded"
                 />
-                <Button
-                  onClick={() => handleDownloadFile(currentImage, "image.jpg")}
-                  className="w-full"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Yuklab olish
-                </Button>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    onClick={() =>
+                      handleDownloadFile(currentImage, "image.jpg")
+                    }
+                    className="w-full"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Yuklab olish
+                  </Button>
+                  <Button
+                    onClick={deletePhoto}
+                    className="w-full bg-red-600 hover:bg-red-500"
+                    disabled={data?.status !== "jarayonda"}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    O'chirish
+                  </Button>
+                </div>
               </>
             )}
           </DialogContent>
