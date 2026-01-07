@@ -26,7 +26,7 @@ export default function ApplicationDetailPage() {
   useEffect(() => {});
 
   return (
-    <div className="grid grid-cols-3 h-[85vh] overflow-hidden">
+    <div className="grid grid-cols-3">
       {/* CHAP PANEL */}
       <div className="lg:col-span-1 lg:block rounded-xl border-r hidden">
         {/* HEADER */}
@@ -109,6 +109,7 @@ export default function ApplicationDetailPage() {
 
                         <Badge
                           variant={statusVariantMap[item.status] || "outline"}
+                          className={"capitalize"}
                         >
                           {item.status}
                         </Badge>

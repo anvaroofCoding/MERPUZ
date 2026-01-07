@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -17,6 +18,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAplication_detailsQuery } from "@/services/api";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {
   Calendar,
   Download,
@@ -29,6 +31,7 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
+
 import { useState } from "react";
 
 const statusVariantMap = {
@@ -113,7 +116,7 @@ export default function ApplicationMainPage({ id }) {
   };
 
   return (
-    <ScrollArea className="h-[100vh] no-scrollbar ">
+    <ScrollArea className=" no-scrollbar pb-10">
       <div className="space-y-4 ">
         <Card className="w-full">
           <CardContent className=" space-y-6">
@@ -154,11 +157,8 @@ export default function ApplicationMainPage({ id }) {
                       Ish jarayoni
                     </div>
 
-                    <Badge
-                      variant="secondary"
-                      className="text-[10px] px-2 py-0"
-                    >
-                      Yangi
+                    <Badge variant="default" className="text-[10px] px-2 py-0">
+                      {data?.steplar?.length} ta
                     </Badge>
                   </DropdownMenuItem>
 
@@ -218,7 +218,34 @@ export default function ApplicationMainPage({ id }) {
 
                 {/* Yaratuvchi */}
                 <div className="flex items-start gap-3">
-                  <Users className="h-4 w-4 text-green-600 mt-1 flex-shrink-0" />
+                  {data?.kim_tomonidan?.photo ? (
+                    <Dialog>
+                      {/* ✅ TRIGGER — faqat bitta element */}
+                      <DialogTrigger asChild>
+                        <img
+                          src={data.kim_tomonidan.photo}
+                          alt="Yaratuvchi rasmi"
+                          className="w-6 h-6 rounded-full cursor-pointer hover:opacity-80 transition"
+                        />
+                      </DialogTrigger>
+
+                      <DialogContent className="max-w-md p-2">
+                        {/* ✅ ACCESSIBILITY UCHUN */}
+                        <VisuallyHidden>
+                          <DialogTitle>Yaratuvchi rasmi</DialogTitle>
+                        </VisuallyHidden>
+
+                        <img
+                          src={data.kim_tomonidan.photo}
+                          alt="Yaratuvchi rasmi"
+                          className="w-full h-auto rounded-lg"
+                        />
+                      </DialogContent>
+                    </Dialog>
+                  ) : (
+                    <Users className="h-4 w-4 text-green-600 mt-1 flex-shrink-0" />
+                  )}
+
                   <div>
                     <p className="text-xs text-muted-foreground">Yaratuvchi</p>
                     <p className="text-sm font-medium">
@@ -247,7 +274,7 @@ export default function ApplicationMainPage({ id }) {
                   <MessageSquare className="h-4 w-4 text-orange-600 mt-1 flex-shrink-0" />
                   <div className="flex-1">
                     <p className="text-xs text-muted-foreground mb-1">Izoh</p>
-                    <p className="text-sm text-gray-300 line-clamp-2">
+                    <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
                       {data.comment}
                     </p>
                   </div>
@@ -294,27 +321,6 @@ export default function ApplicationMainPage({ id }) {
               </>
             ) : (
               <p className="text-xs text-muted-foreground">Rasm topilmadi</p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="w-full">
-          <CardContent className="space-y-2 pt-6">
-            <p className="font-medium text-sm mb-2">Steplar</p>
-            {data?.steplar?.length ? (
-              <Button
-                onClick={() => {
-                  console.log("[v0] Steplar tugmasi clicked");
-                }}
-                variant="outline"
-                className="w-full"
-              >
-                {`Ko'rish (${data.steplar.length})`}
-              </Button>
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                Steplar mavjud emas
-              </p>
             )}
           </CardContent>
         </Card>

@@ -220,7 +220,7 @@ export default function Applications() {
     "bajarilgan": {
       variant: "success",
       icon: IconCircleCheckFilled,
-      iconClass: "text-green-500",
+      iconClass: "text-white",
     },
     "qabul qilindi": {
       variant: "default",
@@ -655,7 +655,7 @@ export default function Applications() {
             {isLoading || OptionTuzilmaLoader || OptionAplicationLoading ? (
               [...Array(30)].map((_, i) => (
                 <TableRow key={i}>
-                  {[...Array(6)].map((_, j) => (
+                  {[...Array(7)].map((_, j) => (
                     <TableCell key={j}>
                       <Skeleton className="h-5 w-full rounded" />
                     </TableCell>
