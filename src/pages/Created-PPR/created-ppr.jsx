@@ -376,7 +376,7 @@ export default function Created_PPR() {
             </Button>
           ) : (
             <Button onClick={() => setShow(true)}>
-              Qo'shish <FilePlusCorner />
+              Qo'shish <FilePlusCorner size={17} className="ml-1" />
             </Button>
           )}
         </div>

@@ -128,7 +128,7 @@ export default function Obyekt() {
         {/* Filters and Sort */}
         <div className="flex flex-row gap-3">
           <Button onClick={() => setOpen(true)}>
-            Qo'shish <FilePlusCorner />
+            Qo'shish <FilePlusCorner className="ml-1" size={17} />
           </Button>
         </div>
       </div>
@@ -190,7 +190,7 @@ export default function Obyekt() {
                         )
                       }
                     >
-                      <Plus className="mr-2 h-4 w-4" />
+                      <Plus className="mr-2 h-4 w-4" size={17} />
                       Lokatsiya qo'shish
                     </DropdownMenuItem>
                   )}

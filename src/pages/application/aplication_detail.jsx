@@ -1,6 +1,5 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,9 +23,9 @@ export default function ApplicationDetailPage() {
     "jarayonda": "warning",
   };
   useEffect(() => {});
-
+  console.log(data);
   return (
-    <div className="grid grid-cols-3">
+    <div className="grid grid-cols-3 h-[89vh] overflow-hidden">
       {/* CHAP PANEL */}
       <div className="lg:col-span-1 lg:block rounded-xl border-r hidden">
         {/* HEADER */}
@@ -53,87 +52,94 @@ export default function ApplicationDetailPage() {
           </div>
         </div>
         {/* LIST */}
-        <ScrollArea className="h-[calc(100vh-110px)] no-scrollbar pr-4">
-          <div className="space-y-3">
+        <ScrollArea className="h-screen no-scrollbar pb-60 pr-2">
+          <div className="flex flex-col">
             {isLoading ? (
-              // Skeleton loading
-              <>
-                {Array.from({ length: 20 }).map((_, i) => (
-                  <Card key={i}>
-                    <CardContent className="p-3 space-y-2">
-                      {/* Top row */}
-                      <div className="flex items-center justify-between">
-                        <Skeleton className="h-4 w-[180px] rounded" />
-                        <Skeleton className="h-5 w-[90px] rounded-full" />
-                      </div>
-
-                      {/* Comment */}
-                      <div className="space-y-1">
-                        <Skeleton className="h-3 w-full rounded" />
-                        <Skeleton className="h-3 w-[70%] rounded" />
-                      </div>
-
-                      {/* Bottom row */}
-                      <div className="flex justify-between">
-                        <Skeleton className="h-3 w-[80px] rounded" />
-                        <Skeleton className="h-3 w-[70px] rounded" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </>
+              // Skeleton
+              Array.from({ length: 12 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 px-3 py-3 border-b"
+                >
+                  <Skeleton className="w-11 h-11 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-[60%]" />
+                    <Skeleton className="h-3 w-[80%]" />
+                  </div>
+                </div>
+              ))
             ) : (
-              // Real data
               <>
-                {data?.results?.map((item) => (
-                  <Card
-                    key={item?.id}
-                    onClick={() => setMainID(item?.id)}
-                    className={cn(
-                      "cursor-pointer hover:bg-muted transition w-full",
-                      mainID == item?.id &&
-                        "bg-gray-200 dark:bg-muted/10 dark:border-white/50 border-black/20",
-                    )}
-                  >
-                    <CardContent className="p-3 space-y-2">
-                      {/* Top row: Tuzilma nomlari + status */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex flex-wrap gap-1 max-w-[70%]">
-                          {item?.tuzilma_nomlari?.map((it, idx) => (
-                            <span key={idx} className="text-sm font-medium">
-                              {it}
-                              {idx !== item.tuzilma_nomlari.length - 1 && ","}
-                            </span>
-                          ))}
+                {data?.results?.map((item) => {
+                  const isActive = mainID === item.id;
+                  const firstLetter =
+                    item?.tuzilma_nomlari?.[0]?.charAt(0)?.toUpperCase() || "?";
+
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => setMainID(item.id)}
+                      className={cn(
+                        "group relative flex items-center gap-3 px-3 py-3 cursor-pointer transition",
+                        "hover:bg-muted/60",
+                        isActive && "bg-muted",
+                      )}
+                    >
+                      {/* Active indicator */}
+                      {isActive && (
+                        <span className="absolute left-0 top-0 h-full w-[3px] bg-blue-500 rounded-r-full" />
+                      )}
+
+                      {/* Avatar */}
+                      <div className="relative">
+                        <div className="w-11 h-11 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold text-lg">
+                          {firstLetter}
                         </div>
 
-                        <Badge
-                          variant={statusVariantMap[item.status] || "outline"}
-                          className={"capitalize"}
-                        >
-                          {item.status}
-                        </Badge>
+                        {/* Premium badge */}
+                        {item?.premium && (
+                          <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white text-[10px] shadow">
+                            ★
+                          </span>
+                        )}
                       </div>
 
-                      {/* Comment */}
-                      <p className="text-xs text-muted-foreground line-clamp-2">
-                        {item?.comment}
-                      </p>
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        {/* Top row */}
+                        <div className="flex items-center justify-between">
+                          <p className="font-medium text-sm truncate">
+                            {item?.tuzilma_nomlari?.join(", ")}
+                          </p>
 
-                      {/* Bottom row */}
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>{item?.turi}</span>
-                        <span>{item?.sana}</span>
+                          <span className="text-[11px] text-muted-foreground shrink-0">
+                            {item?.sana}
+                          </span>
+                        </div>
+
+                        {/* Bottom row */}
+                        <div className="flex items-center justify-between mt-0.5">
+                          <p className="text-xs text-muted-foreground truncate max-w-[80%]">
+                            {item?.comment}
+                          </p>
+
+                          <Badge
+                            variant={statusVariantMap[item.status] || "outline"}
+                            className="text-[10px] px-2 py-0.5 capitalize"
+                          >
+                            {item.status}
+                          </Badge>
+                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                    </div>
+                  );
+                })}
               </>
             )}
 
-            {/* No results */}
+            {/* Empty */}
             {data?.count === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-6">
+              <p className="text-sm text-muted-foreground text-center py-10">
                 Hech narsa topilmadi
               </p>
             )}

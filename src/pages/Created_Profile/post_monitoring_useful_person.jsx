@@ -70,7 +70,7 @@ export function Post_Monitoring_Useful_Person() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline">
-          Monitoring <UserPlus />
+          Monitoring <UserPlus size={16} className="ml-1" />
         </Button>
       </DialogTrigger>
 

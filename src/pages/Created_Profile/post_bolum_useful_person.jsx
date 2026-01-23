@@ -12,7 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAddBolumMutation } from "@/services/api";
-import { Eye, EyeOff, Loader2, UserPlus } from "lucide-react";
+import { IconUserPlus } from "@tabler/icons-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -65,7 +66,7 @@ export function Post_Bolum_Useful_Person({ id }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline">
-          Xodim <UserPlus />
+          Xodim
         </Button>
       </DialogTrigger>
 

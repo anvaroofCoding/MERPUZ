@@ -1,55 +1,22 @@
-// import { LoginForm } from "@/components/login-form";
-
-import { InteractiveGridPattern } from "@/components/ui/interactive-grid-pattern";
-import { cn } from "@/lib/utils";
+import { HeroGeometric } from "@/components/ui/shape-landing-hero";
 import { LoginsNewForm } from "./login.form";
 import SettingsPage from "./login_element";
 
-// export default function Login() {
-//   return (
-//     <div className="grid min-h-svh lg:grid-cols-2">
-//       <div className="flex flex-col gap-4 p-6 md:p-10">
-//         <div className="flex justify-center gap-2 md:justify-start">
-//           <a href="#" className="flex items-center gap-2 font-medium">
-//             <div className="flex size-6 items-center justify-center rounded-md">
-//               <img src="/logo2.png" alt="" />
-//             </div>
-//             Metropoliten ERP
-//           </a>
-//         </div>
-//         <div className="flex flex-1 items-center justify-center">
-//           <div className="w-full max-w-xs">
-//             <LoginForm />
-//           </div>
-//         </div>
-//       </div>
-//       <div className="bg-muted relative hidden lg:block">
-//         <img
-//           src="login.jpg"
-//           alt="Image"
-//           className="absolute inset-0 h-full w-full object-cover "
-//         />
-//       </div>
-//     </div>
-//   );
-// }
-
 export default function Login() {
   return (
-    <div className="bg-background relative flex h-screen w-full flex-col items-center justify-center overflow-hidden rounded-lg border">
-      <InteractiveGridPattern
-        className={cn(
-          "[mask-image:radial-gradient(400px_circle_at_center,white,transparent)]",
-        )}
-        width={20}
-        height={20}
-        squares={[80, 80]}
-        squaresClassName="hover:fill-blue-500"
-      />
-      <div className="absolute z-10 bottom-4 left-4 text-sm text-muted-foreground">
+    <div className="relative h-screen w-full overflow-hidden bg-background">
+      {/* 🔷 HeroGeometric BACKGROUND */}
+      <div className="absolute inset-0 z-0">
+        <HeroGeometric />
+      </div>
+
+      {/* ⚙️ Settings */}
+      <div className="absolute z-100 bottom-4 left-4 text-sm text-muted-foreground">
         <SettingsPage />
       </div>
-      <div>
+
+      {/* 🔐 Login form */}
+      <div className="relative z-20 flex h-full w-full items-center justify-center">
         <LoginsNewForm />
       </div>
     </div>

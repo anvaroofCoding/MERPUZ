@@ -148,7 +148,6 @@ export default function Applications() {
     status: statusFilter,
     tuzilma_nomi: sortBy,
   });
-  console.log(data);
   const { data: OptionAplications, isLoading: OptionAplicationLoading } =
     useOptionAplicationQuery();
   const { data: OptionTuzilma, isLoading: OptionTuzilmaLoader } =
@@ -235,9 +234,11 @@ export default function Applications() {
     "jarayonda": {
       variant: "warning",
       icon: IconLoader,
-      iconClass: "text-white animate-spin",
+      iconClass: "text-white ",
     },
   };
+
+  console.log(data);
 
   return (
     <div className="w-full">
@@ -319,7 +320,7 @@ export default function Applications() {
 
           {show ? (
             <Button
-              variant="outline"
+              variant="default"
               className="bg-red-500 hover:bg-red-600 text-white hover:text-gray-200"
               onClick={() => {
                 setShow(false);
@@ -329,8 +330,8 @@ export default function Applications() {
               Yopish <MessageCircleX className="w-4 h-4" />
             </Button>
           ) : (
-            <Button variant="outline" onClick={() => setShow(true)}>
-              Qo'shish <FilePlusCorner className="w-4 h-4" />
+            <Button variant="default" onClick={() => setShow(true)}>
+              Qo'shish <FilePlusCorner className="w-4 h-4 ml-2" size={17} />
             </Button>
           )}
         </div>

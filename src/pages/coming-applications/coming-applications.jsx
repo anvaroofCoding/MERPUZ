@@ -1,7 +1,6 @@
 import { EmptyOutline } from "@/components/Empty/not_found";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +8,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Pagination,
   PaginationContent,
@@ -18,13 +16,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -34,9 +25,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import {
-  useAddAplicationMutation,
   useComing_AplicationQuery,
   useOptionAplicationQuery,
   useOptionTuzilmaQuery,
@@ -46,111 +36,68 @@ import {
   IconCircleXFilled,
   IconLoader,
 } from "@tabler/icons-react";
-import {
-  Eye,
-  EyeOff,
-  Loader,
-  MessageCircleX,
-  MoreVertical,
-  Search,
-  Send,
-  Upload,
-} from "lucide-react";
+import { ChevronDown, Eye, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import { Edit_Useful_Person } from "../Created_Profile/edit_useful_person";
-
 export default function Coming_Applications() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  console.log(statusFilter);
+  const [sortBy, setSortBy] = useState("");
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const limit = 50;
-  const [editModal, setEditModal] = useState(false);
-  const [editData, setEditData] = useState("");
-  const [passwordVisible, setPasswordVisible] = useState(false);
-  const [show, setShow] = useState(false);
-  const [form, setForm] = useState({
-    comment: "",
-    parol: "",
-    tuzilma: 0,
-    photos: [],
-    bildirgi: "",
-  });
-  const aplication_clear = () => {
-    setForm({ comment: "", parol: "", tuzilma: 0, photos: [], bildirgi: "" });
-  };
-  const handlePhotoUpload = (e) => {
-    const files = Array.from(e.target.files);
-    setForm((prev) => ({
-      ...prev,
-      photos: [...prev.photos, ...files],
-    }));
-  };
-  const removePhoto = (index) => {
-    setForm((prev) => ({
-      ...prev,
-      photos: prev.photos.filter((_, i) => i !== index),
-    }));
-  };
-  const handleBildirgiUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setForm({
-        ...form,
-        bildirgi: file, // <-- shu
-      });
-    }
-  };
-  const { data, isLoading } = useComing_AplicationQuery({
+  const [totalPages, setTotalPages] = useState(1); // Declare totalPages variable
+  const { data, isLoading, total_pages } = useComing_AplicationQuery({
     page,
     limit,
     search: searchTerm,
+    status: statusFilter,
+    tuzilma_nomi: sortBy,
   });
-  console.log(data);
   const { data: OptionAplications, isLoading: OptionAplicationLoading } =
     useOptionAplicationQuery();
   const { data: OptionTuzilma, isLoading: OptionTuzilmaLoader } =
     useOptionTuzilmaQuery();
-  const [AddAplications, { isLoading: AplicationLoader, isError, error }] =
-    useAddAplicationMutation();
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const fd = new FormData();
-    fd.append("comment", form.comment);
-    fd.append("parol", form.parol);
-    fd.append("tuzilma", form.tuzilma);
-    form.photos.forEach((p) => fd.append("photos", p));
-    fd.append("bildirgi", form.bildirgi);
-    toast.promise(AddAplications(fd).unwrap(), {
-      loading: "Yuborilmoqda...",
-      success: "Yuborildi!",
-      error: "Xatolik!",
-    });
-    setShow(false);
-    aplication_clear();
+
+  useEffect(() => {
+    if (total_pages) {
+      setTotalPages(total_pages);
+    }
+  }, [total_pages]);
+
+  const statusConfig = {
+    "bajarilgan": {
+      variant: "success",
+      icon: IconCircleCheckFilled,
+      iconClass: "text-white",
+    },
+    "qabul qilindi": {
+      variant: "default",
+      icon: IconCircleCheckFilled,
+      iconClass: "text-blue-500",
+    },
+    "qaytarildi": {
+      variant: "destructive",
+      icon: IconCircleXFilled,
+      iconClass: "text-red-500",
+    },
+    "jarayonda": {
+      variant: "warning",
+      icon: IconLoader,
+      iconClass: "text-white ",
+    },
   };
 
-  const totalPages = Math.ceil((data?.count || 0) / limit);
-  useEffect(() => {
-    if (isError) {
-      console.log(error);
-      if (error?.data?.comment) {
-        toast.error("Izoh yozishingiz shart!");
-        aplication_clear();
-      }
-      if (error?.data?.parol) {
-        toast.error("Parolingizni xato kiritdingiz");
-      }
-    }
-  }, [isError, error]);
+  console.log(data);
+
   return (
     <div className="w-full">
       {/* Controls Section */}
       <div className="flex flex-col xl:flex-row w-full gap-4 mb-4">
         {/* Search Bar */}
-        <div className="relative w-full">
-          <Search className="absolute left-3 top-4.5 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Izoh bo'yicha qidiring..."
             className="pl-10 bg-card border-border"
@@ -158,300 +105,180 @@ export default function Coming_Applications() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-      </div>
-      {/* add */}
-      {show ? (
-        <Card className="w-full my-5">
-          <CardHeader>
-            <CardTitle className="text-lg">
-              Ariza jo'natish uchun ma'lumotlarni to'ldiring
-            </CardTitle>
-          </CardHeader>
 
-          <CardContent className="flex flex-col gap-4">
-            {/* COMMENT */}
-            <div className="flex flex-col gap-1">
-              <Label>Komment</Label>
-              <Textarea
-                placeholder="Komment yozing"
-                value={form.comment}
-                onChange={(e) => setForm({ ...form, comment: e.target.value })}
-              />
-            </div>
-
-            {/* PASSWORD */}
-            <div className="flex flex-col gap-1 relative">
-              <Label>Parol</Label>
-              <Input
-                type={passwordVisible ? "text" : "password"}
-                placeholder="Parol"
-                value={form.parol}
-                onChange={(e) => setForm({ ...form, parol: e.target.value })}
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-7 text-muted-foreground"
-                onClick={() => setPasswordVisible(!passwordVisible)}
-              >
-                {passwordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-
-            {/* TUZILMA SELECT */}
-            <div className="flex flex-col gap-1">
-              <Label>Tuzilma</Label>
-              <Select
-                onValueChange={(val) =>
-                  setForm({ ...form, tuzilma: Number(val) })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Tuzilma tanlang" />
-                </SelectTrigger>
-                <SelectContent>
-                  {OptionTuzilma?.map((item) => {
-                    return (
-                      <SelectItem key={item?.id} value={item?.id}>
-                        {item?.tuzilma_nomi}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* PHOTOS */}
-            <div className="flex flex-col gap-1">
-              <Label>Rasmlar</Label>
-
-              <label className="border flex items-center justify-center gap-2 p-3 rounded cursor-pointer hover:bg-muted/40">
-                <Upload size={18} /> Rasmlar yuklash
-                <input
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  multiple
-                  onChange={handlePhotoUpload}
-                />
-              </label>
-
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mt-2">
-                {form.photos.map((photo, index) => (
-                  <div key={index} className="relative group">
-                    <img
-                      src={URL.createObjectURL(photo)}
-                      alt="preview"
-                      className="w-full h-20 object-cover rounded"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removePhoto(index)}
-                      className="absolute -right-2 -top-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow group-hover:scale-110 transition"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <Label>Fayl</Label>
-
-              <label className="border flex items-center justify-center gap-2 p-3 rounded cursor-pointer hover:bg-muted/40">
-                <Upload size={18} /> Faylni yuklash
-                <input
-                  type="file"
-                  className="hidden"
-                  accept=".pdf,.doc,.docx,.txt,.jpg,.png"
-                  onChange={handleBildirgiUpload}
-                />
-              </label>
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mt-2">
-                {form.bildirgi && (
-                  <p className="text-sm mt-1 text-green-600">
-                    Yuklangan fayl: {form.bildirgi.name}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="flex grid grid-cols-2 gap-5 ">
+        {/* Filters and Sort */}
+        <div className="flex flex-row gap-3">
+          {/* Status Filter */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button
-                className="bg-red-600 hover:bg-red-500 text-white mt-2"
-                onClick={() => {
-                  setShow(false);
-                  aplication_clear();
-                }}
+                variant="outline"
+                className="gap-2 border-border bg-card hover:bg-card/80"
               >
-                Bekor qilish <MessageCircleX />
+                Status
+                <ChevronDown className="w-4 h-4" />
               </Button>
-              {AplicationLoader ? (
-                <Button className=" mt-2" disabled>
-                  Yuborilmoqda... <Loader />
-                </Button>
-              ) : (
-                <Button
-                  className=" mt-2"
-                  disabled={form?.comment ? false : true}
-                  onClick={handleSubmit}
-                >
-                  Yuborish <Send />
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        ""
-      )}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="bg-card border-border"
+            >
+              <DropdownMenuItem onClick={() => setStatusFilter("")}>
+                Barchasi
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter("jarayonda")}>
+                Jarayonda
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter("bajarilgan")}>
+                Bajarilgan
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter("qaytarildi")}>
+                Qaytarilgan
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-      {/* Table */}
+          {/* Sort Filter */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="gap-2 border-border bg-card hover:bg-card/80"
+              >
+                Kimga
+                <ChevronDown className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="bg-card border-border"
+            >
+              <DropdownMenuItem onClick={() => setSortBy("")}>
+                Barchasi
+              </DropdownMenuItem>
+              {OptionTuzilma?.map((item) => {
+                return (
+                  <DropdownMenuItem
+                    key={item?.id}
+                    onClick={() => setSortBy(item?.tuzilma_nomi)}
+                  >
+                    {item?.tuzilma_nomi}
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      {/* table */}
       <div className="border border-border rounded-lg bg-card overflow-hidden">
         <Table>
-          <TableHeader className="bg-muted/50 border-none">
-            <TableRow className="hover:bg-transparent border-none">
-              <TableHead className="w-[15%] font-semibold">
-                Kim tamonidan
-              </TableHead>
-              <TableHead className="w-[15%] font-semibold">Kimga</TableHead>
-              <TableHead className="w-[15%] font-semibold">
-                Ariza yaratuvchi
-              </TableHead>
-              <TableHead className="w-[15%] font-semibold">
-                Yaratilgan sana
-              </TableHead>
-              <TableHead className="w-[15%] font-semibold">Status</TableHead>
-              <TableHead className="w-[37%] font-semibold">Izoh</TableHead>
-              <TableHead className="w-[3%] text-right font-semibold">
-                Amallar
-              </TableHead>
+          <TableHeader className="bg-muted/50">
+            <TableRow>
+              <TableHead className="w-[18%]">Ariza beruvchi</TableHead>
+              <TableHead className="w-[15%]">Ariza yaratuvchi</TableHead>
+              <TableHead className="w-[15%]">Turi</TableHead>
+              <TableHead className="w-[15%]">Status</TableHead>
+              <TableHead className="w-[25%]">Izoh</TableHead>
+              <TableHead className="w-[5%] text-right">Amallar</TableHead>
             </TableRow>
           </TableHeader>
+
           <TableBody>
             {isLoading || OptionTuzilmaLoader || OptionAplicationLoading ? (
-              [...Array(10)].map((_, index) => (
-                <TableRow key={index} className="border-none">
-                  <TableCell>
-                    <Skeleton className="w-full h-6 rounded" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="w-full h-6 rounded" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="w-full h-6 rounded" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="w-full h-6 rounded" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="w-full h-6 rounded" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="w-full h-6 rounded" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="w-full h-6 rounded" />
-                  </TableCell>
+              [...Array(30)].map((_, i) => (
+                <TableRow key={i}>
+                  {[...Array(7)].map((_, j) => (
+                    <TableCell key={j}>
+                      <Skeleton className="h-5 w-full rounded" />
+                    </TableCell>
+                  ))}
                 </TableRow>
               ))
             ) : data?.results?.length > 0 ? (
-              data?.results?.map((item, index) => (
+              data.results.map((item, index) => (
                 <TableRow
                   key={item.id}
-                  className={`border-b border-border hover:bg-muted/50 transition-colors ${
+                  className={
                     index % 2 === 0 ? "bg-background/50" : "bg-background"
-                  }`}
+                  }
                 >
-                  <TableCell className="font-medium text-foreground truncate flex items-center gap-2">
-                    {item?.kim_tomonidan ? item?.kim_tomonidan : "Mavjud emas"}
-                  </TableCell>
-                  <TableCell className="font-medium text-foreground truncate">
-                    {item?.tuzilma ? item?.tuzilma : "Mavjud emas"}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm truncate">
-                    {item?.created_by ? item?.created_by : "Mavjud emas"}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm truncate">
-                    {item?.sana
-                      ? (() => {
-                          const d = new Date(item.sana);
-                          const dd = String(d.getDate()).padStart(2, "0");
-                          const mm = String(d.getMonth() + 1).padStart(2, "0");
-                          const yyyy = d.getFullYear();
-                          const hh = String(d.getHours()).padStart(2, "0");
-                          const mins = String(d.getMinutes()).padStart(2, "0");
-                          return `${dd}-${mm}-${yyyy} ${hh}:${mins}`;
-                        })()
-                      : "Mavjud emas"}
+                  {/* Kim tomonidan */}
+                  <TableCell className="flex items-center gap-2">
+                    {item?.kim_tomonidan?.photo ? (
+                      <img
+                        src={item.kim_tomonidan.photo}
+                        alt={item.kim_tomonidan.name}
+                        className="w-9 h-9 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold uppercase">
+                        {item?.kim_tomonidan?.name?.charAt(0) || "?"}
+                      </div>
+                    )}
+
+                    <span className="font-medium truncate">
+                      {item?.kim_tomonidan?.name || "Mavjud emas"}
+                    </span>
                   </TableCell>
 
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className="text-muted-foreground px-1.5 capitalize flex items-center gap-1"
-                    >
-                      {item.status === "bajarilgan" && (
-                        <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-                      )}
-
-                      {item.status === "qaytarildi" && (
-                        <IconCircleXFilled className="fill-red-500 dark:fill-red-400" />
-                      )}
-
-                      {item.status === "qabul qilindi" && (
-                        <IconCircleCheckFilled className="fill-blue-500 dark:fill-blue-400" />
-                      )}
-
-                      {item.status === "jarayonda" && (
-                        <IconLoader className="animate-spin text-amber-500" />
-                      )}
-
-                      {item.status}
-                    </Badge>
-                  </TableCell>
-
+                  {/* Ariza yaratuvchi */}
                   <TableCell className="text-sm text-muted-foreground">
-                    {item.comment
-                      ? item?.comment?.length > 60
+                    {item?.created_by || "Mavjud emas"}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {item?.turi == "ijro" ? "Ijro uchun" : "Ma'lumot uchun"}
+                  </TableCell>
+
+                  {/* Status */}
+                  <TableCell>
+                    {(() => {
+                      const status = statusConfig[item.status];
+
+                      return (
+                        <Badge
+                          variant={status?.variant || "outline"}
+                          className="flex items-center gap-1 capitalize w-fit"
+                        >
+                          {status?.icon && (
+                            <status.icon
+                              className={cn("h-4 w-4", status.iconClass)}
+                            />
+                          )}
+                          {item.status}
+                        </Badge>
+                      );
+                    })()}
+                  </TableCell>
+
+                  {/* Izoh */}
+                  <TableCell className="text-sm text-muted-foreground">
+                    {item?.comment
+                      ? item.comment.length > 60
                         ? item.comment.slice(0, 60) + "..."
                         : item.comment
                       : "Mavjud emas"}
                   </TableCell>
+
+                  {/* Amallar */}
                   <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 hover:bg-muted"
-                        >
-                          <MoreVertical className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent
-                        align="end"
-                        className="bg-card border-border w-48"
-                      >
-                        <DropdownMenuItem
-                          onClick={() => {
-                            const than_title = item?.kim_tomonidan;
-                            navigate(`${than_title}/${item?.id}`);
-                          }}
-                        >
-                          <Eye /> Ko'rish
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        const than_title = item?.created_by;
+                        navigate(`${than_title}/${item?.id}`);
+                      }}
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={8}
-                  className="text-center py-8 text-muted-foreground"
-                >
+                <TableCell colSpan={6} className="py-10 text-center">
                   <EmptyOutline />
                 </TableCell>
               </TableRow>
@@ -459,50 +286,33 @@ export default function Coming_Applications() {
           </TableBody>
         </Table>
       </div>
-      {/* edit amali */}
-      <Edit_Useful_Person
-        data={editData}
-        open={editModal}
-        setOpen={setEditModal}
-      />
-      {data?.results?.length > 0 ? (
-        <div className="py-5">
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="mt-4 flex justify-center">
           <Pagination>
             <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={() => page > 1 && setPage(page - 1)}
-                />
-              </PaginationItem>
-
-              {/* Dynamik page numbers */}
-              {[...Array(totalPages)].map((_, index) => {
-                const pageNum = index + 1;
-                return (
-                  <PaginationItem key={pageNum}>
-                    <PaginationLink
-                      href="#"
-                      isActive={page === pageNum}
-                      onClick={() => setPage(pageNum)}
-                    >
-                      {pageNum}
-                    </PaginationLink>
-                  </PaginationItem>
-                );
-              })}
-
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={() => page < totalPages && setPage(page + 1)}
-                />
-              </PaginationItem>
+              <PaginationPrevious
+                onClick={() => setPage(Math.max(1, page - 1))}
+                isActive={page === 1}
+              />
+              {[...Array(totalPages)].map((_, index) => (
+                <PaginationItem key={index}>
+                  <PaginationLink
+                    onClick={() => setPage(index + 1)}
+                    isActive={page === index + 1}
+                  >
+                    {index + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              <PaginationNext
+                onClick={() => setPage(Math.min(totalPages, page + 1))}
+                isActive={page === totalPages}
+              />
             </PaginationContent>
           </Pagination>
         </div>
-      ) : (
-        ""
       )}
     </div>
   );

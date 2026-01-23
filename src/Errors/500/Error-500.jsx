@@ -1,40 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import { CircleArrowOutUpRight } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import NotFoundPage from "@/components/ui/page-not-found";
 
 export default function Error500() {
-  const navigate = useNavigate();
   return (
-    <div className=" grid grid-cols-2 h-screen w-full">
-      <div className=" flex justify-center items-center">
-        <div className="flex flex-col justify-center px-10 space-y-5">
-          <h1 className="text-5xl leading-none font-semibold tracking-tighter text-balance sm:text-6xl md:text-7xl lg:text-8xl text-purple-500">
-            500
-          </h1>
-          <div>
-            <p className="text-muted-foreground max-w-md">
-              Server xatoligi yuz berdi. Iltimos qayta urinib ko'ring!
-            </p>
-            <p className="text-muted-foreground ">
-              Muammo hal bo'lmasa biz bilan bog'lanishingizni so'raymiz!
-            </p>
-          </div>
-
-          <div className="flex gap-4">
-            <Button className={"bg-purple-500"} onClick={() => navigate(-1)}>
-              Ortga qaytish <CircleArrowOutUpRight />
-            </Button>
-          </div>
-        </div>
-      </div>
-      <div>
-        <DotLottieReact
-          src="https://lottie.host/7b64df58-ca16-4096-8cb7-fca2fafa1e8e/nrzckn4mNb.lottie"
-          loop
-          autoplay
-        />
-      </div>
+    <div className="flex w-full h-screen justify-center items-center">
+      <NotFoundPage />
     </div>
   );
 }

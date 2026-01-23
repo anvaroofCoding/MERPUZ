@@ -144,9 +144,9 @@ export default function Useful_Person() {
                   <TableCell>
                     <Badge variant="outline">
                       {item.status ? (
-                        <IconCircleCheckFilled className="text-green-500" />
+                        <IconCircleCheckFilled size={17} className="text-green-500" />
                       ) : (
-                        <IconLoader />
+                        <IconLoader size={17} />
                       )}
                       {item.status ? "Faol" : "Faol emas"}
                     </Badge>

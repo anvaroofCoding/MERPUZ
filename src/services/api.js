@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 const baseQuery = fetchBaseQuery({
-  baseUrl: "https://pprs-7o08.onrender.com/api",
+  baseUrl: "http://88.88.150.151:9000/api",
   prepareHeaders: (headers) => {
     const token = localStorage.getItem("access");
     if (token) {
@@ -135,8 +135,14 @@ export const api = createApi({
       invalidatesTags: ["MainTag"],
     }),
     Coming_Aplication: builder.query({
-      query: ({ page = 1, limit = 10, search = "" }) =>
-        `/kelgan-arizalar?page=${page}&limit=${limit}&search=${search}`,
+      query: ({
+        page = 1,
+        limit = 10,
+        search = "",
+        status = "",
+        tuzilma_nomi = "",
+      }) =>
+        `/kelgan-arizalar?page=${page}&limit=${limit}&search=${search}&status=${status}&tuzilma_nomi=${tuzilma_nomi}`,
       providesTags: ["MainTag"],
     }),
     Coming_Application_Detail: builder.query({
@@ -276,9 +282,36 @@ export const api = createApi({
       query: ({ search = "" }) => `/ariza?search=${search}`,
       providesTags: ["MainTag"],
     }),
+    AddAplicationsSteps: builder.mutation({
+      query: ({ body, id }) => ({
+        url: `/ariza/${id}/`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    DeleteAplicationsSteps: builder.mutation({
+      query: ({ id }) => ({
+        url: `/ariza/${id}/`,
+        method: "Delete",
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    // kelgan arizalarni statusini o'zgartirish
+    ChangeComingAplication: builder.mutation({
+      query: ({ body }) => ({
+        url: `/kelgan-arizalar/status_ozgartirish/`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
   }),
 });
 export const {
+  useChangeComingAplicationMutation,
+  useDeleteAplicationsStepsMutation,
+  useAddAplicationsStepsMutation,
   useAplication2Query,
   useAddRegister2Mutation,
   useTarkibiyQuery,

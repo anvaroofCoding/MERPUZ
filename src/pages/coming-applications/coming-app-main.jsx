@@ -12,27 +12,23 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  useAplication_detailsQuery,
+  useComing_Application_DetailQuery,
   useDeletePhotoMutation,
   useMEQuery,
 } from "@/services/api";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { Download, DownloadCloud } from "lucide-react";
+
+import { Input } from "@/components/ui/input";
 import {
-  Calendar,
-  Download,
-  DownloadCloud,
-  FileText,
-  Layers,
-  Loader,
-  MessageSquare,
-  Trash2,
-  Users,
-} from "lucide-react";
-
+  IconCalendarWeek,
+  IconFileTypography,
+  IconMessage,
+  IconSection,
+  IconUserQuestion,
+} from "@tabler/icons-react";
 import { useState } from "react";
-import { toast } from "sonner";
-import Aplication_Work_Progress from "./aplication.work.progress";
-
+import Coming_Application_Details_Work_Pogress from "./coming-application-work-prosess";
 const statusVariantMap = {
   "bajarilgan": "success",
   "qaytarildi": "destructive",
@@ -40,12 +36,11 @@ const statusVariantMap = {
   "jarayonda": "warning",
 };
 
-export default function ApplicationMainPage({ id }) {
-  const { data, isLoading } = useAplication_detailsQuery(id);
+export default function Application_details_Main({ id }) {
+  const { data, isLoading } = useComing_Application_DetailQuery(id);
   const [DeletePhotos, { isLoading: DeleteLoadingPhoto }] =
     useDeletePhotoMutation();
   const { data: me } = useMEQuery();
-  console.log(me);
   const [selectedImages, setSelectedImages] = useState([]);
   const [showImageModal, setShowImageModal] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
@@ -118,21 +113,12 @@ export default function ApplicationMainPage({ id }) {
       console.error("File download error:", error);
     }
   };
-  const deletePhoto = () => {
-    toast.promise(DeletePhotos({ ids: [currentImageId] }).unwrap(), {
-      loading: "O'chirilmoqda...",
-      success: "Rasm muvaffaqiyatli o'chirildi!",
-      error: "Rasmni o'chirishda xatolik yuz berdi!",
-    });
-    setShowImageModal(false);
-    setCurrentImageId(null);
-  };
 
   return (
     <ScrollArea className="no-scrollbar h-screen pb-35">
       <div className="space-y-4 ">
-        <Card className="w-full">
-          <CardContent className=" space-y-6">
+        <Card className="w-full outline-none p-4 pb-3">
+          <CardContent className="p-0 border-none space-y-6">
             {/* Top: Ariza va Actions Dropdown */}
             <div className="flex items-center justify-between gap-4">
               {/* Ariza info */}
@@ -158,9 +144,14 @@ export default function ApplicationMainPage({ id }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Sana */}
                 <div className="flex items-start gap-3">
-                  <Calendar className="h-4 w-4 text-blue-600 mt-1 flex-shrink-0" />
+                  <IconCalendarWeek
+                    stroke={2}
+                    className="h-4 w-4 text-blue-600 mt-1 flex-shrink-0"
+                  />
                   <div>
-                    <p className="text-xs text-muted-foreground">Sana</p>
+                    <p className="text-xs text-muted-foreground">
+                      Ariza sanasi
+                    </p>
                     <p className="text-sm font-medium">
                       {data?.sana || "Mavjud emas"}
                     </p>
@@ -169,7 +160,10 @@ export default function ApplicationMainPage({ id }) {
 
                 {/* Turi */}
                 <div className="flex items-start gap-3">
-                  <FileText className="h-4 w-4 text-blue-600 mt-1 flex-shrink-0" />
+                  <IconFileTypography
+                    stroke={2}
+                    className="h-4 w-4 text-blue-600 mt-1 flex-shrink-0"
+                  />
                   <div>
                     <p className="text-xs text-muted-foreground">Turi</p>
                     <p className="text-sm font-medium">
@@ -182,13 +176,13 @@ export default function ApplicationMainPage({ id }) {
                 {/* Yaratuvchi */}
                 <div className="flex items-start gap-3">
                   {data?.kim_tomonidan?.photo ? (
-                    <Dialog>
+                    <Dialog className="text-white">
                       {/* ✅ TRIGGER — faqat bitta element */}
-                      <DialogTrigger asChild>
+                      <DialogTrigger className="text-white" asChild>
                         <img
                           src={data.kim_tomonidan.photo}
                           alt="Yaratuvchi rasmi"
-                          className="w-6 h-6 rounded-full cursor-pointer hover:opacity-80 transition"
+                          className="w-6 h-6 rounded-full cursor-pointer hover:opacity-80 transition text-white"
                         />
                       </DialogTrigger>
 
@@ -201,12 +195,15 @@ export default function ApplicationMainPage({ id }) {
                         <img
                           src={data.kim_tomonidan.photo}
                           alt="Yaratuvchi rasmi"
-                          className="w-full h-auto rounded-lg"
+                          className="w-full h-auto rounded-lg text-white"
                         />
                       </DialogContent>
                     </Dialog>
                   ) : (
-                    <Users className="h-4 w-4 text-blue-600 mt-1 flex-shrink-0" />
+                    <IconUserQuestion
+                      stroke={2}
+                      className="h-4 w-4 text-blue-600 mt-1 flex-shrink-0"
+                    />
                   )}
 
                   <div>
@@ -219,13 +216,16 @@ export default function ApplicationMainPage({ id }) {
 
                 {/* Tuzilmalar */}
                 <div className="flex items-start gap-3">
-                  <Layers className="h-4 w-4 text-blue-600 mt-1 flex-shrink-0" />
+                  <IconSection
+                    stroke={2}
+                    className="h-4 w-4 text-blue-600 mt-1 flex-shrink-0"
+                  />
                   <div>
-                    <p className="text-xs text-muted-foreground">Tuzilmalar</p>
+                    <p className="text-xs text-muted-foreground">
+                      Ariza beruvchi tuzilma
+                    </p>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {data?.tuzilma_nomlari?.map((name, idx) => (
-                        <Badge key={idx}>{name}</Badge>
-                      ))}
+                      <Badge>{data?.kim_tomonidan?.name}</Badge>
                     </div>
                   </div>
                 </div>
@@ -233,8 +233,11 @@ export default function ApplicationMainPage({ id }) {
 
               {/* Comment section */}
               {data?.comment && (
-                <div className="flex gap-3 pt-3 border-t">
-                  <MessageSquare className="h-4 w-4 text-orange-600 mt-1 flex-shrink-0" />
+                <div className="flex gap-3">
+                  <IconMessage
+                    stroke={2}
+                    className="h-4 w-4 text-orange-600 mt-1 flex-shrink-0"
+                  />
                   <div className="flex-1">
                     <p className="text-xs text-muted-foreground mb-1">Izoh</p>
                     <p className="text-sm text-gray-600 dark:text-gray-300 ">
@@ -247,8 +250,8 @@ export default function ApplicationMainPage({ id }) {
           </CardContent>
         </Card>
         {/* Rasmlar */}
-        <Card className="w-full">
-          <CardContent className="space-y-2">
+        <Card className="w-full p-4 ">
+          <CardContent className="p-0">
             <p className="font-medium text-sm mb-2">Rasmlar</p>
             {data?.rasmlar?.length ? (
               <>
@@ -258,16 +261,16 @@ export default function ApplicationMainPage({ id }) {
                       <img
                         src={r.rasm || "/placeholder.svg"}
                         alt="ariza rasm"
-                        className="w-full h-24 object-cover rounded cursor-pointer border hover:opacity-80 transition-opacity"
+                        className="w-full h-24 object-cover rounded cursor-pointer  hover:opacity-80 transition-opacity"
                         onClick={() => {
                           setCurrentImage(r.rasm);
                           setCurrentImageId(r.id);
                           setShowImageModal(true);
                         }}
                       />
-                      <input
+                      <Input
                         type="checkbox"
-                        className="absolute top-1 right-1 cursor-pointer"
+                        className="absolute w-4 h-4 rounded-full top-1 right-1 cursor-pointer"
                         checked={selectedImages.includes(r.rasm)}
                         onChange={() => toggleSelectImage(r.rasm)}
                         aria-label="Select image"
@@ -276,8 +279,8 @@ export default function ApplicationMainPage({ id }) {
                   ))}
                 </div>
                 {selectedImages.length > 0 && (
-                  <Button onClick={downloadImages} className="w-full">
-                    <Download className="h-4 w-4 mr-2" />
+                  <Button onClick={downloadImages} className="w-full mt-5">
+                    <Download className="h-4 w-4 mr-2 " />
                     Tanlanganlarni yuklab olish ({selectedImages.length})
                   </Button>
                 )}
@@ -287,7 +290,7 @@ export default function ApplicationMainPage({ id }) {
             )}
           </CardContent>
         </Card>
-        <Aplication_Work_Progress data={data} />
+        <Coming_Application_Details_Work_Pogress data={data} />
         {/* Image Modal */}
         <Dialog open={showImageModal} onOpenChange={setShowImageModal}>
           <DialogContent className="sm:max-w-lg w-full">
@@ -302,34 +305,16 @@ export default function ApplicationMainPage({ id }) {
                   alt="modal rasm"
                   className="w-full h-auto rounded"
                 />
-                <div className="grid grid-cols-2 gap-2">
+                <div>
                   <Button
+                    variant="link"
                     onClick={() =>
                       handleDownloadFile(currentImage, "image.jpg")
                     }
                     className="w-full"
                   >
                     <Download className="h-4 w-4 mr-2" />
-                    Yuklab olish
                   </Button>
-                  {DeleteLoadingPhoto ? (
-                    <Button
-                      className="w-full bg-red-600 hover:bg-red-500"
-                      disabled={DeleteLoadingPhoto}
-                    >
-                      <Loader className="h-4 w-4 mr-2 animate-spin" />
-                      O'chirish
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={deletePhoto}
-                      className="w-full bg-red-600 hover:bg-red-500"
-                      disabled={data?.status !== "jarayonda"}
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      O'chirish
-                    </Button>
-                  )}
                 </div>
               </>
             )}

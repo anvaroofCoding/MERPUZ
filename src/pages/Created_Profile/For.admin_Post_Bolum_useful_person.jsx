@@ -73,7 +73,7 @@ export function ForAdmin_Post_Bolum_Useful_Person({ id }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline">
-          Xodim <UserPlus />
+          Xodim <UserPlus size={16} className="ml-1" />
         </Button>
       </DialogTrigger>
 

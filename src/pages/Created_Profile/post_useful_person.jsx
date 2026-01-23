@@ -129,7 +129,7 @@ export function Post_Useful_Person() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline">
-          Rahbar <UserPlus />
+          Rahbar <UserPlus size={16} className="ml-1" />
         </Button>
       </DialogTrigger>
 
