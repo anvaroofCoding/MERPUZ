@@ -279,9 +279,17 @@ export const api = createApi({
       invalidatesTags: ["MainTag"],
     }),
     aplication2: builder.query({
-      query: ({ search = "" }) => `/ariza?search=${search}`,
+      query: ({ search = "", status = "" }) => {
+        const params = new URLSearchParams();
+
+        if (search) params.append("search", search);
+        if (status && status !== "all") params.append("status", status);
+
+        return `/ariza?${params.toString()}`;
+      },
       providesTags: ["MainTag"],
     }),
+
     AddAplicationsSteps: builder.mutation({
       query: ({ body, id }) => ({
         url: `/ariza/${id}/`,
@@ -300,15 +308,27 @@ export const api = createApi({
     // kelgan arizalarni statusini o'zgartirish
     ChangeComingAplication: builder.mutation({
       query: ({ body }) => ({
-        url: `/kelgan-arizalar/status_ozgartirish/`,
+        url: `/ariza-status/`,
         method: "POST",
         body,
       }),
       invalidatesTags: ["MainTag"],
     }),
+    Comingaplication2: builder.query({
+      query: ({ search = "", status = "" }) => {
+        const params = new URLSearchParams();
+
+        if (search) params.append("search", search);
+        if (status && status !== "all") params.append("status", status);
+
+        return `/kelgan-arizalar?${params.toString()}`;
+      },
+      providesTags: ["MainTag"],
+    }),
   }),
 });
 export const {
+  useComingaplication2Query,
   useChangeComingAplicationMutation,
   useDeleteAplicationsStepsMutation,
   useAddAplicationsStepsMutation,

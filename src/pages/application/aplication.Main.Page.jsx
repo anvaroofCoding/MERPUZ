@@ -128,6 +128,8 @@ export default function ApplicationMainPage({ id }) {
     setCurrentImageId(null);
   };
 
+  console.log(data);
+
   return (
     <ScrollArea className="no-scrollbar h-screen pb-35">
       <div className="space-y-4 ">

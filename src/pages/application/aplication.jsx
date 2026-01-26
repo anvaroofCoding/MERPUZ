@@ -229,7 +229,7 @@ export default function Applications() {
     "qaytarildi": {
       variant: "destructive",
       icon: IconCircleXFilled,
-      iconClass: "text-red-500",
+      iconClass: "text-red-100",
     },
     "jarayonda": {
       variant: "warning",

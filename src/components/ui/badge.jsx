@@ -14,14 +14,14 @@ const badgeVariants = cva(
           "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/90",
 
         destructive:
-          "border-transparent bg-destructive text-white hover:bg-destructive/90",
+          "border-transparent bg-red-600 text-white hover:bg-destructive/90",
 
         outline:
           "border border-input text-foreground hover:bg-accent hover:text-accent-foreground",
 
         /** 🟢 BAJARILGAN */
         success:
-          "border-transparent bg-green-500 text-white hover:bg-green-600",
+          "border-transparent bg-green-700 text-white hover:bg-green-600",
 
         /** 🟠 JARAYONDA */
         warning:

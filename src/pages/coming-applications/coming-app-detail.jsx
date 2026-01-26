@@ -1,21 +1,27 @@
+import { AnimatedTabs } from "@/components/ui/animated-tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { useAplication2Query } from "@/services/api";
+import { useComingaplication2Query } from "@/services/api";
+import { IconStarFilled } from "@tabler/icons-react";
 import { ArrowLeft, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Application_details_Main from "./coming-app-main";
 
 export default function Aplication_Detail() {
+  const [selectedTab, setSelectedTab] = useState("all");
   const { id } = useParams();
   const [mainID, setMainID] = useState(id);
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  const { data, isLoading } = useAplication2Query({ search });
+  const { data, isLoading } = useComingaplication2Query({
+    search,
+    status: selectedTab,
+  });
   const statusVariantMap = {
     "bajarilgan": "success",
     "qaytarildi": "destructive",
@@ -23,6 +29,7 @@ export default function Aplication_Detail() {
     "jarayonda": "warning",
   };
   useEffect(() => {});
+  console.log(selectedTab);
   return (
     <div className="grid grid-cols-3 h-[89vh] overflow-hidden">
       {/* CHAP PANEL */}
@@ -47,9 +54,21 @@ export default function Aplication_Detail() {
               className="pl-8 h-9"
             />
           </div>
+          <div className="w-full">
+            <AnimatedTabs
+              tabs={[
+                { label: "Hammasi", value: "all" },
+                { label: "Jarayonda", value: "jarayonda" },
+                { label: "Qabul qilindi", value: "qabul qilindi" },
+                { label: "Bajarilgan", value: "bajarilgan" },
+                { label: "Qaytarilgan", value: "qaytarildi" },
+              ]}
+              onChange={(val) => setSelectedTab(val)}
+            />
+          </div>
         </div>
         {/* LIST */}
-        <ScrollArea className="h-screen no-scrollbar pb-60 pr-2">
+        <ScrollArea className="h-screen no-scrollbar pb-70 pr-2">
           <div className="flex flex-col">
             {isLoading ? (
               // Skeleton
@@ -70,14 +89,14 @@ export default function Aplication_Detail() {
                 {data?.results?.map((item) => {
                   const isActive = mainID === item.id;
                   const firstLetter =
-                    item?.tuzilma_nomlari?.[0]?.charAt(0)?.toUpperCase() || "?";
+                    item?.kim_tomonidan?.name?.charAt(0)?.toUpperCase() || "?";
 
                   return (
                     <div
                       key={item.id}
                       onClick={() => setMainID(item.id)}
                       className={cn(
-                        "group relative flex items-center gap-3 px-3 py-3 cursor-pointer transition",
+                        "group  relative flex items-center gap-3 px-3 py-3 cursor-pointer transition",
                         "hover:bg-muted/60",
                         isActive && "bg-muted",
                       )}
@@ -93,10 +112,9 @@ export default function Aplication_Detail() {
                           {firstLetter}
                         </div>
 
-                        {/* Premium badge */}
-                        {item?.premium && (
-                          <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white text-[10px] shadow">
-                            ★
+                        {isActive && (
+                          <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-green-600 flex items-center justify-center text-white text-[10px] shadow">
+                            <IconStarFilled size={11} />
                           </span>
                         )}
                       </div>
@@ -106,7 +124,7 @@ export default function Aplication_Detail() {
                         {/* Top row */}
                         <div className="flex items-center justify-between">
                           <p className="font-medium text-sm truncate">
-                            {item?.tuzilma_nomlari?.join(", ")}
+                            {item?.kim_tomonidan?.name}
                           </p>
 
                           <span className="text-[11px] text-muted-foreground shrink-0">
@@ -117,12 +135,12 @@ export default function Aplication_Detail() {
                         {/* Bottom row */}
                         <div className="flex items-center justify-between mt-0.5">
                           <p className="text-xs text-muted-foreground truncate max-w-[80%]">
-                            {item?.comment}
+                            {item?.comment.slice(0, 30) + "..."}
                           </p>
 
                           <Badge
                             variant={statusVariantMap[item.status] || "outline"}
-                            className="text-[10px] px-2 py-0.5 capitalize"
+                            className="text-[10px] px-2 py-1 capitalize"
                           >
                             {item.status}
                           </Badge>

@@ -80,7 +80,7 @@ export default function Coming_Applications() {
     "qaytarildi": {
       variant: "destructive",
       icon: IconCircleXFilled,
-      iconClass: "text-red-500",
+      iconClass: "text-red-100",
     },
     "jarayonda": {
       variant: "warning",
@@ -88,8 +88,6 @@ export default function Coming_Applications() {
       iconClass: "text-white ",
     },
   };
-
-  console.log(data);
 
   return (
     <div className="w-full">
@@ -134,6 +132,11 @@ export default function Coming_Applications() {
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setStatusFilter("qaytarildi")}>
                 Qaytarilgan
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setStatusFilter("qabul qilindi")}
+              >
+                Qabul qilindi
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

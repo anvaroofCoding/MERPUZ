@@ -120,7 +120,11 @@ export default function AplicationWorkChat({ data }) {
                 {!isMe && (
                   <span className="font-semibold">{step.created_by}</span>
                 )}
-                <span className={isMe ? "text-white" : "dark:text-gray-300"}>
+                <span
+                  className={
+                    isMe ? "text-white ml-3" : "dark:text-gray-300 ml-3"
+                  }
+                >
                   {formattedDate}
                 </span>
                 {isMe && <span className="font-semibold ml-2">Men</span>}
@@ -140,31 +144,65 @@ export default function AplicationWorkChat({ data }) {
                         className="w-24 h-24 object-cover rounded-lg cursor-pointer transition transform hover:scale-105"
                         onClick={() => window.open(url, "_blank")}
                       />
-                      <button
+                      <Button
+                        variant="ghost"
                         onClick={() =>
                           handleDownloadFile(url, `image-${idx}.jpg`)
                         }
-                        className="absolute bottom-1 right-1 bg-white p-1 rounded-full shadow opacity-0 group-hover:opacity-100 transition"
+                        className="absolute bottom-1 right-1 bg-white rounded-full shadow opacity-0 group-hover:opacity-100 transition px-1 py-0"
                       >
-                        <CloudDownload className="w-4 h-4" />
-                      </button>
+                        <CloudDownload
+                          className="w-4 h-4 text-black"
+                          size={11}
+                        />
+                      </Button>
                     </div>
                   ))}
                 </div>
               )}
 
               {/* FILES */}
+              {step.bildirgi && (
+                <div className="mt-1">
+                  <Button
+                    size="sm"
+                    variant="solid"
+                    className="rounded-full flex items-center gap-1 px-3 py-1"
+                    onClick={() =>
+                      handleDownloadFile(step.bildirgi, "bildirgi.pdf")
+                    }
+                  >
+                    <CloudDownload className="w-4 h-4" /> Bildirgi
+                  </Button>
+                </div>
+              )}
+
               {step.ilovalar && (
                 <div className="mt-1">
                   <Button
                     size="sm"
-                    variant="outline"
+                    variant="solid"
                     className="rounded-full flex items-center gap-1 px-3 py-1"
                     onClick={() =>
-                      handleDownloadFile(step.ilovalar, "file.pdf")
+                      handleDownloadFile(step.ilovalar, "ilova.pdf")
                     }
                   >
-                    <CloudDownload className="w-4 h-4" /> Fayl
+                    <CloudDownload className="w-4 h-4" /> Ilova
+                  </Button>
+                </div>
+              )}
+
+              {step.akt_file && (
+                <div className="mt-1">
+                  <Button
+                    size="sm"
+                    variant="solid"
+                    className="rounded-full flex items-center gap-1 px-3 py-1"
+                    onClick={() =>
+                      handleDownloadFile(step.akt_file, "ilova.pdf")
+                    }
+                  >
+                    <CloudDownload className="w-4 h-4" /> Akt
                   </Button>
                 </div>
               )}
@@ -176,7 +214,7 @@ export default function AplicationWorkChat({ data }) {
       {/* ADD NEW STEP */}
       <div className="mt-4 border-t border-border/30 pt-4 space-y-3">
         <div className="flex flex-wrap gap-2">
-          <label className="flex items-center justify-center w-20 h-20 border-2 border-dashed border-blue-400 rounded-lg cursor-pointer hover:bg-gray-800">
+          <label className="flex items-center justify-center w-20 h-20 border-2 border-dashed border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100">
             <div className="flex flex-col items-center gap-1">
               <Plus className="w-5 h-5 text-blue-600" />
               <span className="text-xs text-blue-600">Qo'sh</span>
@@ -210,8 +248,9 @@ export default function AplicationWorkChat({ data }) {
           ))}
         </div>
 
-        <label className="flex items-center gap-2 px-3 py-2 border-2 border-dashed border-blue-400 rounded-lg cursor-pointer hover:bg-gray-800">
-          <Upload size={16} /> <span className="text-sm">Fayl yuklash</span>
+        <label className="flex items-center gap-2 px-3 py-2 border-2 border-dashed border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100">
+          <Upload size={16} className="text-blue-600" />{" "}
+          <span className="text-sm text-blue-600">Fayl yuklash</span>
           <input
             type="file"
             className="hidden"
@@ -230,7 +269,10 @@ export default function AplicationWorkChat({ data }) {
         />
 
         <Button
-          disabled={!isFormComplete() || data?.status !== "jarayonda"}
+          disabled={
+            !isFormComplete() ||
+            (data?.status !== "jarayonda" && data?.status !== "qaytarildi")
+          }
           onClick={() => setShowVerificationModal(true)}
           className="flex items-center justify-center gap-2"
         >
@@ -249,7 +291,7 @@ export default function AplicationWorkChat({ data }) {
                 placeholder="Parol"
                 value={form.parol}
                 onChange={(e) => setForm({ ...form, parol: e.target.value })}
-                className="w-full p-2 border border-border rounded-xl text-sm"
+                className="w-full p-2 border border-border rounded-xl text-sm "
               />
               <button
                 type="button"
