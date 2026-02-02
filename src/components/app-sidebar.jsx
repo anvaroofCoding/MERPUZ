@@ -65,14 +65,6 @@ export function AppSidebar({ ...props }) {
             title: t("21_20251120"),
             url: "/Kompleks",
           },
-          {
-            title: t("22_20251120"),
-            url: "/Dash",
-          },
-          {
-            title: t("23_20251120"),
-            url: "#",
-          },
         ],
       },
       {

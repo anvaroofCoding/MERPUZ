@@ -11,7 +11,6 @@ import Created_PPR from "@/pages/Created-PPR/created-ppr";
 import One_UseFul_Person from "@/pages/Created_Profile/one_useful_person";
 import Useful_Person from "@/pages/Created_Profile/useful_person";
 import Dashboard from "@/pages/dashboard/dashboard";
-import Dash_Admin from "@/pages/head/dash-admin/dash_admin";
 import YandexMapLocation from "@/pages/Obyekt/address";
 import YandexMapEdit from "@/pages/Obyekt/address_edit";
 import Obyekt from "@/pages/Obyekt/obyekt";
@@ -27,7 +26,6 @@ export const router = createBrowserRouter([
     element: <Sidebar_Shadcn />,
     children: [
       { path: "/Sozlamalar/:MainTitle", element: <SettingsPanel /> },
-      { path: "/Dash/:MainTitle/:SubTitle", element: <Dash_Admin /> },
       { path: "/Kompleks/:MainTitle/:SubTitle", element: <Dashboard /> },
       {
         path: "/foydalanuvchilar/:MainTitle",

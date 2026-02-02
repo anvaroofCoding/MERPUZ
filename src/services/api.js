@@ -325,9 +325,20 @@ export const api = createApi({
       },
       providesTags: ["MainTag"],
     }),
+    // Dashboards
+    dashbaordsCharter: builder.query({
+      query: () => "/chart-statistics/",
+      providesTags: ["MainTag"],
+    }),
+    getPprYearly: builder.query({
+      query: () => "/ppr-yillik/",
+      providesTags: ["MainTag"],
+    }),
   }),
 });
 export const {
+  useGetPprYearlyQuery,
+  useDashbaordsCharterQuery,
   useComingaplication2Query,
   useChangeComingAplicationMutation,
   useDeleteAplicationsStepsMutation,
