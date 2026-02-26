@@ -30,10 +30,10 @@ import {
 import { useState } from "react";
 import Coming_Application_Details_Work_Pogress from "./coming-application-work-prosess";
 const statusVariantMap = {
-  "bajarilgan": "success",
-  "qaytarildi": "destructive",
+  bajarilgan: "success",
+  qaytarildi: "destructive",
   "qabul qilindi": "default",
-  "jarayonda": "warning",
+  jarayonda: "warning",
 };
 
 export default function Application_details_Main({ id }) {
@@ -124,7 +124,7 @@ export default function Application_details_Main({ id }) {
               {/* Ariza info */}
               <div className="flex-1">
                 <p className="text-lg font-semibold  mb-2">
-                  Ariza raqami: #{data?.id}
+                  Ariza raqami: {data?.id}
                 </p>
                 <Badge
                   variant={statusVariantMap[data?.status] || "outline"}
@@ -134,8 +134,8 @@ export default function Application_details_Main({ id }) {
                 </Badge>
               </div>
               {/* Actions Dropdown */}
-              <Button onClick={() => setShowFileModal(true)}>
-                Bildirgi fayli <DownloadCloud className="ml-1" size={17} />
+              <Button size="sm" onClick={() => setShowFileModal(true)}>
+                Bildirgi fayli <DownloadCloud size={17} />
               </Button>
             </div>
 
@@ -239,9 +239,27 @@ export default function Application_details_Main({ id }) {
                     className="h-4 w-4 text-orange-600 mt-1 flex-shrink-0"
                   />
                   <div className="flex-1">
-                    <p className="text-xs text-muted-foreground mb-1">Izoh</p>
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Muhokama
+                    </p>
                     <p className="text-sm text-gray-600 dark:text-gray-300 ">
                       {data.comment}
+                    </p>
+                  </div>
+                </div>
+              )}
+              {data?.comment && (
+                <div className="flex gap-3">
+                  <IconMessage
+                    stroke={2}
+                    className="h-4 w-4 text-orange-600 mt-1 flex-shrink-0"
+                  />
+                  <div className="flex-1">
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Tezkor xabar
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 ">
+                      {data.extra_comment}
                     </p>
                   </div>
                 </div>
@@ -324,19 +342,22 @@ export default function Application_details_Main({ id }) {
         <Dialog open={showFileModal} onOpenChange={setShowFileModal}>
           <DialogContent className="sm:max-w-md w-full">
             <DialogHeader>
-              <DialogTitle>Yuklab olish</DialogTitle>
+              <DialogTitle>Bildirgi faylin haqida</DialogTitle>
               <DialogClose />
             </DialogHeader>
             <p className="text-xs text-muted-foreground mb-2">
               {data?.comment}
+            </p>{" "}
+            <p className="text-xs text-muted-foreground mb-2">
+              {data?.extra_comment}
             </p>
             {data?.bildirgi && (
               <Button
                 onClick={() => handleDownloadFile(data.bildirgi, "file")}
                 className="w-full"
               >
-                <Download className="h-4 w-4 mr-2" />
-                Yuklab olish
+                <Download className="h-4 w-4 " />
+                Yuklash
               </Button>
             )}
           </DialogContent>

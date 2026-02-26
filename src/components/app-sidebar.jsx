@@ -2,6 +2,7 @@ import {
   AudioWaveform,
   BellRing,
   BrainCog,
+  Cog,
   Command,
   FileText,
   GalleryVerticalEnd,
@@ -29,6 +30,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 export function AppSidebar({ ...props }) {
+  const { data: me, isLoading: meLoading } = useMEQuery();
   const navigate = useNavigate();
   const token = localStorage.getItem("access");
   if (!token) {
@@ -62,8 +64,9 @@ export function AppSidebar({ ...props }) {
         isActive: true,
         items: [
           {
-            title: t("21_20251120"),
+            title: "Dashboard",
             url: "/Kompleks",
+            roles: ["admin", "monitoring", "tarkibiy", "bekat", "bolim"],
           },
         ],
       },
@@ -75,10 +78,12 @@ export function AppSidebar({ ...props }) {
           {
             title: "Arizalar Yuborish",
             url: "Arizalar",
+            roles: ["admin", "monitoring", "tarkibiy", "bekat", "bolim"],
           },
           {
             title: t("25_20251120"),
             url: "Kelgan-Arizalar",
+            roles: ["admin", "monitoring", "tarkibiy", "bekat", "bolim"],
           },
         ],
       },
@@ -88,12 +93,9 @@ export function AppSidebar({ ...props }) {
         icon: NotebookPen,
         items: [
           {
-            title: "Yillik reja",
-            url: "yil",
-          },
-          {
             title: "Oylik reja",
             url: "oy",
+            roles: ["admin", "monitoring", "tarkibiy", "bekat", "bolim"],
           },
         ],
       },
@@ -105,65 +107,48 @@ export function AppSidebar({ ...props }) {
           {
             title: t("31_20251120"),
             url: "PPRlar",
+            roles: ["admin", "bolim"],
           },
           {
             title: t("32_20251120"),
             url: "Obyektlar",
-          },
-        ],
-      },
-      {
-        title: t("33_20251120"),
-        url: "#",
-        icon: FileText,
-        items: [
-          {
-            title: t("34_20251120"),
-            url: "#",
-          },
-          {
-            title: t("35_20251120"), // 1-zayavkalar - 2-PPR
-            url: "#",
+            roles: ["admin", "bolim"],
           },
         ],
       },
     ],
     projects: [
       {
-        name: t("36_20251120"),
-        url: "#",
-        icon: BellRing,
-      },
-      {
         name: t("37_20251120"),
-        url: "#",
+        url: "/Programm",
         icon: BrainCog,
+        roles: ["admin", "monitoring", "tarkibiy", "bekat", "bolim"],
       },
       {
         name: "Foydalanuvchilar",
         url: "/foydalanuvchilar",
         icon: Users,
-      },
-      {
-        name: "Dastur haqida",
-        url: "/Programm",
-        icon: Settings2,
+        roles: ["admin", "monitoring", "tarkibiy", "bekat"],
       },
       {
         name: t("38_20251120"),
         url: "/Sozlamalar",
-        icon: Settings2,
+        icon: Cog,
+        roles: ["admin", "monitoring", "tarkibiy", "bekat", "bolim"],
       },
     ],
   };
+  if (meLoading) {
+    return null;
+  }
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        <NavMain items={data.navMain} userRole={me?.role} />
+        <NavProjects projects={data.projects} userRole={me?.role} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser data={supper} isLoading={isLoading} />

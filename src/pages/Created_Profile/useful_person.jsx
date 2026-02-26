@@ -36,6 +36,7 @@ import { ForAdmin_Post_Bolum_Useful_Person } from "./For.admin_Post_Bolum_useful
 import { Post_Bolum_Useful_Person } from "./post_bolum_useful_person";
 import { Post_Monitoring_Useful_Person } from "./post_monitoring_useful_person";
 import { Post_Useful_Person } from "./post_useful_person";
+import { CreatedBolumNAme } from "./created.Bolum.Name";
 
 export default function Useful_Person() {
   const navigate = useNavigate();
@@ -100,6 +101,7 @@ export default function Useful_Person() {
         ) : (
           ""
         )}
+        <CreatedBolumNAme />
       </div>
 
       {/* TABLE */}
@@ -144,7 +146,10 @@ export default function Useful_Person() {
                   <TableCell>
                     <Badge variant="outline">
                       {item.status ? (
-                        <IconCircleCheckFilled size={17} className="text-green-500" />
+                        <IconCircleCheckFilled
+                          size={17}
+                          className="text-green-500"
+                        />
                       ) : (
                         <IconLoader size={17} />
                       )}

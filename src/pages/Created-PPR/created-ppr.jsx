@@ -369,14 +369,14 @@ export default function Created_PPR() {
         <div className="flex flex-row gap-3">
           {show ? (
             <Button
-              className="bg-red-500 hover:bg-red-600 text-white hover:text-gray-200"
+              className="bg-red-500 hover:bg-red-600 text-white hover:text-gray-200 flex items-center gap-1"
               onClick={() => setShow(false)}
             >
-              Yopish <MessageCircleX />
+              Yopish <MessageCircleX size={15} />
             </Button>
           ) : (
             <Button onClick={() => setShow(true)}>
-              Qo'shish <FilePlusCorner size={17} className="ml-1" />
+              Qo'shish <FilePlusCorner size={15} className="ml-1" />
             </Button>
           )}
         </div>

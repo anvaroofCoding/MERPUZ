@@ -8,14 +8,31 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
+import Notification from "@/pages/notification/notification";
+import {
+  useBolimNameQuery,
+  useMEQuery,
+  usePprMonthQuery,
+} from "@/services/api";
+import { setBolim } from "@/store/bolimSlice";
 import { Bell } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
 
 export default function Sidebar_Shadcn() {
@@ -24,10 +41,19 @@ export default function Sidebar_Shadcn() {
   const notiv = localStorage.getItem("notiv");
   const params = useParams();
   const [font, setFont] = useState("roboto");
+  const { data: bolimCategory, isLoading } = useBolimNameQuery();
+  const { data: me } = useMEQuery();
+  const dispatch = useDispatch();
+  const bolim = useSelector((state) => state.bolim.bolim);
+  const { data: PPR_DATA, refetch } = usePprMonthQuery({
+    bolim_category: bolim,
+  });
+
   useEffect(() => {
     const fonts = localStorage.getItem("font");
     setFont(fonts);
   }, []);
+
   if (!notiv) {
     localStorage.setItem("notiv", "rangli");
   }
@@ -46,7 +72,7 @@ export default function Sidebar_Shadcn() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b">
+          <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 ">
             <div className="flex items-center justify-between gap-2 px-4 w-full">
               <div className="flex items-center gap-2">
                 <SidebarTrigger className="-ml-1" />
@@ -61,7 +87,12 @@ export default function Sidebar_Shadcn() {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator className="hidden md:block" />
                     <BreadcrumbItem>
-                      <BreadcrumbPage>
+                      <BreadcrumbPage
+                        onClick={() => {
+                          navigate(-1);
+                        }}
+                        className={"cursor-pointer"}
+                      >
                         {params.SubTitle ? params.SubTitle : params.MainTitle}
                       </BreadcrumbPage>
                     </BreadcrumbItem>
@@ -74,7 +105,52 @@ export default function Sidebar_Shadcn() {
                   </BreadcrumbList>
                 </Breadcrumb>
               </div>
-              <Bell />
+              <div className="flex gap-5 items-center">
+                {params?.SubTitle == "Oylik reja" ? (
+                  <>
+                    {me?.role == "bolim" ? (
+                      ""
+                    ) : (
+                      <>
+                        {isLoading ? (
+                          <Skeleton className={"w-10"} />
+                        ) : (
+                          <Select
+                            size="sm"
+                            default
+                            value={bolim}
+                            onValueChange={(value) => {
+                              dispatch(setBolim(value));
+                              refetch();
+                            }}
+                          >
+                            <SelectTrigger className="h-8 text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent position={"popper"}>
+                              <SelectGroup>
+                                {bolimCategory?.map((items) => {
+                                  return (
+                                    <SelectItem
+                                      key={items?.id}
+                                      value={items?.nomi}
+                                    >
+                                      {items?.nomi}
+                                    </SelectItem>
+                                  );
+                                })}
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </>
+                    )}
+                  </>
+                ) : (
+                  ""
+                )}
+                <Notification />
+              </div>
             </div>
             <Example />
           </header>

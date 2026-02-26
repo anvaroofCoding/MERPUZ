@@ -11,6 +11,7 @@ import { ArrowLeft, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Aplication_Main_Page from "./aplication.Main.Page";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function ApplicationDetailPage() {
   const [selectedTab, setSelectedTab] = useState("all");
@@ -22,11 +23,18 @@ export default function ApplicationDetailPage() {
     search,
     status: selectedTab,
   });
+  const statusTabs = [
+    { label: "Hammasi", value: "all" },
+    { label: "Jarayonda", value: "jarayonda" },
+    { label: "Qabul qilindi", value: "qabul_qilindi" },
+    { label: "Bajarilgan", value: "bajarilgan" },
+    { label: "Qaytarilgan", value: "qaytarildi" },
+  ];
   const statusVariantMap = {
-    "bajarilgan": "success",
-    "qaytarildi": "destructive",
+    bajarilgan: "success",
+    qaytarildi: "destructive",
     "qabul qilindi": "default",
-    "jarayonda": "warning",
+    jarayonda: "warning",
   };
   useEffect(() => {});
   return (
@@ -56,17 +64,24 @@ export default function ApplicationDetailPage() {
             />
           </div>
 
-          <div className="w-full">
-            <AnimatedTabs
-              tabs={[
-                { label: "Hammasi", value: "all" },
-                { label: "Jarayonda", value: "jarayonda" },
-                { label: "Qabul qilindi", value: "qabul qilindi" },
-                { label: "Bajarilgan", value: "bajarilgan" },
-                { label: "Qaytarilgan", value: "qaytarildi" },
-              ]}
-              onChange={(val) => setSelectedTab(val)}
-            />
+          <div className="w-full overflow-x-auto no-scrollbar py-1">
+            <Tabs
+              value={selectedTab}
+              onValueChange={(val) => setSelectedTab(val)}
+              className="w-full"
+            >
+              <TabsList className="w-full justify-start">
+                {statusTabs.map((tab) => (
+                  <TabsTrigger
+                    key={tab.value}
+                    value={tab.value}
+                    className="whitespace-nowrap"
+                  >
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
           </div>
         </div>
         {/* LIST */}

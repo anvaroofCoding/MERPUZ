@@ -109,25 +109,21 @@ export default function AplicationWorkChat({ data }) {
             className={`flex ${isMe ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`relative max-w-[75%] p-3 rounded-2xl shadow-md
+              className={`relative max-w-[75%]  p-3 rounded-2xl shadow-md
               ${
                 isMe
                   ? "bg-blue-500 text-white rounded-br-none"
                   : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-bl-none"
               }`}
             >
-              <div className="flex justify-between items-center mb-1 text-[10px]">
+              <div className="flex justify-between gap-5 mb-5 items-center mb-1 text-[10px]">
                 {!isMe && (
                   <span className="font-semibold">{step.created_by}</span>
                 )}
-                <span
-                  className={
-                    isMe ? "text-white ml-3" : "dark:text-gray-300 ml-3"
-                  }
-                >
+                <span className={isMe ? "text-white " : "dark:text-gray-300"}>
                   {formattedDate}
                 </span>
-                {isMe && <span className="font-semibold ml-2">Men</span>}
+                {isMe && <span className="font-semibold ">Men</span>}
               </div>
 
               {/* COMMENT */}

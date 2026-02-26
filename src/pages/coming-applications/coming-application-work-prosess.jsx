@@ -14,7 +14,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useChangeComingAplicationMutation, useMEQuery } from "@/services/api";
-import { CloudDownload, Send } from "lucide-react";
+import { Check, CloudDownload, Loader, Send } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 export default function Coming_Application_Details_Work_Pogress({ data }) {
@@ -55,7 +55,6 @@ export default function Coming_Application_Details_Work_Pogress({ data }) {
     setOpenShet(false);
   };
 
-  console.log(form);
   const handleDownloadFile = async (url, filename = "file") => {
     try {
       const res = await fetch(url);
@@ -120,18 +119,14 @@ export default function Coming_Application_Details_Work_Pogress({ data }) {
                   : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-bl-none"
               }`}
             >
-              <div className="flex justify-between items-center mb-1 text-[10px]">
+              <div className="flex justify-between gap-5 items-center mb-5 text-[10px]">
                 {!isMe && (
                   <span className="font-semibold">{step.created_by}</span>
                 )}
-                <span
-                  className={
-                    isMe ? "text-white ml-2" : "dark:text-gray-300 ml-2"
-                  }
-                >
+                <span className={isMe ? "text-white" : "dark:text-gray-300"}>
                   {formattedDate}
                 </span>
-                {isMe && <span className="font-semibold m ml-2">Men</span>}
+                {isMe && <span className="font-semibold ">Men</span>}
               </div>
 
               {/* COMMENT */}
@@ -257,7 +252,7 @@ export default function Coming_Application_Details_Work_Pogress({ data }) {
       </div>
 
       {/* add file */}
-      <div className="relative flex min-h-screen w-full items-center justify-center">
+      <div className="relative flex  w-full items-center justify-center">
         <div
           aria-hidden="true"
           className={cn(
@@ -323,10 +318,21 @@ export default function Coming_Application_Details_Work_Pogress({ data }) {
               </SheetClose>
               <SheetClose asChild>
                 <Button
-                  disabled={form.ilovalar == null || form.akt_file == null}
+                  disabled={
+                    form.ilovalar == null ||
+                    form.akt_file == null ||
+                    data?.status == "bajarilgan"
+                  }
                   onClick={submitForm}
                 >
-                  Yuborish
+                  {data?.status == "bajarilgan" ? "Bajarilgan" : "Yuborish"}
+                  {isLoadingComing ? (
+                    <Loader className="ml-2 animate-spin" size={16} />
+                  ) : data?.status == "bajarilgan" ? (
+                    <Check className="ml-2" size={16} />
+                  ) : (
+                    <Send className="ml-2" size={16} />
+                  )}
                 </Button>
               </SheetClose>
             </SheetFooter>

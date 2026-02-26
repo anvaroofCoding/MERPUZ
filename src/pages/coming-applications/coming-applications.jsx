@@ -32,9 +32,11 @@ import {
   useOptionTuzilmaQuery,
 } from "@/services/api";
 import {
+  IconArrowBackUp,
   IconCircleCheckFilled,
   IconCircleXFilled,
   IconLoader,
+  IconRosetteDiscountCheck,
 } from "@tabler/icons-react";
 import { ChevronDown, Eye, Search } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -67,9 +69,9 @@ export default function Coming_Applications() {
   }, [total_pages]);
 
   const statusConfig = {
-    "bajarilgan": {
+    bajarilgan: {
       variant: "success",
-      icon: IconCircleCheckFilled,
+      icon: IconRosetteDiscountCheck,
       iconClass: "text-white",
     },
     "qabul qilindi": {
@@ -77,12 +79,12 @@ export default function Coming_Applications() {
       icon: IconCircleCheckFilled,
       iconClass: "text-blue-500",
     },
-    "qaytarildi": {
+    qaytarildi: {
       variant: "destructive",
-      icon: IconCircleXFilled,
+      icon: IconArrowBackUp,
       iconClass: "text-red-100",
     },
-    "jarayonda": {
+    jarayonda: {
       variant: "warning",
       icon: IconLoader,
       iconClass: "text-white ",
@@ -241,7 +243,7 @@ export default function Coming_Applications() {
 
                       return (
                         <Badge
-                          variant={status?.variant || "outline"}
+                          variant={"outline"}
                           className="flex items-center gap-1 capitalize w-fit"
                         >
                           {status?.icon && (

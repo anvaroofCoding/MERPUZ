@@ -5,6 +5,7 @@ import {
   CreditCard,
   LogOut,
   Sparkles,
+  SunMoon,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -150,10 +151,6 @@ export function NavUser({ data, isLoading }) {
                       Profil
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <CreditCard className="mr-2" />
-                      Billing
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
                       <Bell className="mr-2" />
                       Notifications
                     </DropdownMenuItem>
@@ -200,7 +197,7 @@ export function NavUser({ data, isLoading }) {
                 ) : (
                   // haqiqiy kontent
                   <>
-                    <Avatar className="h-10 w-8 rounded-lg">
+                    <Avatar className="h-8 w-8 rounded-full">
                       <AvatarImage src={data?.photo} alt={data?.username} />
                       <AvatarFallback className="rounded-lg">
                         {data?.username?.charAt(0) ?? "CN"}
@@ -241,7 +238,7 @@ export function NavUser({ data, isLoading }) {
                     </>
                   ) : (
                     <>
-                      <Avatar className="h-10 w-8 rounded-lg">
+                      <Avatar className="h-8 w-8 rounded-full">
                         <AvatarImage src={data?.photo} alt={data?.username} />
                         <AvatarFallback className="rounded-lg">
                           {data?.username?.charAt(0) ?? "CN"}
@@ -274,8 +271,8 @@ export function NavUser({ data, isLoading }) {
                   </>
                 ) : (
                   <DropdownMenuItem>
-                    <Sparkles className="mr-2" />
-                    Upgrade to Pro
+                    <SunMoon className="mr-2" />
+                    Dark rejimi
                   </DropdownMenuItem>
                 )}
               </DropdownMenuGroup>
@@ -298,10 +295,7 @@ export function NavUser({ data, isLoading }) {
                         Profil
                       </DropdownMenuItem>
                     </Link>
-                    <DropdownMenuItem>
-                      <CreditCard className="mr-2" />
-                      Billing
-                    </DropdownMenuItem>
+
                     <DropdownMenuItem>
                       <Bell className="mr-2" />
                       Notifications

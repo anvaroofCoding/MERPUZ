@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +12,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useAddBolumMutation } from "@/services/api";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useAddBolumMutation, useBolimNameQuery } from "@/services/api";
 import { IconUserPlus } from "@tabler/icons-react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -22,7 +31,7 @@ export function Post_Bolum_Useful_Person({ id }) {
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
     tuzilma: id,
-    bolim_nomi: "",
+    bolim_category_id: null,
     username: "",
     password: "",
     faoliyati: "",
@@ -33,10 +42,11 @@ export function Post_Bolum_Useful_Person({ id }) {
     status: true,
   });
   const [addBolum, { isLoading, isError, error }] = useAddBolumMutation();
+  const { data: bolimcategory } = useBolimNameQuery();
   const clearForm = () =>
     setForm({
       tuzilma: id,
-      bolim_nomi: "",
+      bolim_category_id: null,
       username: "",
       password: "",
       faoliyati: "",
@@ -65,9 +75,7 @@ export function Post_Bolum_Useful_Person({ id }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
-          Xodim
-        </Button>
+        <Button variant="outline">Xodim</Button>
       </DialogTrigger>
 
       <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
@@ -125,17 +133,6 @@ export function Post_Bolum_Useful_Person({ id }) {
               </div>
             </div>
 
-            <div className="space-y-1">
-              <Label>Bo'lim nomi</Label>
-              <Input
-                className="h-10"
-                value={form.bolim_nomi}
-                onChange={(e) =>
-                  setForm({ ...form, bolim_nomi: e.target.value })
-                }
-              />
-            </div>
-
             {/* FAOLIYATI */}
             <div className="space-y-1">
               <Label>Faoliyati</Label>
@@ -146,6 +143,36 @@ export function Post_Bolum_Useful_Person({ id }) {
                   setForm({ ...form, faoliyati: e.target.value })
                 }
               />
+            </div>
+
+            <div className="space-y-2 w-full col-span-2">
+              {bolimcategory?.map((item) => {
+                const checked = form.bolim_category_id === item.id;
+                return (
+                  <div
+                    key={item.id}
+                    className="flex items-start gap-3 rounded-lg w-full border p-3 hover:bg-muted transition"
+                  >
+                    <Checkbox
+                      id={`bolim-${item.id}`}
+                      checked={checked}
+                      onCheckedChange={() =>
+                        setForm({
+                          ...form,
+                          bolim_category_id: item.id,
+                        })
+                      }
+                    />
+
+                    <Label
+                      htmlFor={`bolim-${item.id}`}
+                      className="cursor-pointer leading-snug break-words w-full"
+                    >
+                      {item.nomi}
+                    </Label>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

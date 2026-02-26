@@ -51,7 +51,7 @@ export default function MensProfileCard() {
         tuzilma_nomi: data?.tarkibiy_tuzilma || "",
         faoliyati: data?.faoliyati || "",
         rahbari: data?.rahbari || "",
-        passport_seriya: data?.passport_seriya || true,
+        passport_seriya: data?.passport_seriya || "",
         status: data?.status ?? true, // agar boolean bo‘lsa
         email: data?.email ?? "",
         birth_date: data?.birth_date || "",
@@ -90,6 +90,7 @@ export default function MensProfileCard() {
       toast.error("Yuklashda xatolik yuz berdi!");
     }
   };
+  console.log(data);
 
   return (
     <Card className="w-full shadow-2xl overflow-hidden">
@@ -120,7 +121,7 @@ export default function MensProfileCard() {
                       </Avatar>
 
                       <div className="absolute bottom-2 right-2 flex gap-2">
-                        <div className="bg-green-500 md:w-10 md:h-10 h-5 w-5 rounded-full shadow-lg border-2 border-white dark:border-slate-800 flex justify-center items-center">
+                        <div className="bg-green-500 md:w-10 md:h-10 h-5 w-5 rounded-full shadow-lg  flex justify-center items-center">
                           ✔
                         </div>
                       </div>
@@ -217,11 +218,8 @@ export default function MensProfileCard() {
               {/* Edit Button */}
               {!isLoading && (
                 <div className="flex items-start w-full md:w-auto">
-                  <Button
-                    onClick={() => setIsDialogOpen(true)}
-                    className="w-full md:w-auto bg-slate-900 hover:bg-slate-800 text-white gap-2 h-10 md:h-8 px-4 md:px-6 rounded-lg dark:bg-slate-700 dark:hover:bg-slate-600"
-                  >
-                    <Edit3 className="w-4 h-4" />
+                  <Button onClick={() => setIsDialogOpen(true)} size={"sm"}>
+                    <Edit3 size={12} className="mr-2" />
                     <span className="hidden sm:inline">Tahrirlash</span>
                     <span className="sm:hidden">Tahrirlash</span>
                   </Button>
@@ -256,8 +254,8 @@ export default function MensProfileCard() {
                     <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
                       Roli
                     </p>
-                    <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
-                      {data?.role == "bekat" ? "Bekat" : "Tarkibiy tuzilma"}
+                    <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100 capitalize">
+                      {data?.role}
                     </p>
                   </>
                 )}
@@ -285,24 +283,45 @@ export default function MensProfileCard() {
               </article>
 
               {/* Location */}
-              <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                {isLoading ? (
-                  <>
-                    <Skeleton className="w-16 h-4 mb-2" />
-                    <Skeleton className="w-28 h-5" />
-                  </>
-                ) : (
-                  <>
-                    <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1">
-                      <MapPin className="w-3 h-3 md:w-4 md:h-4" />
-                      Bekati
-                    </p>
-                    <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
-                      {data?.bekat_nomi ? data?.bekat_nomi : "Mavjud emas"}
-                    </p>
-                  </>
-                )}
-              </article>
+              {data?.bolim_nomi ? (
+                <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                  {isLoading ? (
+                    <>
+                      <Skeleton className="w-16 h-4 mb-2" />
+                      <Skeleton className="w-28 h-5" />
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1">
+                        <MapPin className="w-3 h-3 md:w-4 md:h-4" />
+                        Bo'lim nomi
+                      </p>
+                      <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
+                        {data?.bolim_nomi ? data?.bolim_nomi : "Mavjud emas"}
+                      </p>
+                    </>
+                  )}
+                </article>
+              ) : (
+                <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                  {isLoading ? (
+                    <>
+                      <Skeleton className="w-16 h-4 mb-2" />
+                      <Skeleton className="w-28 h-5" />
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1">
+                        <MapPin className="w-3 h-3 md:w-4 md:h-4" />
+                        Bekati
+                      </p>
+                      <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
+                        {data?.bekat_nomi ? data?.bekat_nomi : "Mavjud emas"}
+                      </p>
+                    </>
+                  )}
+                </article>
+              )}
 
               {/* Status */}
               <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
@@ -562,7 +581,7 @@ export default function MensProfileCard() {
                       Roli
                     </p>
                     <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
-                      {data?.role == "bekat" ? "Bekat" : "Tarkibiy tuzilma"}
+                      {data?.role}
                     </p>
                   </>
                 )}
@@ -590,24 +609,45 @@ export default function MensProfileCard() {
               </article>
 
               {/* Location */}
-              <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                {isLoading ? (
-                  <>
-                    <Skeleton className="w-16 h-4 mb-2" />
-                    <Skeleton className="w-28 h-5" />
-                  </>
-                ) : (
-                  <>
-                    <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1">
-                      <MapPin className="w-3 h-3 md:w-4 md:h-4" />
-                      Bekati
-                    </p>
-                    <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
-                      {data?.bekat_nomi ? data?.bekat_nomi : "Mavjud emas"}
-                    </p>
-                  </>
-                )}
-              </article>
+              {data?.bolim_nomi ? (
+                <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                  {isLoading ? (
+                    <>
+                      <Skeleton className="w-16 h-4 mb-2" />
+                      <Skeleton className="w-28 h-5" />
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1">
+                        <MapPin className="w-3 h-3 md:w-4 md:h-4" />
+                        Bo'lim nomi
+                      </p>
+                      <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
+                        {data?.bolim_nomi ? data?.bolim_nomi : "Mavjud emas"}
+                      </p>
+                    </>
+                  )}
+                </article>
+              ) : (
+                <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                  {isLoading ? (
+                    <>
+                      <Skeleton className="w-16 h-4 mb-2" />
+                      <Skeleton className="w-28 h-5" />
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1">
+                        <MapPin className="w-3 h-3 md:w-4 md:h-4" />
+                        Bekati
+                      </p>
+                      <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
+                        {data?.bekat_nomi ? data?.bekat_nomi : "Mavjud emas"}
+                      </p>
+                    </>
+                  )}
+                </article>
+              )}
 
               {/* Status */}
               <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">

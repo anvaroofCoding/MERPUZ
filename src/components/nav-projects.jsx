@@ -1,38 +1,35 @@
 "use client";
 
-import { Folder, Forward, MoreHorizontal, Trash2 } from "lucide-react";
-
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
+  useSidebar,
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuAction,
-  SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
+  SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { useNavigate } from "react-router-dom";
 
-export function NavProjects({ projects }) {
+export function NavProjects({ projects, userRole }) {
   const { isMobile } = useSidebar();
   const navigate = useNavigate();
+
+  // 🔐 Role filter
+  const filteredProjects = projects.filter((project) =>
+    project.roles?.includes(userRole),
+  );
+
+  if (filteredProjects.length === 0) return null; // Hech narsa bo'lmasa ko'rsatmaslik
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Yordamchi menyular</SidebarGroupLabel>
       <SidebarMenu>
-        {projects.map((item) => (
+        {filteredProjects.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
               <button onClick={() => navigate(`${item.url}/${item.name}`)}>
-                <item.icon />
+                {item.icon && <item.icon />}
                 <span>{item.name}</span>
               </button>
             </SidebarMenuButton>

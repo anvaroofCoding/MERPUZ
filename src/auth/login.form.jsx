@@ -123,7 +123,7 @@ export function LoginsNewForm() {
           {isLoading ? (
             <Loader2 className="animate-spin ml-2 h-4 w-4" />
           ) : (
-            <IconBrandTelegram stroke={2} className="ml-2" />
+            <IconBrandTelegram stroke={2} size={18} className="ml-2" />
           )}
         </Button>
       </CardFooter>

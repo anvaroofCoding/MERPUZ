@@ -1,5 +1,4 @@
 import { ChevronRight } from "lucide-react";
-
 import {
   Collapsible,
   CollapsibleContent,
@@ -16,13 +15,29 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { useNavigate } from "react-router-dom";
-export function NavMain({ items }) {
+
+export function NavMain({ items, userRole }) {
   const navigate = useNavigate();
+
+  // 🔐 Role filter
+  const filteredItems = items
+    .map((item) => {
+      // Sub itemsni role bo'yicha filter qilamiz
+      const filteredSubItems = item.items?.filter((sub) =>
+        sub.roles?.includes(userRole),
+      );
+      // Agar subItems bo‘sh bo‘lsa, parent ham bo‘lmasin
+      if (!filteredSubItems || filteredSubItems.length === 0) return null;
+
+      return { ...item, items: filteredSubItems };
+    })
+    .filter(Boolean); // null bo'lganlarni olib tashlash
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Menyular</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
+        {filteredItems.map((item) => (
           <Collapsible
             key={item.title}
             asChild
@@ -37,9 +52,10 @@ export function NavMain({ items }) {
                   <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                 </SidebarMenuButton>
               </CollapsibleTrigger>
+
               <CollapsibleContent>
                 <SidebarMenuSub>
-                  {item.items?.map((subItem) => (
+                  {item.items.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
                       <SidebarMenuSubButton asChild>
                         <button

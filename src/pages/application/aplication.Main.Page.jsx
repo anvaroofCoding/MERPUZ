@@ -5,20 +5,33 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  CalendarIcon,
+  CalendarSearch,
+  MoreHorizontal,
+  Send,
+} from "lucide-react"; // 3 nuqtali icon
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   useAplication_detailsQuery,
   useDeletePhotoMutation,
+  useIjroTimeMutation,
   useMEQuery,
 } from "@/services/api";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {
-  Calendar,
   Download,
   DownloadCloud,
   FileText,
@@ -32,12 +45,18 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import Aplication_Work_Progress from "./aplication.work.progress";
+import { IconClockHour6 } from "@tabler/icons-react";
+import { Label } from "@/components/ui/label";
+
+import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
 
 const statusVariantMap = {
-  "bajarilgan": "success",
-  "qaytarildi": "destructive",
+  bajarilgan: "success",
+  qaytarildi: "destructive",
   "qabul qilindi": "default",
-  "jarayonda": "warning",
+  jarayonda: "warning",
 };
 
 export default function ApplicationMainPage({ id }) {
@@ -45,12 +64,58 @@ export default function ApplicationMainPage({ id }) {
   const [DeletePhotos, { isLoading: DeleteLoadingPhoto }] =
     useDeletePhotoMutation();
   const { data: me } = useMEQuery();
-  console.log(me);
   const [selectedImages, setSelectedImages] = useState([]);
   const [showImageModal, setShowImageModal] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
   const [currentImageId, setCurrentImageId] = useState(null);
   const [showFileModal, setShowFileModal] = useState(false);
+  const [isDialogVisible, setIsDialogVisible] = useState(false);
+  const [postIjroTime, { isLoading: ijroL }] = useIjroTimeMutation();
+  const parol = localStorage.getItem("life");
+
+  const [executionData, setExecutionData] = useState({
+    remark: "",
+    dueDate: undefined, // "" o'rniga undefined ishlating
+  });
+
+  const saveExecutionData = async () => {
+    // 1. Ma'lumotni API formatiga tayyorlaymiz
+    const payload = {
+      comment: executionData.remark, // remark -> comment
+      // Date obyektini "YYYY-MM-DD" formatiga o'tkazamiz
+      ijro_muddati: executionData.dueDate
+        ? format(executionData.dueDate, "yyyy-MM-dd")
+        : null,
+      parol: parol,
+    };
+
+    try {
+      // 2. API ga yuborish (postIjroTime - sizning api funksiyangiz)
+      // payloadni argument sifatida uzatamiz
+      const response = await postIjroTime({ body: payload, id }).unwrap();
+
+      if (response) {
+        console.log("Muvaffaqiyatli saqlandi:", payload);
+
+        // 3. Dialog oynasini yopish
+        setIsDialogVisible(false);
+
+        // 4. State-ni tozalash (ixtiyoriy)
+        setExecutionData({ remark: "", dueDate: undefined });
+      }
+    } catch (error) {
+      console.error("Xatolik yuz berdi:", error);
+      // Bu yerda foydalanuvchiga xatolik haqida xabar ko'rsatish mumkin (Toast)
+    }
+  };
+
+  // Sanani tanlash funksiyasi
+  const handleDateSelect = (selectedDate) => {
+    setExecutionData((prev) => ({
+      ...prev,
+      dueDate: selectedDate, // Bu yerda to'g'ridan-to'g'ri Date obyekti keladi
+    }));
+  };
 
   if (isLoading || !data) {
     return (
@@ -128,8 +193,6 @@ export default function ApplicationMainPage({ id }) {
     setCurrentImageId(null);
   };
 
-  console.log(data);
-
   return (
     <ScrollArea className="no-scrollbar h-screen pb-35">
       <div className="space-y-4 ">
@@ -140,7 +203,7 @@ export default function ApplicationMainPage({ id }) {
               {/* Ariza info */}
               <div className="flex-1">
                 <p className="text-lg font-semibold  mb-2">
-                  Ariza raqami: #{data?.id}
+                  Ariza raqami: {data?.id}
                 </p>
                 <Badge
                   variant={statusVariantMap[data?.status] || "outline"}
@@ -150,9 +213,27 @@ export default function ApplicationMainPage({ id }) {
                 </Badge>
               </div>
               {/* Actions Dropdown */}
-              <Button onClick={() => setShowFileModal(true)}>
+              <Button size="sm" onClick={() => setShowFileModal(true)}>
                 Bildirgi fayli <DownloadCloud className="ml-1" size={17} />
               </Button>
+              {data?.ijro_muddati ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="sm">
+                      <MoreHorizontal className="w-5 h-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent align="end" className="w-40">
+                    <DropdownMenuItem onClick={() => setIsDialogVisible(true)}>
+                      <IconClockHour6 stroke={2} />
+                      Ijro vaqti
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                ""
+              )}
             </div>
 
             {/* Umumiy ma'lumot */}
@@ -160,7 +241,7 @@ export default function ApplicationMainPage({ id }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Sana */}
                 <div className="flex items-start gap-3">
-                  <Calendar className="h-4 w-4 text-blue-600 mt-1 flex-shrink-0" />
+                  <CalendarSearch className="h-4 w-4 text-blue-600 mt-1 flex-shrink-0" />
                   <div>
                     <p className="text-xs text-muted-foreground">Sana</p>
                     <p className="text-sm font-medium">
@@ -238,7 +319,23 @@ export default function ApplicationMainPage({ id }) {
                 <div className="flex gap-3 pt-3 border-t">
                   <MessageSquare className="h-4 w-4 text-orange-600 mt-1 flex-shrink-0" />
                   <div className="flex-1">
-                    <p className="text-xs text-muted-foreground mb-1">Izoh</p>
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Muhokama
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 ">
+                      {data.comment}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {data?.comment && (
+                <div className="flex gap-3 pt-3 border-t">
+                  <MessageSquare className="h-4 w-4 text-orange-600 mt-1 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Tezkor xabar
+                    </p>
                     <p className="text-sm text-gray-600 dark:text-gray-300 ">
                       {data.comment}
                     </p>
@@ -279,8 +376,8 @@ export default function ApplicationMainPage({ id }) {
                 </div>
                 {selectedImages.length > 0 && (
                   <Button onClick={downloadImages} className="w-full">
-                    <Download className="h-4 w-4 mr-2" />
                     Tanlanganlarni yuklab olish ({selectedImages.length})
+                    <Download size={17} className="h-4 w-4" />
                   </Button>
                 )}
               </>
@@ -294,7 +391,7 @@ export default function ApplicationMainPage({ id }) {
         <Dialog open={showImageModal} onOpenChange={setShowImageModal}>
           <DialogContent className="sm:max-w-lg w-full">
             <DialogHeader>
-              <DialogTitle>Rasmni ko'rish</DialogTitle>
+              <DialogTitle>Jo'natilgan rasm ko'rinishi</DialogTitle>
               <DialogClose />
             </DialogHeader>
             {currentImage && (
@@ -311,7 +408,7 @@ export default function ApplicationMainPage({ id }) {
                     }
                     className="w-full"
                   >
-                    <Download className="h-4 w-4 mr-2" />
+                    <Download className="h-4 w-4" />
                     Yuklab olish
                   </Button>
                   {DeleteLoadingPhoto ? (
@@ -328,7 +425,7 @@ export default function ApplicationMainPage({ id }) {
                       className="w-full bg-red-600 hover:bg-red-500"
                       disabled={data?.status !== "jarayonda"}
                     >
-                      <Trash2 className="h-4 w-4 mr-2" />
+                      <Trash2 className="h-4 w-4" />
                       O'chirish
                     </Button>
                   )}
@@ -341,9 +438,12 @@ export default function ApplicationMainPage({ id }) {
         <Dialog open={showFileModal} onOpenChange={setShowFileModal}>
           <DialogContent className="sm:max-w-md w-full">
             <DialogHeader>
-              <DialogTitle>Yuklab olish</DialogTitle>
+              <DialogTitle>Bildirgi faylini haqida</DialogTitle>
               <DialogClose />
             </DialogHeader>
+            <p className="text-xs text-muted-foreground mb-2">
+              {data?.extra_comment}
+            </p>
             <p className="text-xs text-muted-foreground mb-2">
               {data?.comment}
             </p>
@@ -352,10 +452,78 @@ export default function ApplicationMainPage({ id }) {
                 onClick={() => handleDownloadFile(data.bildirgi, "file")}
                 className="w-full"
               >
-                <Download className="h-4 w-4 mr-2" />
-                Yuklab olish
+                <Download className="h-4 w-4 " />
+                Yuklash
               </Button>
             )}
+          </DialogContent>
+        </Dialog>
+        {/* for ijro date */}
+        <Dialog open={isDialogVisible} onOpenChange={setIsDialogVisible}>
+          <DialogContent className="sm:max-w-[450px] p-6">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold text-center">
+                Ijro sanasini o'zgartirish
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-6 py-4">
+              {/* Kalendar qismi */}
+              <div className="flex flex-col items-center gap-2">
+                <Label className="w-full font-semibold text-sm text-muted-foreground">
+                  Yangi muddatni tanlang
+                </Label>
+                <div className="rounded-md border shadow-sm bg-white dark:bg-zinc-950">
+                  <Calendar
+                    mode="single"
+                    selected={executionData.dueDate}
+                    onSelect={handleDateSelect}
+                    className="rounded-md"
+                    // Agar yillar ro'yxati kerak bo'lsa:
+                    captionLayout="dropdown"
+                    fromYear={2024}
+                    toYear={2030}
+                  />
+                </div>
+              </div>
+
+              {/* Izoh qismi */}
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="remark"
+                  className="font-semibold text-sm text-muted-foreground"
+                >
+                  O'zgartirish sabablari
+                </Label>
+                <Textarea
+                  id="remark"
+                  placeholder="Izoh qoldiring..."
+                  value={executionData.remark}
+                  onChange={(e) =>
+                    setExecutionData((prev) => ({
+                      ...prev,
+                      remark: e.target.value,
+                    }))
+                  }
+                  className="min-h-[80px] focus-visible:ring-primary"
+                />
+              </div>
+            </div>
+
+            <DialogFooter className="flex sm:justify-center">
+              <Button
+                className="w-full sm:w-[200px] flex gap-2"
+                onClick={saveExecutionData || ijroL}
+                disabled={!executionData.dueDate} // Sana tanlanmasa tugma ishlamaydi
+              >
+                Saqlash{" "}
+                {ijroL ? (
+                  <Loader className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

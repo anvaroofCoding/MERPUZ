@@ -141,8 +141,10 @@ export default function Obyekt() {
             <CardContent className="p-4 flex items-start justify-between">
               {/* LEFT */}
               <div className="space-y-1">
-                <p className="font-semibold leading-none">{item.obyekt_nomi}</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="font-semibold leading-none break-words">
+                  {item.obyekt_nomi}
+                </p>
+                <p className="text-sm text-muted-foreground  break-all leading-none">
                   {item.toliq_nomi}
                 </p>
               </div>

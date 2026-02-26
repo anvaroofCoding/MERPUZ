@@ -220,7 +220,8 @@ export const api = createApi({
       providesTags: ["MainTag"],
     }),
     PprMonth: builder.query({
-      query: () => "/ppr-jadval/oylik/",
+      query: ({ bolim_category }) =>
+        `/ppr-jadval/?bolim_category=${bolim_category}`,
       providesTags: ["MainTag"],
     }),
     AddPPRJadval: builder.mutation({
@@ -330,14 +331,159 @@ export const api = createApi({
       query: () => "/chart-statistics/",
       providesTags: ["MainTag"],
     }),
-    getPprYearly: builder.query({
-      query: () => "/ppr-yillik/",
+
+    pprYears: builder.query({
+      query: ({
+        page = 1,
+        limit = 10,
+        search = "",
+        status = "all",
+        yil = "",
+        oy = "",
+      }) => {
+        const params = new URLSearchParams();
+
+        params.append("page", page);
+        params.append("limit", limit);
+
+        if (search) params.append("search", search);
+        if (yil) params.append("yil", yil);
+        if (oy) params.append("oy", oy);
+
+        // 🔥 ENG MUHIM QISM
+        if (status && status !== "all") {
+          params.append("status", status);
+        }
+
+        return `/ppr-yillik?${params.toString()}`;
+      },
+      providesTags: ["MainTag"],
+    }),
+
+    obyektOption: builder.query({
+      query: () => "/obyekt/",
+      providesTags: ["MainTag"],
+    }),
+    pprTuriOption: builder.query({
+      query: () => "/ppr-turi/",
+      providesTags: ["MainTag"],
+    }),
+    addPPRYears: builder.mutation({
+      query: ({ body }) => ({
+        url: `/ppr-yillik/`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    IjroTime: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `/ariza/${id}/`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    BolimName: builder.query({
+      query: () => "/bolim-category/",
+      providesTags: ["MainTag"],
+    }),
+    addBolimName: builder.mutation({
+      query: ({ body }) => ({
+        url: `/bolim-category/`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    editBolimName: builder.mutation({
+      query: ({ body, id }) => ({
+        url: `/bolim-category/${id}/`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    PPRtastiqlashGet: builder.query({
+      query: ({
+        status = "",
+        search = "",
+        limit = 10,
+        page = 1,
+        bolim_category__nomi = "",
+      }) =>
+        `/yuborish-status/?status=${status}&search=${search}&limit=${limit}&page=${page}&bolim_category__nomi=${bolim_category__nomi}`,
+      providesTags: ["MainTag"],
+    }),
+    PPRtastiqlashPOSt: builder.mutation({
+      query: ({ body }) => ({
+        url: `/ppr-tasdiqlash/`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    pprYuborish: builder.mutation({
+      query: ({ body, id }) => ({
+        url: `/ppr-yuborish/${id}/`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    PPrniJonatishPost: builder.mutation({
+      query: (body) => ({
+        url: `/ppr-yuborish/`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    PPRtastiqlashGetForFind: builder.query({
+      query: () => `/yuborish-status/`,
+      providesTags: ["MainTag"],
+    }),
+    pprJarayondaForFinding: builder.query({
+      query: () => "/ppr-jarayonda/",
+      providesTags: ["MainTag"],
+    }),
+    PPRbajarildiPOST: builder.mutation({
+      query: (formData) => ({
+        url: `/ppr-bajarildi/`,
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    Notifications: builder.query({
+      query: ({ search = "", limit = 10, page = 1 }) =>
+        `/notifications/?search=${search}&limit=${limit}&page=${page}`,
+      providesTags: ["MainTag"],
+    }),
+    NotificationsView: builder.query({
+      query: ({ id }) => `/notifications/${id}`,
       providesTags: ["MainTag"],
     }),
   }),
 });
 export const {
-  useGetPprYearlyQuery,
+  useNotificationsViewQuery,
+  useNotificationsQuery,
+  usePPRbajarildiPOSTMutation,
+  usePprJarayondaForFindingQuery,
+  usePPRtastiqlashGetForFindQuery,
+  usePPrniJonatishPostMutation,
+  usePprYuborishMutation,
+  usePPRtastiqlashPOStMutation,
+  usePPRtastiqlashGetQuery,
+  useAddBolimNameMutation,
+  useEditBolimNameMutation,
+  useBolimNameQuery,
+  useIjroTimeMutation,
+  useAddPPRYearsMutation,
+  useObyektOptionQuery,
+  usePprTuriOptionQuery,
+  usePprYearsQuery,
   useDashbaordsCharterQuery,
   useComingaplication2Query,
   useChangeComingAplicationMutation,

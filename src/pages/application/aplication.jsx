@@ -55,9 +55,11 @@ import {
   useOptionTuzilmaQuery,
 } from "@/services/api";
 import {
+  IconArrowBackUp,
   IconCircleCheckFilled,
   IconCircleXFilled,
   IconLoader,
+  IconRosetteDiscountCheck,
 } from "@tabler/icons-react";
 import { format } from "date-fns";
 import {
@@ -70,6 +72,7 @@ import {
   Loader,
   MessageCircleX,
   Plus,
+  PlusCircle,
   Search,
   Send,
   Upload,
@@ -77,6 +80,7 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { DoubleSide } from "three";
 
 export default function Applications() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -93,7 +97,7 @@ export default function Applications() {
   const [form, setForm] = useState({
     comment: "",
     parol: "",
-    tuzilmalar: [],
+    targets: [],
     photos: [],
     bildirgi: "",
     turi: "",
@@ -103,7 +107,7 @@ export default function Applications() {
     setForm({
       comment: "",
       parol: "",
-      tuzilmalar: [],
+      targets: [],
       photos: [],
       bildirgi: "",
       turi: "",
@@ -111,6 +115,25 @@ export default function Applications() {
       qayta_yuklandi: true,
     });
   };
+  const handleTuzilmaSelect = (value) => {
+    setForm((prev) => {
+      const exists = prev.targets?.find((item) => item.tuzilma === value);
+
+      if (exists) return prev;
+
+      return {
+        ...prev,
+        targets: [
+          ...prev.targets,
+          {
+            tuzilma: value,
+            extra_comment: "",
+          },
+        ],
+      };
+    });
+  };
+
   const handlePhotoUpload = (e) => {
     const files = Array.from(e.target.files);
     setForm((prev) => ({
@@ -133,14 +156,31 @@ export default function Applications() {
       });
     }
   };
-  const handleStructureToggle = (structureId) => {
-    setForm((prev) => ({
-      ...prev,
-      tuzilmalar: prev.tuzilmalar.includes(structureId)
-        ? prev.tuzilmalar.filter((id) => id !== structureId)
-        : [...prev.tuzilmalar, structureId],
-    }));
+  const handleStructureToggle = (structure) => {
+    setForm((prev) => {
+      const exists = prev.targets.find((item) => item.tuzilma === structure.id);
+
+      if (exists) {
+        return {
+          ...prev,
+          targets: prev.targets.filter((item) => item.tuzilma !== structure.id),
+        };
+      }
+
+      return {
+        ...prev,
+        targets: [
+          ...prev.targets,
+          {
+            tuzilma: structure.id,
+            tuzilma_nomi: structure.tuzilma_nomi,
+            extra_comment: "",
+          },
+        ],
+      };
+    });
   };
+
   const { data, isLoading, total_pages } = useAplicationQuery({
     page,
     limit,
@@ -165,7 +205,7 @@ export default function Applications() {
     ) || [];
   const isFormComplete = () => {
     const hasRequiredFields =
-      form.comment.trim() !== "" && form.tuzilmalar.length > 0;
+      form.comment.trim() !== "" && form.targets.length > 0;
 
     return hasRequiredFields;
   };
@@ -180,7 +220,15 @@ export default function Applications() {
       fd.append("ijro_muddati", format(form.ijro_muddati, "yyyy-MM-dd"));
     }
 
-    form.tuzilmalar.forEach((id) => fd.append("tuzilmalar", id));
+    fd.append(
+      "targets",
+      JSON.stringify(
+        form.targets.map((item) => ({
+          tuzilma: item.tuzilma,
+          extra_comment: item.extra_comment,
+        })),
+      ),
+    );
 
     form.photos.forEach((p) => fd.append("photos", p));
 
@@ -204,7 +252,6 @@ export default function Applications() {
   };
   useEffect(() => {
     if (isError) {
-      console.log(error);
       if (error?.data?.comment) {
         toast.error("Izoh yozishingiz shart!");
         aplication_clear();
@@ -216,9 +263,9 @@ export default function Applications() {
   }, [isError, error]);
 
   const statusConfig = {
-    "bajarilgan": {
+    bajarilgan: {
       variant: "success",
-      icon: IconCircleCheckFilled,
+      icon: IconRosetteDiscountCheck,
       iconClass: "text-white",
     },
     "qabul qilindi": {
@@ -226,19 +273,17 @@ export default function Applications() {
       icon: IconCircleCheckFilled,
       iconClass: "text-blue-500",
     },
-    "qaytarildi": {
+    qaytarildi: {
       variant: "destructive",
-      icon: IconCircleXFilled,
+      icon: IconArrowBackUp,
       iconClass: "text-red-100",
     },
-    "jarayonda": {
+    jarayonda: {
       variant: "warning",
       icon: IconLoader,
       iconClass: "text-white ",
     },
   };
-
-  console.log(data);
 
   return (
     <div className="w-full">
@@ -272,18 +317,33 @@ export default function Applications() {
               align="start"
               className="bg-card border-border"
             >
-              <DropdownMenuItem onClick={() => setStatusFilter("")}>
-                Barchasi
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("jarayonda")}>
-                Jarayonda
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("bajarilgan")}>
-                Bajarilgan
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("qaytarildi")}>
-                Qaytarilgan
-              </DropdownMenuItem>
+              {["", "jarayonda", "bajarilgan", "qaytarildi"].map((status) => {
+                const label =
+                  status === ""
+                    ? "Barchasi"
+                    : status === "jarayonda"
+                      ? "Jarayonda"
+                      : status === "bajarilgan"
+                        ? "Bajarilgan"
+                        : "Qaytarildi";
+
+                const isSelected = statusFilter === status; // tanlanganini tekshirish
+
+                return (
+                  <DropdownMenuItem
+                    key={status || "all"}
+                    onClick={() => setStatusFilter(status)}
+                    className={cn(
+                      "cursor-pointer",
+                      isSelected
+                        ? "bg-blue-500 text-white"
+                        : "hover:bg-blue-100",
+                    )}
+                  >
+                    {label}
+                  </DropdownMenuItem>
+                );
+              })}
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -302,14 +362,28 @@ export default function Applications() {
               align="start"
               className="bg-card border-border"
             >
-              <DropdownMenuItem onClick={() => setSortBy("")}>
+              <DropdownMenuItem
+                onClick={() => setSortBy("")}
+                className={cn(
+                  sortBy === ""
+                    ? "bg-blue-500 text-white"
+                    : "hover:bg-blue-100",
+                )}
+              >
                 Barchasi
               </DropdownMenuItem>
+
               {OptionTuzilma?.map((item) => {
+                const isSelected = sortBy === item?.tuzilma_nomi;
                 return (
                   <DropdownMenuItem
                     key={item?.id}
                     onClick={() => setSortBy(item?.tuzilma_nomi)}
+                    className={cn(
+                      isSelected
+                        ? "bg-blue-500 text-white"
+                        : "hover:bg-blue-100",
+                    )}
                   >
                     {item?.tuzilma_nomi}
                   </DropdownMenuItem>
@@ -327,11 +401,11 @@ export default function Applications() {
                 aplication_clear();
               }}
             >
-              Yopish <MessageCircleX className="w-4 h-4" />
+              Yopish <MessageCircleX className="w-4 h-4 ml-1" />
             </Button>
           ) : (
             <Button variant="default" onClick={() => setShow(true)}>
-              Qo'shish <FilePlusCorner className="w-4 h-4 ml-2" size={17} />
+              Qo'shish <Plus className="w-4 h-4 ml-1" size={17} />
             </Button>
           )}
         </div>
@@ -345,7 +419,7 @@ export default function Applications() {
               Ariza jo'natish
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-1">
-              Barcha bo'sh joylarni to'ldiring
+              Barcha bo'sh joylarni to'ldiring va arizani jo'nating!
             </p>
           </CardHeader>
 
@@ -374,9 +448,9 @@ export default function Applications() {
                       <button
                         key={item?.id}
                         type="button"
-                        onClick={() => handleStructureToggle(item?.id)}
+                        onClick={() => handleStructureToggle(item)}
                         className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 ${
-                          form.tuzilmalar.includes(item?.id)
+                          form.targets.some((t) => t.tuzilma === item.id)
                             ? "bg-blue-600 text-white shadow-sm"
                             : "bg-muted text-muted-foreground border border-border/50 hover:bg-muted/70"
                         }`}
@@ -390,12 +464,39 @@ export default function Applications() {
                     </p>
                   )}
                 </div>
-                {form.tuzilmalar.length > 0 && (
+                {form.targets.length > 0 && (
                   <p className="text-xs text-blue-600 font-medium">
-                    ✓ {form.tuzilmalar.length} ta tanlangan
+                    ✓ {form.targets.length} ta tanlangan
                   </p>
                 )}
               </div>
+
+              {form.targets.map((item, index) => (
+                <div key={item.tuzilma} className="space-y-2">
+                  <Label>
+                    {item.tuzilma_nomi} tarkibiy tuzilmasiga tegishli xabar
+                  </Label>
+
+                  <Textarea
+                    value={item.extra_comment}
+                    placeholder="Xabarni yozing"
+                    onChange={(e) => {
+                      setForm((prev) => {
+                        const updated = [...prev.targets];
+                        updated[index] = {
+                          ...updated[index],
+                          extra_comment: e.target.value,
+                        };
+
+                        return {
+                          ...prev,
+                          targets: updated,
+                        };
+                      });
+                    }}
+                  />
+                </div>
+              ))}
 
               {/* TYPE & CALENDAR - INLINE */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -532,9 +633,9 @@ export default function Applications() {
 
               {/* COMMENT - AT BOTTOM */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Komment</Label>
+                <Label className="text-sm font-medium">Umumiy xabar</Label>
                 <Textarea
-                  placeholder="O'z fikringizni yozing..."
+                  placeholder="yozing..."
                   className="resize-none h-20 text-sm bg-card border-border"
                   value={form.comment}
                   onChange={(e) =>
@@ -576,8 +677,8 @@ export default function Applications() {
                     disabled={!isFormComplete()}
                     onClick={handleSubmit}
                   >
-                    <Send className="w-4 h-4 mr-2" />
-                    Yuborish
+                    Jo'natish
+                    <Send className="w-4 h-4" />
                   </Button>
                 )}
               </div>
@@ -726,7 +827,7 @@ export default function Applications() {
 
                       return (
                         <Badge
-                          variant={status?.variant || "outline"}
+                          variant={"outline"}
                           className="flex items-center gap-1 capitalize w-fit"
                         >
                           {status?.icon && (
