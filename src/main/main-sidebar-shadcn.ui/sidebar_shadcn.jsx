@@ -106,48 +106,39 @@ export default function Sidebar_Shadcn() {
                 </Breadcrumb>
               </div>
               <div className="flex gap-5 items-center">
-                {params?.SubTitle == "Oylik reja" ? (
+                {me?.role == "bolim" ? (
+                  ""
+                ) : (
                   <>
-                    {me?.role == "bolim" ? (
-                      ""
+                    {isLoading ? (
+                      <Skeleton className={"w-10"} />
                     ) : (
-                      <>
-                        {isLoading ? (
-                          <Skeleton className={"w-10"} />
-                        ) : (
-                          <Select
-                            size="sm"
-                            default
-                            value={bolim}
-                            onValueChange={(value) => {
-                              dispatch(setBolim(value));
-                              refetch();
-                            }}
-                          >
-                            <SelectTrigger className="h-8 text-sm">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent position={"popper"}>
-                              <SelectGroup>
-                                {bolimCategory?.map((items) => {
-                                  return (
-                                    <SelectItem
-                                      key={items?.id}
-                                      value={items?.nomi}
-                                    >
-                                      {items?.nomi}
-                                    </SelectItem>
-                                  );
-                                })}
-                              </SelectGroup>
-                            </SelectContent>
-                          </Select>
-                        )}
-                      </>
+                      <Select
+                        size="sm"
+                        default
+                        value={bolim}
+                        onValueChange={(value) => {
+                          dispatch(setBolim(value));
+                          refetch();
+                        }}
+                      >
+                        <SelectTrigger className="h-8 text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent position={"popper"}>
+                          <SelectGroup>
+                            {bolimCategory?.map((items) => {
+                              return (
+                                <SelectItem key={items?.id} value={items?.nomi}>
+                                  {items?.nomi}
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
                     )}
                   </>
-                ) : (
-                  ""
                 )}
                 <Notification />
               </div>

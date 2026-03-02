@@ -51,6 +51,7 @@ import { cn } from "@/lib/utils";
 import {
   useAddAplicationMutation,
   useAplicationQuery,
+  useMEQuery,
   useOptionAplicationQuery,
   useOptionTuzilmaQuery,
 } from "@/services/api";
@@ -188,6 +189,7 @@ export default function Applications() {
     status: statusFilter,
     tuzilma_nomi: sortBy,
   });
+  const { data: me, isLoading: meLoading } = useMEQuery();
   const { data: OptionAplications, isLoading: OptionAplicationLoading } =
     useOptionAplicationQuery();
   const { data: OptionTuzilma, isLoading: OptionTuzilmaLoader } =
@@ -444,20 +446,24 @@ export default function Applications() {
                 {/* Horizontal scrollable structures */}
                 <div className="flex gap-2 overflow-x-auto pb-2 pt-2 -mx-0.5 px-0.5">
                   {filteredStructures && filteredStructures.length > 0 ? (
-                    filteredStructures.map((item) => (
-                      <button
-                        key={item?.id}
-                        type="button"
-                        onClick={() => handleStructureToggle(item)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 ${
-                          form.targets.some((t) => t.tuzilma === item.id)
-                            ? "bg-blue-600 text-white shadow-sm"
-                            : "bg-muted text-muted-foreground border border-border/50 hover:bg-muted/70"
-                        }`}
-                      >
-                        {item?.tuzilma_nomi}
-                      </button>
-                    ))
+                    filteredStructures
+                      .filter(
+                        (item) => item.tuzilma_nomi !== me?.tarkibiy_tuzilma,
+                      )
+                      .map((item) => (
+                        <button
+                          key={item?.id}
+                          type="button"
+                          onClick={() => handleStructureToggle(item)}
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 ${
+                            form.targets.some((t) => t.tuzilma === item.id)
+                              ? "bg-blue-600 text-white shadow-sm"
+                              : "bg-muted text-muted-foreground border border-border/50 hover:bg-muted/70"
+                          }`}
+                        >
+                          {item?.tuzilma_nomi}
+                        </button>
+                      ))
                   ) : (
                     <p className="text-xs text-muted-foreground py-2">
                       Tuzilmalar topilmadi
@@ -754,7 +760,10 @@ export default function Applications() {
           </TableHeader>
 
           <TableBody>
-            {isLoading || OptionTuzilmaLoader || OptionAplicationLoading ? (
+            {isLoading ||
+            OptionTuzilmaLoader ||
+            OptionAplicationLoading ||
+            meLoading ? (
               [...Array(30)].map((_, i) => (
                 <TableRow key={i}>
                   {[...Array(7)].map((_, j) => (
@@ -832,7 +841,9 @@ export default function Applications() {
                         >
                           {status?.icon && (
                             <status.icon
-                              className={cn("h-4 w-4", status.iconClass)}
+                              className={cn(
+                                "h-4 w-4 text-gray-900 dark:text-gray-300",
+                              )}
                             />
                           )}
                           {item.status}

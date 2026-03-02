@@ -17,9 +17,9 @@ import {
 
 import {
   useNotificationsQuery,
-  useNotificationsViewQuery,
+  useNotificationViewMutation,
 } from "@/services/api";
-import { skipToken } from "@reduxjs/toolkit/query";
+import { toast } from "sonner";
 
 export default function Notification() {
   const [mainID, setMainID] = useState(null);
@@ -49,9 +49,27 @@ export default function Notification() {
   const unreadCount = notifications.filter((item) => !item.is_read).length;
 
   // 📌 Selected notification detail
-  const { data: MainIDDAta, isFetching: isMainFetching } =
-    useNotificationsViewQuery(mainID ? { id: mainID } : skipToken);
+  const [MainIDDAta, { isLoading: notificationLoads }] =
+    useNotificationViewMutation();
 
+  const sumbit = async (item) => {
+    const formData = {
+      is_read: true,
+    };
+    try {
+      await MainIDDAta({ formData, id: item.id }).unwrap();
+      toast.success("O'qildi!");
+    } catch (error) {
+      console.log(error);
+      toast.error("Nimadir xato ketdi!");
+    }
+  };
+
+  const repeadRead = (item) => {
+    toast.warning(`Xabar ${item.read_time} sanada o'qilgan!`);
+  };
+
+  console.log(data);
   return (
     <Drawer direction="left">
       <DrawerTrigger asChild>
@@ -104,7 +122,7 @@ export default function Notification() {
 
           {filteredNotifications.map((item) => (
             <div
-              onClick={() => setMainID(item?.id)}
+              onClick={() => (item.is_read ? repeadRead(item) : sumbit(item))}
               key={item.id}
               className={`rounded-xl border p-4 transition hover:bg-muted/40 cursor-pointer ${
                 !item.is_read ? "bg-muted/50 border-primary" : ""
@@ -126,27 +144,6 @@ export default function Notification() {
               </div>
             </div>
           ))}
-
-          {/* Selected notification detail (MainIDDAta) */}
-          {mainID &&
-            (isMainFetching ? (
-              <p className="text-sm text-muted-foreground mt-2">
-                Yuklanmoqda...
-              </p>
-            ) : (
-              MainIDDAta && (
-                <div className="mt-4 p-4 border rounded-lg bg-muted/20">
-                  <h4 className="font-semibold mb-2">{MainIDDAta.title}</h4>
-                  <p>{MainIDDAta.message}</p>
-                  <div className="text-xs text-muted-foreground mt-2">
-                    {format(
-                      new Date(MainIDDAta.created_at),
-                      "dd.MM.yyyy HH:mm",
-                    )}
-                  </div>
-                </div>
-              )
-            ))}
         </div>
 
         {/* Pagination */}

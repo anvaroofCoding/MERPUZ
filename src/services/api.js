@@ -460,14 +460,29 @@ export const api = createApi({
         `/notifications/?search=${search}&limit=${limit}&page=${page}`,
       providesTags: ["MainTag"],
     }),
-    NotificationsView: builder.query({
-      query: ({ id }) => `/notifications/${id}`,
+    NotificationView: builder.mutation({
+      query: ({ formData, id }) => ({
+        url: `/notifications/${id}/`,
+        method: "PUT",
+        body: formData,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    ForDashboard: builder.query({
+      query: ({ bolim_category = "", year = "" }) =>
+        `/dashboard/stats/?year=${year}&bolim_category=${bolim_category}`,
+      providesTags: ["MainTag"],
+    }),
+    GridDaashoard: builder.query({
+      query: () => `/dashboard/main-stats/`,
       providesTags: ["MainTag"],
     }),
   }),
 });
 export const {
-  useNotificationsViewQuery,
+  useNotificationViewMutation,
+  useGridDaashoardQuery,
+  useForDashboardQuery,
   useNotificationsQuery,
   usePPRbajarildiPOSTMutation,
   usePprJarayondaForFindingQuery,

@@ -248,7 +248,9 @@ export default function Coming_Applications() {
                         >
                           {status?.icon && (
                             <status.icon
-                              className={cn("h-4 w-4", status.iconClass)}
+                              className={cn(
+                                "h-4 w-4 text-gray-900 dark:text-gray-300",
+                              )}
                             />
                           )}
                           {item.status}
