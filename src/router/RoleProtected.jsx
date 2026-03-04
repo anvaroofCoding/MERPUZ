@@ -8,7 +8,7 @@ const RoleProtected = ({ children, allowedRoles }) => {
   if (data?.role === "admin") return children;
 
   if (!allowedRoles.includes(data?.role)) {
-    return <Navigate to="/401" replace />;
+    return <Navigate to="/Error-401" replace />;
   }
 
   return children;

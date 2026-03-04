@@ -7,7 +7,7 @@ const AuthProtected = () => {
   if (isLoading) return null; // loader qo‘ysa ham bo‘ladi
 
   if (!data || isError) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/no-token-and-go-login" replace />;
   }
 
   return <Outlet />;
