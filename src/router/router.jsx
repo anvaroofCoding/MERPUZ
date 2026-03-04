@@ -36,7 +36,6 @@ export const router = createBrowserRouter([
   // 🌍 PUBLIC ROUTES
   // =========================
   { path: "/no-token-and-go-login", element: <Login /> },
-  { path: "/", element: <Login /> },
   { path: "/Error-401", element: <Error401 /> },
   { path: "/Error-500", element: <Error500 /> },
   { path: "/Programm/:MainTitle", element: <Programm /> },
@@ -49,7 +48,7 @@ export const router = createBrowserRouter([
     element: <AuthProtected />, // faqat login borligini tekshiradi
     children: [
       {
-        path: "/a",
+        path: "/",
         element: <Sidebar_Shadcn />,
         children: [
           // 🏠 ROOT → Dashboardga o‘tadi
