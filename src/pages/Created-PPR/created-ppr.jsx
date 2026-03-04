@@ -148,7 +148,8 @@ export default function Created_PPR() {
     useOptionAplicationQuery();
   const { data: OptionTuzilma, isLoading: OptionTuzilmaLoader } =
     useOptionTuzilmaQuery();
-  const [AddPPRTuri, { isError, error }] = useCreated_PPR_PostMutation();
+  const [AddPPRTuri, { isError, error, isLoading: load }] =
+    useCreated_PPR_PostMutation();
   const [EditPPRTuri] = useCreated_PPR_EditMutation();
   const handleSubmit = async () => {
     try {
@@ -498,7 +499,7 @@ export default function Created_PPR() {
             <div>
               <Button
                 onClick={handleSubmit}
-                // disabled={AplicationLoader}
+                disabled={load}
                 className="bg-green-600 hover:bg-green-700 text-white w-full h-11 font-semibold text-base"
               >
                 Saqlash

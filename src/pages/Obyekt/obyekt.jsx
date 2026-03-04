@@ -58,7 +58,7 @@ export default function Obyekt() {
   const { data: response, isLoading } = useObyektQuery({
     search: searchTerm,
   });
-  const [Obyekt_post] = useObyekt_postMutation();
+  const [Obyekt_post, { isLoading: Load }] = useObyekt_postMutation();
   if (isLoading) {
     return (
       <div>
@@ -253,6 +253,7 @@ export default function Obyekt() {
 
               {/* Submit Button */}
               <Button
+                disabled={Load}
                 onClick={handleEditSubmit}
                 className="bg-green-600 hover:bg-green-700 text-white w-full h-11 font-semibold text-base mt-4"
               >
