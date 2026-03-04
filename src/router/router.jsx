@@ -54,7 +54,7 @@ export const router = createBrowserRouter([
           // 🏠 ROOT → Dashboardga o‘tadi
           {
             index: true,
-            element: <Navigate to="Kompleks/Dashboard/Main" replace />,
+            element: <Navigate to="Kompleks/Bosh sahifa/" replace />,
           },
 
           { path: "test", element: <Counter /> },
@@ -63,7 +63,7 @@ export const router = createBrowserRouter([
           // DASHBOARD
           // =========================
           {
-            path: "Kompleks/:MainTitle/:SubTitle",
+            path: "Kompleks/:MainTitle/",
             element: <Dashboard />,
           },
 

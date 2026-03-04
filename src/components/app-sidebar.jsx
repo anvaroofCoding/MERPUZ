@@ -119,6 +119,12 @@ export function AppSidebar({ ...props }) {
     ],
     projects: [
       {
+        name: t("20_20251120"),
+        url: "/Kompleks",
+        icon: Gauge,
+        roles: ["admin", "monitoring", "tarkibiy", "bekat", "bolim"],
+      },
+      {
         name: t("37_20251120"),
         url: "/Programm",
         icon: BrainCog,
@@ -147,8 +153,8 @@ export function AppSidebar({ ...props }) {
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} userRole={me?.role} />
         <NavProjects projects={data.projects} userRole={me?.role} />
+        <NavMain items={data.navMain} userRole={me?.role} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser data={supper} isLoading={isLoading} />
