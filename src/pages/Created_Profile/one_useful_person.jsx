@@ -1,748 +1,506 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { FollowerPointerCard } from "@/components/ui/following-pointer";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import {
-  useEditRegisterPhotoMutation,
-  useRegister_DetailQuery,
-} from "@/services/api";
+	useEditRegisterPhotoMutation,
+	useRegister_DetailQuery,
+} from '@/services/api'
 import {
-  Briefcase,
-  Calendar,
-  Edit3,
-  FileCheck,
-  Mail,
-  MapPin,
-  Shield,
-} from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
-import { toast } from "sonner";
-import { EditUserForm } from "./one_useful_person_edit";
+	Briefcase,
+	Calendar,
+	Camera,
+	FileCheck,
+	Mail,
+	MapPin,
+	Pencil,
+	Shield,
+	User,
+} from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { toast } from 'sonner'
+import { EditUserForm } from './one_useful_person_edit'
 
+/* ─────────────────────────────────────────
+   SKELETON
+───────────────────────────────────────── */
+function Pulse({ className = '' }) {
+	return (
+		<div
+			className={`animate-pulse rounded-lg bg-[var(--muted)] ${className}`}
+		/>
+	)
+}
+
+function ProfileSkeleton() {
+	return (
+		<div className='w-full'>
+			<div className='h-52 w-full rounded-t-2xl bg-[var(--muted)] animate-pulse' />
+			<div className='px-6 sm:px-10 pb-10 pt-0'>
+				<div className='flex flex-col sm:flex-row sm:items-end gap-5 -mt-14 mb-10'>
+					<Pulse className='w-28 h-28 rounded-2xl ring-4 ring-[var(--background)] flex-shrink-0' />
+					<div className='flex-1 pb-1 space-y-2.5'>
+						<Pulse className='h-7 w-44' />
+						<Pulse className='h-4 w-28' />
+						<div className='flex gap-2 pt-1'>
+							<Pulse className='h-5 w-20 rounded-full' />
+							<Pulse className='h-5 w-16 rounded-full' />
+							<Pulse className='h-5 w-16 rounded-full' />
+						</div>
+					</div>
+					<Pulse className='h-11 w-32 rounded-xl' />
+				</div>
+				<div className='grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8'>
+					{[1, 2, 3].map(i => (
+						<Pulse key={i} className='h-16 rounded-xl' />
+					))}
+				</div>
+				<div className='flex items-center gap-3 mb-5'>
+					<div className='flex-1 h-px bg-[var(--border)]' />
+					<Pulse className='h-4 w-24 rounded-full' />
+					<div className='flex-1 h-px bg-[var(--border)]' />
+				</div>
+				<div className='grid grid-cols-2 lg:grid-cols-3 gap-3 mb-8'>
+					{[1, 2, 3, 4, 5, 6].map(i => (
+						<Pulse key={i} className='h-20 rounded-xl' />
+					))}
+				</div>
+				<div className='flex justify-between pt-5 border-t border-[var(--border)]'>
+					<Pulse className='h-4 w-36' />
+					<Pulse className='h-4 w-20' />
+				</div>
+			</div>
+		</div>
+	)
+}
+
+/* ─────────────────────────────────────────
+   INFO CHIP
+───────────────────────────────────────── */
+function InfoChip({ icon: Icon, label, value, variant = 'primary' }) {
+	const styles = {
+		primary: {
+			wrap: 'bg-[hsl(235,100%,98%)] dark:bg-[hsl(235,100%,9%)] border-[hsl(235,100%,88%)] dark:border-[hsl(235,100%,16%)]',
+			icon: 'bg-[var(--primary)] text-[var(--primary-foreground)] shadow-[0_2px_8px_hsl(235,100%,60%,0.35)]',
+			label: 'text-[var(--primary)]',
+		},
+		teal: {
+			wrap: 'bg-[hsl(174,55%,96%)] dark:bg-[hsl(174,55%,7%)] border-[hsl(174,55%,82%)] dark:border-[hsl(174,55%,15%)]',
+			icon: 'bg-[hsl(174,55%,38%)] dark:bg-[hsl(174,55%,42%)] text-white shadow-[0_2px_8px_hsl(174,55%,38%,0.3)]',
+			label: 'text-[hsl(174,55%,32%)] dark:text-[hsl(174,55%,60%)]',
+		},
+		amber: {
+			wrap: 'bg-[hsl(43,100%,97%)] dark:bg-[hsl(43,100%,6%)] border-[hsl(43,100%,82%)] dark:border-[hsl(43,100%,15%)]',
+			icon: 'bg-[hsl(43,90%,48%)] text-white shadow-[0_2px_8px_hsl(43,90%,48%,0.3)]',
+			label: 'text-[hsl(43,80%,36%)] dark:text-[hsl(43,100%,62%)]',
+		},
+	}
+	const s = styles[variant]
+	return (
+		<div
+			className={`flex items-center gap-3 p-3.5 rounded-xl border transition-all hover:shadow-md ${s.wrap}`}
+		>
+			<div
+				className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${s.icon}`}
+			>
+				<Icon className='w-4 h-4' />
+			</div>
+			<div className='min-w-0'>
+				<p
+					className={`text-[10px] font-extrabold uppercase tracking-[0.13em] mb-0.5 ${s.label}`}
+				>
+					{label}
+				</p>
+				<p className='text-sm font-semibold text-[var(--card-foreground)] truncate'>
+					{value || 'Mavjud emas'}
+				</p>
+			</div>
+		</div>
+	)
+}
+
+/* ─────────────────────────────────────────
+   DETAIL CARD
+───────────────────────────────────────── */
+function DetailCard({ icon: Icon, label, value, accent = false }) {
+	return (
+		<div
+			className={`relative overflow-hidden p-4 rounded-xl border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md
+      ${
+				accent
+					? 'bg-[hsl(235,100%,98%)] dark:bg-[hsl(235,100%,7%)] border-[var(--primary)]'
+					: 'bg-[var(--card)] border-[var(--border)] hover:border-[var(--primary)]'
+			}`}
+		>
+			{accent && (
+				<div className='absolute top-0 left-0 w-0.5 h-full bg-[var(--primary)] rounded-l-xl' />
+			)}
+			<div className='flex items-center gap-1.5 mb-2'>
+				{Icon && (
+					<Icon
+						className={`w-3.5 h-3.5 flex-shrink-0 ${accent ? 'text-[var(--primary)]' : 'text-[var(--muted-foreground)]'}`}
+					/>
+				)}
+				<p
+					className={`text-[10px] font-extrabold uppercase tracking-[0.13em] ${accent ? 'text-[var(--primary)]' : 'text-[var(--muted-foreground)]'}`}
+				>
+					{label}
+				</p>
+			</div>
+			<p className='text-sm font-bold text-[var(--card-foreground)] leading-snug'>
+				{value || 'Mavjud emas'}
+			</p>
+		</div>
+	)
+}
+
+/* ─────────────────────────────────────────
+   BADGE
+───────────────────────────────────────── */
+function StatusBadge({ ok, trueLabel, falseLabel }) {
+	return (
+		<span
+			className={`inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-1 rounded-full border ${
+				ok
+					? 'bg-[hsl(142,60%,95%)] dark:bg-[hsl(142,60%,7%)] border-[hsl(142,60%,78%)] dark:border-[hsl(142,60%,18%)] text-[hsl(142,55%,32%)] dark:text-[hsl(142,60%,58%)]'
+					: 'bg-[hsl(0,75%,97%)] dark:bg-[hsl(0,75%,7%)] border-[hsl(0,75%,82%)] dark:border-[hsl(0,75%,18%)] text-[hsl(0,65%,48%)] dark:text-[hsl(0,70%,62%)]'
+			}`}
+		>
+			{ok ? '✓' : '✗'} {ok ? trueLabel : falseLabel}
+		</span>
+	)
+}
+
+/* ─────────────────────────────────────────
+   MAIN
+───────────────────────────────────────── */
 export default function MensProfileCard() {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const life = localStorage.getItem("life");
-  const { id } = useParams();
-  const { data, isLoading } = useRegister_DetailQuery(id);
-  const [user, setUser] = useState({
-    username: "",
-    password: "",
-    role: "",
-    bekat_nomi: "",
-    tuzilma_nomi: "",
-    faoliyati: "",
-    rahbari: "",
-    passport_seriya: "",
-    status: "",
-    email: "",
-    birth_date: "",
-    photo: "",
-  });
-  useEffect(() => {
-    if (data) {
-      setUser({
-        username: data?.username || "",
-        password: life,
-        role: data?.role || "",
-        bekat_nomi: data?.bekat_nomi || "",
-        tuzilma_nomi: data?.tarkibiy_tuzilma || "",
-        faoliyati: data?.faoliyati || "",
-        rahbari: data?.rahbari || "",
-        passport_seriya: data?.passport_seriya || "",
-        status: data?.status ?? true, // agar boolean bo‘lsa
-        email: data?.email ?? "",
-        birth_date: data?.birth_date || "",
-        photo: data?.photo || "",
-      });
-    }
-  }, [data, life]);
-  const fileInputRef = useRef(null);
-  const [uploadUserPhoto, { isLoading: mainLoading }] =
-    useEditRegisterPhotoMutation();
-  const handleAvatarClick = () => {
-    fileInputRef.current?.click();
-  };
-  const handleUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const formData = new FormData();
-    formData.append("photo", file);
-    formData.append("username", user.username);
-    formData.append("password", user.password);
-    formData.append("role", user.role);
-    formData.append("bekat_nomi", user.bekat_nomi);
-    formData.append("tuzilma_nomi", user.tuzilma_nomi);
-    formData.append("faoliyati", user.faoliyati);
-    formData.append("rahbari", user.rahbari);
-    formData.append("passport_seriya", user.passport_seriya);
-    formData.append("status", user.status);
-    formData.append("email", user.email);
-    formData.append("birth_date", user.birth_date);
+	const [isDialogOpen, setIsDialogOpen] = useState(false)
+	const [previewPhoto, setPreviewPhoto] = useState(null)
+	const life = localStorage.getItem('life')
+	const { id } = useParams()
+	const { data, isLoading, refetch } = useRegister_DetailQuery(id)
 
-    try {
-      await uploadUserPhoto({ id, body: formData }).unwrap();
-      toast.success("Muvaffaqiyatli rasm yuklandi");
-    } catch (err) {
-      console.error(err);
-      toast.error("Yuklashda xatolik yuz berdi!");
-    }
-  };
-  console.log(data);
+	const [user, setUser] = useState({
+		username: '',
+		password: '',
+		role: '',
+		bekat_nomi: '',
+		tuzilma_nomi: '',
+		faoliyati: '',
+		rahbari: '',
+		passport_seriya: '',
+		status: true,
+		email: '',
+		birth_date: '',
+		photo: '',
+	})
 
-  return (
-    <Card className="w-full shadow-2xl overflow-hidden">
-      <FollowerPointerCard className={"xl:block hidden"} title={data?.username}>
-        <CardContent className="p-4 md:p-8">
-          {/* Header Section with Background Shading */}
-          <section className=" rounded-lg p-4 md:p-8 mb-8 -mx-4 md:-mx-8 md:mx-0">
-            <div className="flex flex-col md:flex-row gap-6 md:gap-8">
-              {/* Avatar Section */}
-              <div className="flex flex-col items-center md:items-start flex-shrink-0">
-                <div className="relative">
-                  {isLoading || mainLoading ? (
-                    <Skeleton className="w-32 h-32 md:w-40 md:h-40 rounded-full" />
-                  ) : (
-                    <div
-                      className="relative cursor-pointer"
-                      onClick={handleAvatarClick}
-                    >
-                      <Avatar className="w-32 h-32 md:w-40 md:h-40 border-4 border-white shadow-lg dark:border-slate-800">
-                        <AvatarImage
-                          src={data?.photo}
-                          alt={data?.username || "Profile"}
-                          className="object-cover"
-                        />
-                        <AvatarFallback className="bg-slate-300 dark:bg-slate-700 text-xl md:text-2xl font-bold">
-                          {data?.username?.charAt(0) || "AR"}
-                        </AvatarFallback>
-                      </Avatar>
+	useEffect(() => {
+		if (data) {
+			setUser({
+				username: data?.username || '',
+				password: life || '',
+				role: data?.role || '',
+				bekat_nomi: data?.bekat_nomi || '',
+				tuzilma_nomi: data?.tarkibiy_tuzilma || '',
+				faoliyati: data?.faoliyati || '',
+				rahbari: data?.rahbari || '',
+				passport_seriya: data?.passport_seriya || '',
+				status: data?.status ?? true,
+				email: data?.email || '',
+				birth_date: data?.birth_date || '',
+				photo: data?.photo || '',
+			})
+		}
+	}, [data, life])
 
-                      <div className="absolute bottom-2 right-2 flex gap-2">
-                        <div className="bg-green-500 md:w-10 md:h-10 h-5 w-5 rounded-full shadow-lg  flex justify-center items-center">
-                          ✔
-                        </div>
-                      </div>
+	const fileInputRef = useRef(null)
+	const [uploadUserPhoto, { isLoading: photoUploading }] =
+		useEditRegisterPhotoMutation()
 
-                      <input
-                        type="file"
-                        accept="image/*"
-                        ref={fileInputRef}
-                        className="hidden"
-                        onChange={handleUpload}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
+	const handleAvatarClick = () => {
+		if (!photoUploading) fileInputRef.current?.click()
+	}
 
-              {/* Profile Info Section */}
-              <article className="flex-1 flex flex-col justify-between w-full">
-                {/* Name and Title */}
-                <header className="mb-4 md:mb-0">
-                  {isLoading ? (
-                    <>
-                      <Skeleton className="w-32 h-7 md:h-8 mb-2" />
-                      <Skeleton className="w-48 h-5" />
-                    </>
-                  ) : (
-                    <>
-                      <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-50">
-                        {data?.username}
-                      </h1>
-                      <p className="text-base md:text-lg text-slate-600 dark:text-slate-400 my-2">
-                        {data?.faoliyati}
-                      </p>
-                    </>
-                  )}
-                </header>
+	const handleUpload = async e => {
+		const file = e.target.files?.[0]
+		if (!file) return
+		if (!file.type.startsWith('image/')) {
+			toast.error('Faqat rasm fayllari!')
+			return
+		}
+		if (file.size > 5 * 1024 * 1024) {
+			toast.error('Maksimal hajm 5MB!')
+			return
+		}
 
-                {/* Quick Info */}
-                {isLoading ? (
-                  <div className="space-y-3">
-                    <Skeleton className="w-full h-5" />
-                    <Skeleton className="w-3/4 h-5" />
-                    <Skeleton className="w-4/5 h-5" />
-                  </div>
-                ) : (
-                  <div className="space-y-3 text-sm md:text-base">
-                    <div className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                      <Briefcase className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 text-slate-500" />
-                      <span>{data?.rahbari}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                      <Mail className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 text-slate-500" />
-                      <span className="truncate">
-                        {data?.email ? data?.email : "Mavjud emas"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                      <Calendar className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 text-slate-500" />
-                      <span>
-                        {data?.birth_date ? data?.birth_date : "Mavjud emas"}
-                      </span>
-                    </div>
-                  </div>
-                )}
+		const reader = new FileReader()
+		reader.onload = ev => setPreviewPhoto(ev.target?.result)
+		reader.readAsDataURL(file)
 
-                {/* Badges */}
-                {!isLoading && (
-                  <div className="flex flex-wrap gap-2 mt-6">
-                    {data?.passport_seriya ? (
-                      <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-900/40 dark:text-emerald-300">
-                        Passport Tastiqlangan
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-red-100 text-red-800 hover:bg-red-100 dark:bg-red-900/40 dark:text-red-300">
-                        Passport ma'lumot yo'q
-                      </Badge>
-                    )}
-                    {data?.email ? (
-                      <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100 dark:bg-blue-900/40 dark:text-blue-300">
-                        Email bor
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-red-100 text-red-800 hover:bg-red-100 dark:bg-red-900/40 dark:text-red-300">
-                        Email yo'q
-                      </Badge>
-                    )}
-                    <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 dark:bg-amber-900/40 dark:text-amber-300">
-                      Premium
-                    </Badge>
-                  </div>
-                )}
-              </article>
+		const formData = new FormData()
+		Object.entries({
+			photo: file,
+			username: user.username,
+			password: user.password,
+			role: user.role,
+			bekat_nomi: user.bekat_nomi,
+			tuzilma_nomi: user.tuzilma_nomi,
+			faoliyati: user.faoliyati,
+			rahbari: user.rahbari,
+			passport_seriya: user.passport_seriya,
+			status: String(user.status),
+			email: user.email,
+			birth_date: user.birth_date,
+		}).forEach(([k, v]) => formData.append(k, v))
 
-              {/* Edit Button */}
-              {!isLoading && (
-                <div className="flex items-start w-full md:w-auto">
-                  <Button onClick={() => setIsDialogOpen(true)} size={"sm"}>
-                    <Edit3 size={12} className="mr-2" />
-                    <span className="hidden sm:inline">Tahrirlash</span>
-                    <span className="sm:hidden">Tahrirlash</span>
-                  </Button>
-                </div>
-              )}
-            </div>
-          </section>
+		try {
+			await uploadUserPhoto({ id, body: formData }).unwrap()
+			toast.success('Rasm muvaffaqiyatli yuklandi!')
+			refetch()
+		} catch (err) {
+			setPreviewPhoto(null)
+			toast.error(
+				err?.data?.detail || err?.data?.message || 'Yuklashda xatolik!',
+			)
+		} finally {
+			if (fileInputRef.current) fileInputRef.current.value = ''
+		}
+	}
 
-          {/* Details Section with Shading */}
-          <section className=" rounded-lg p-4 md:p-6 mb-8">
-            <header className="mb-6">
-              {isLoading ? (
-                <Skeleton className="w-20 h-5" />
-              ) : (
-                <h2 className="text-lg md:text-xl font-semibold text-slate-900 dark:text-slate-50 flex items-center gap-2">
-                  <FileCheck className="w-5 h-5" />
-                  Tafsilotlar
-                </h2>
-              )}
-            </header>
+	const avatarSrc = previewPhoto || data?.photo
+	const initials = data?.username?.slice(0, 2)?.toUpperCase() || 'AR'
+	const isActive = data?.status === true || data?.status === 'true'
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {/* Rol */}
-              <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                {isLoading ? (
-                  <>
-                    <Skeleton className="w-20 h-4 mb-2" />
-                    <Skeleton className="w-32 h-5" />
-                  </>
-                ) : (
-                  <>
-                    <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
-                      Roli
-                    </p>
-                    <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100 capitalize">
-                      {data?.role}
-                    </p>
-                  </>
-                )}
-              </article>
+	if (isLoading) {
+		return (
+			<Card className='w-full overflow-hidden rounded-2xl py-0 border-[var(--border)] bg-[var(--card)] shadow-xl'>
+				<ProfileSkeleton />
+			</Card>
+		)
+	}
 
-              {/* Department */}
-              <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                {isLoading ? (
-                  <>
-                    <Skeleton className="w-24 h-4 mb-2" />
-                    <Skeleton className="w-40 h-5" />
-                  </>
-                ) : (
-                  <>
-                    <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
-                      Tarkibiy tuzilmasi
-                    </p>
-                    <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
-                      {data?.tarkibiy_tuzilma
-                        ? data?.tarkibiy_tuzilma
-                        : "Mavjud emas"}
-                    </p>
-                  </>
-                )}
-              </article>
+	return (
+		<>
+			<Card className='w-full overflow-hidden py-0 rounded-2xl border-[var(--border)] bg-[var(--card)] shadow-xl'>
+				{/* ── HERO BANNER ── */}
+				<div className='relative h-52 overflow-hidden select-none'>
+					{/* Base gradient using project primary */}
+					<div className='absolute inset-0 bg-gradient-to-br from-[var(--primary)] via-[hsl(235,80%,42%)] to-[hsl(258,65%,32%)]' />
 
-              {/* Location */}
-              {data?.bolim_nomi ? (
-                <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                  {isLoading ? (
-                    <>
-                      <Skeleton className="w-16 h-4 mb-2" />
-                      <Skeleton className="w-28 h-5" />
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1">
-                        <MapPin className="w-3 h-3 md:w-4 md:h-4" />
-                        Bo'lim nomi
-                      </p>
-                      <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
-                        {data?.bolim_nomi ? data?.bolim_nomi : "Mavjud emas"}
-                      </p>
-                    </>
-                  )}
-                </article>
-              ) : (
-                <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                  {isLoading ? (
-                    <>
-                      <Skeleton className="w-16 h-4 mb-2" />
-                      <Skeleton className="w-28 h-5" />
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1">
-                        <MapPin className="w-3 h-3 md:w-4 md:h-4" />
-                        Bekati
-                      </p>
-                      <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
-                        {data?.bekat_nomi ? data?.bekat_nomi : "Mavjud emas"}
-                      </p>
-                    </>
-                  )}
-                </article>
-              )}
+					{/* Glowing orbs */}
+					<div className='absolute -top-16 -left-16 w-64 h-64 rounded-full bg-[hsl(235,100%,78%)] opacity-[0.22] blur-3xl' />
+					<div className='absolute -bottom-8 right-8 w-52 h-52 rounded-full bg-[hsl(258,80%,62%)] opacity-[0.22] blur-2xl' />
+					<div className='absolute top-8 right-1/3 w-36 h-36 rounded-full bg-[hsl(210,100%,75%)] opacity-[0.15] blur-2xl' />
 
-              {/* Status */}
-              <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                {isLoading ? (
-                  <>
-                    <Skeleton className="w-16 h-4 mb-2" />
-                    <Skeleton className="w-20 h-5" />
-                  </>
-                ) : (
-                  <>
-                    <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
-                      Status
-                    </p>
-                    <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
-                      {data?.status == true ? "Faol" : "Faol emas"}
-                    </p>
-                  </>
-                )}
-              </article>
+					{/* Subtle grid texture */}
+					<div
+						className='absolute inset-0 opacity-[0.06]'
+						style={{
+							backgroundImage:
+								'radial-gradient(circle, white 1px, transparent 1px)',
+							backgroundSize: '20px 20px',
+						}}
+					/>
 
-              {/* Passport */}
-              <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                {isLoading ? (
-                  <>
-                    <Skeleton className="w-28 h-4 mb-2" />
-                    <Skeleton className="w-32 h-5" />
-                  </>
-                ) : (
-                  <>
-                    <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1">
-                      <FileCheck className="w-3 h-3 md:w-4 md:h-4" />
-                      Passport
-                    </p>
-                    <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
-                      {data?.passport_seriya
-                        ? data?.passport_seriya
-                        : "Mavjud emas"}
-                    </p>
-                  </>
-                )}
-              </article>
+					{/* Diagonal lines */}
+					<div
+						className='absolute inset-0 opacity-[0.05]'
+						style={{
+							backgroundImage:
+								'repeating-linear-gradient(45deg, white 0, white 1px, transparent 1px, transparent 14px)',
+						}}
+					/>
 
-              {/* Date Created */}
-              <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                {isLoading ? (
-                  <>
-                    <Skeleton className="w-24 h-4 mb-2" />
-                    <Skeleton className="w-36 h-5" />
-                  </>
-                ) : (
-                  <>
-                    <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1">
-                      <Calendar className="w-3 h-3 md:w-4 md:h-4" />
-                      Yaratilgan sana
-                    </p>
-                    <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
-                      {data?.created_at}
-                    </p>
-                  </>
-                )}
-              </article>
-            </div>
-          </section>
+					{/* User's full name as big watermark */}
+					<div className='absolute bottom-8 left-6 sm:left-10'>
+						<p className='text-white/10 text-6xl sm:text-8xl font-black tracking-tight select-none pointer-events-none truncate max-w-md'>
+							{data?.username}
+						</p>
+					</div>
 
-          {/* Footer Info Section */}
-          <footer className=" rounded-lg p-4 md:p-6 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-            {isLoading ? (
-              <>
-                <Skeleton className="w-32 h-4" />
-                <Skeleton className="w-28 h-4" />
-              </>
-            ) : (
-              <>
-                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                  <Shield className="w-4 h-4 flex-shrink-0" />
-                  <span>
-                    Profil yaratuvchi:{" "}
-                    <span className="font-semibold text-slate-900 dark:text-slate-100">
-                      {data?.created_by ? data?.created_by : "Admin"}
-                    </span>
-                  </span>
-                </div>
-                <span className="text-xs text-slate-500 dark:text-slate-500">
-                  Profil kodi: Saqlanuvchan
-                </span>
-              </>
-            )}
-          </footer>
-        </CardContent>
-        <EditUserForm
-          data={data}
-          open={isDialogOpen}
-          setOpen={setIsDialogOpen}
-        />
-      </FollowerPointerCard>
-      <div className="xl:hidden block">
-        <CardContent className="p-4 md:p-8">
-          {/* Header Section with Background Shading */}
-          <section className=" rounded-lg p-4 md:p-8 mb-8 -mx-4 md:-mx-8 md:mx-0">
-            <div className="flex flex-col md:flex-row gap-6 md:gap-8">
-              {/* Avatar Section */}
-              <div className="flex flex-col items-center md:items-start flex-shrink-0">
-                <div className="relative">
-                  {isLoading || mainLoading ? (
-                    <Skeleton className="w-32 h-32 md:w-40 md:h-40 rounded-full" />
-                  ) : (
-                    <div
-                      className="relative cursor-pointer"
-                      onClick={handleAvatarClick}
-                    >
-                      <Avatar className="w-32 h-32 md:w-40 md:h-40 border-4 border-white shadow-lg dark:border-slate-800">
-                        <AvatarImage
-                          src={data?.photo}
-                          alt={data?.username || "Profile"}
-                          className="object-cover"
-                        />
-                        <AvatarFallback className="bg-slate-300 dark:bg-slate-700 text-xl md:text-2xl font-bold">
-                          {data?.username?.charAt(0) || "AR"}
-                        </AvatarFallback>
-                      </Avatar>
+					{/* Status pill */}
+					<div className='absolute top-4 right-5'>
+						<span
+							className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full backdrop-blur-md border ${
+								isActive
+									? 'bg-white/10 border-white/25 text-white'
+									: 'bg-black/20 border-white/15 text-white/60'
+							}`}
+						>
+							<span
+								className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-[hsl(142,76%,68%)] animate-pulse shadow-[0_0_6px_hsl(142,76%,68%)]' : 'bg-white/40'}`}
+							/>
+							{isActive ? 'Faol' : 'Faol emas'}
+						</span>
+					</div>
 
-                      <div className="absolute bottom-2 right-2 flex gap-2">
-                        <div className="bg-green-500 md:w-10 md:h-10 h-7 w-7 rounded-full shadow-lg border-2 border-white dark:border-slate-800 flex justify-center items-center text-white">
-                          ✔
-                        </div>
-                      </div>
+					{/* Bottom fade into card */}
+					<div className='absolute bottom-0 inset-x-0 h-14 bg-gradient-to-t from-[var(--card)] to-transparent' />
+				</div>
 
-                      <input
-                        type="file"
-                        accept="image/*"
-                        ref={fileInputRef}
-                        className="hidden"
-                        onChange={handleUpload}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
+				{/* ── BODY ── */}
+				<div className='px-6 sm:px-10 pb-10 pt-0'>
+					{/* Avatar + Name */}
+					<div className='flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 -mt-14 mb-8'>
+						<div className='flex flex-col sm:flex-row items-center sm:items-end gap-4'>
+							{/* Avatar */}
+							<div
+								className={`relative group cursor-pointer flex-shrink-0 ${photoUploading ? 'pointer-events-none' : ''}`}
+								onClick={handleAvatarClick}
+								title="Rasm o'zgartirish uchun bosing"
+							>
+								<div className='relative w-28 h-28 rounded-2xl overflow-hidden ring-4 ring-[var(--card)] shadow-2xl transition-transform duration-200 group-hover:scale-[1.04]'>
+									<Avatar className='w-full h-full rounded-none'>
+										<AvatarImage
+											src={avatarSrc}
+											alt={data?.username}
+											className='object-cover w-full h-full'
+										/>
+										<AvatarFallback className='w-full h-full rounded-none bg-gradient-to-br from-[var(--primary)] to-[hsl(258,65%,42%)] text-[var(--primary-foreground)] text-2xl font-black flex items-center justify-center'>
+											{initials}
+										</AvatarFallback>
+									</Avatar>
+									{/* Hover overlay */}
+									<div className='absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-200 flex items-center justify-center'>
+										{photoUploading ? (
+											<div className='w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin' />
+										) : (
+											<Camera className='w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg' />
+										)}
+									</div>
+								</div>
+								{isActive && (
+									<span className='absolute bottom-1 right-1 w-4 h-4 rounded-full bg-[hsl(142,70%,45%)] border-[3px] border-[var(--card)] shadow-md' />
+								)}
+								<input
+									type='file'
+									accept='image/*'
+									ref={fileInputRef}
+									className='hidden'
+									onChange={handleUpload}
+								/>
+							</div>
 
-              {/* Profile Info Section */}
-              <article className="flex-1 flex flex-col justify-between w-full">
-                {/* Name and Title */}
-                <header className="mb-4 md:mb-0">
-                  {isLoading ? (
-                    <>
-                      <Skeleton className="w-32 h-7 md:h-8 mb-2" />
-                      <Skeleton className="w-48 h-5" />
-                    </>
-                  ) : (
-                    <>
-                      <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-50">
-                        {data?.username}
-                      </h1>
-                      <p className="text-base md:text-lg text-slate-600 dark:text-slate-400 my-2">
-                        {data?.faoliyati}
-                      </p>
-                    </>
-                  )}
-                </header>
+							{/* Name block */}
+							<div className='pb-0.5 text-center sm:text-left mt-10'>
+								<h1 className='text-2xl sm:text-3xl font-black tracking-tight text-[var(--card-foreground)] leading-none mb-1.5'>
+									{data?.username}
+								</h1>
+								{data?.faoliyati && (
+									<p className='text-sm text-[var(--muted-foreground)] font-semibold mb-3'>
+										{data.faoliyati}
+									</p>
+								)}
+								<div className='flex flex-wrap gap-1.5 justify-center sm:justify-start'>
+									<StatusBadge
+										ok={!!data?.passport_seriya}
+										trueLabel='Passport'
+										falseLabel="Passport yo'q"
+									/>
+									<StatusBadge
+										ok={!!data?.email}
+										trueLabel='Email'
+										falseLabel="Email yo'q"
+									/>
+									<span className='inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-1 rounded-full border bg-[hsl(43,100%,96%)] dark:bg-[hsl(43,100%,6%)] border-[hsl(43,100%,78%)] dark:border-[hsl(43,100%,16%)] text-[hsl(43,80%,38%)] dark:text-[hsl(43,100%,62%)]'>
+										★ Premium
+									</span>
+								</div>
+							</div>
+						</div>
 
-                {/* Quick Info */}
-                {isLoading ? (
-                  <div className="space-y-3">
-                    <Skeleton className="w-full h-5" />
-                    <Skeleton className="w-3/4 h-5" />
-                    <Skeleton className="w-4/5 h-5" />
-                  </div>
-                ) : (
-                  <div className="space-y-3 text-sm md:text-base">
-                    <div className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                      <Briefcase className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 text-slate-500" />
-                      <span>{data?.rahbari}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                      <Mail className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 text-slate-500" />
-                      <span className="truncate">
-                        {data?.email ? data?.email : "Mavjud emas"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                      <Calendar className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 text-slate-500" />
-                      <span>
-                        {data?.birth_date ? data?.birth_date : "Mavjud emas"}
-                      </span>
-                    </div>
-                  </div>
-                )}
+						{/* Edit btn */}
+						<Button
+							onClick={() => setIsDialogOpen(true)}
+							className='w-full sm:w-auto gap-2 font-bold rounded-xl h-11 px-6 shadow-lg hover:shadow-xl transition-all bg-[var(--primary)] hover:bg-[hsl(235,100%,54%)] text-[var(--primary-foreground)] border-0'
+						>
+							<Pencil className='w-4 h-4' />
+							Tahrirlash
+						</Button>
+					</div>
 
-                {/* Badges */}
-                {!isLoading && (
-                  <div className="flex flex-wrap gap-2 mt-6">
-                    {data?.passport_seriya ? (
-                      <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-900/40 dark:text-emerald-300">
-                        Passport Tastiqlangan
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-red-100 text-red-800 hover:bg-red-100 dark:bg-red-900/40 dark:text-red-300">
-                        Passport ma'lumot yo'q
-                      </Badge>
-                    )}
-                    {data?.email ? (
-                      <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100 dark:bg-blue-900/40 dark:text-blue-300">
-                        Email bor
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-red-100 text-red-800 hover:bg-red-100 dark:bg-red-900/40 dark:text-red-300">
-                        Email yo'q
-                      </Badge>
-                    )}
-                    <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 dark:bg-amber-900/40 dark:text-amber-300">
-                      Premium
-                    </Badge>
-                  </div>
-                )}
-              </article>
+					{/* ── QUICK CHIPS ── */}
+					<div className='grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8'>
+						<InfoChip
+							icon={Briefcase}
+							label='Rahbari'
+							value={data?.rahbari}
+							variant='primary'
+						/>
+						<InfoChip
+							icon={Mail}
+							label='Email'
+							value={data?.email}
+							variant='teal'
+						/>
+						<InfoChip
+							icon={Calendar}
+							label="Tug'ilgan sana"
+							value={data?.birth_date}
+							variant='amber'
+						/>
+					</div>
 
-              {/* Edit Button */}
-              {!isLoading && (
-                <div className="flex items-start w-full md:w-auto">
-                  <Button
-                    onClick={() => setIsDialogOpen(true)}
-                    className="w-full md:w-auto text-white gap-2 h-10 md:h-8 px-4 md:px-6 rounded-lg  "
-                  >
-                    <Edit3 className="w-4 h-4" />
-                    <span className="hidden sm:inline">Tahrirlash</span>
-                    <span className="sm:hidden">Tahrirlash</span>
-                  </Button>
-                </div>
-              )}
-            </div>
-          </section>
+					{/* ── DIVIDER ── */}
+					<div className='flex items-center gap-3 mb-5'>
+						<div className='flex-1 h-px bg-[var(--border)]' />
+						<span className='flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-[0.15em] text-[var(--muted-foreground)] px-1'>
+							<FileCheck className='w-3 h-3' /> Tafsilotlar
+						</span>
+						<div className='flex-1 h-px bg-[var(--border)]' />
+					</div>
 
-          {/* Details Section with Shading */}
-          <section className="dark:bg-slate-900/20 rounded-lg p-4 md:p-6 mb-8">
-            <header className="mb-6">
-              {isLoading ? (
-                <Skeleton className="w-20 h-5" />
-              ) : (
-                <h2 className="text-lg md:text-xl font-semibold text-slate-900 dark:text-slate-50 flex items-center gap-2">
-                  <FileCheck className="w-5 h-5" />
-                  Tafsilotlar
-                </h2>
-              )}
-            </header>
+					{/* ── DETAIL GRID ── */}
+					<div className='grid grid-cols-2 lg:grid-cols-3 gap-3 mb-8'>
+						<DetailCard label='Roli' value={data?.role} icon={User} accent />
+						<DetailCard
+							label='Tarkibiy tuzilma'
+							value={data?.tarkibiy_tuzilma}
+						/>
+						<DetailCard
+							label={data?.bolim_nomi ? "Bo'lim nomi" : 'Bekati'}
+							value={data?.bolim_nomi || data?.bekat_nomi}
+							icon={MapPin}
+						/>
+						<DetailCard
+							label='Status'
+							value={isActive ? '✓ Faol' : '✗ Faol emas'}
+						/>
+						<DetailCard
+							label='Passport'
+							value={data?.passport_seriya}
+							icon={FileCheck}
+						/>
+						<DetailCard
+							label='Yaratilgan sana'
+							value={data?.created_at}
+							icon={Calendar}
+						/>
+					</div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {/* Rol */}
-              <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                {isLoading ? (
-                  <>
-                    <Skeleton className="w-20 h-4 mb-2" />
-                    <Skeleton className="w-32 h-5" />
-                  </>
-                ) : (
-                  <>
-                    <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
-                      Roli
-                    </p>
-                    <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
-                      {data?.role}
-                    </p>
-                  </>
-                )}
-              </article>
+					{/* ── FOOTER ── */}
+					<div className='flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center pt-5 border-t border-[var(--border)]'>
+						<div className='flex items-center gap-2.5 text-sm text-[var(--muted-foreground)]'>
+							<div className='w-8 h-8 rounded-lg bg-[var(--muted)] flex items-center justify-center flex-shrink-0'>
+								<Shield className='w-3.5 h-3.5' />
+							</div>
+							<span>
+								Yaratdi:{' '}
+								<span className='font-bold text-[var(--card-foreground)]'>
+									{data?.created_by || 'Admin'}
+								</span>
+							</span>
+						</div>
+						<span className='text-[11px] font-mono text-[var(--muted-foreground)] bg-[var(--muted)] px-3 py-1.5 rounded-lg'>
+							ID: {id}
+						</span>
+					</div>
+				</div>
+			</Card>
 
-              {/* Department */}
-              <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                {isLoading ? (
-                  <>
-                    <Skeleton className="w-24 h-4 mb-2" />
-                    <Skeleton className="w-40 h-5" />
-                  </>
-                ) : (
-                  <>
-                    <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
-                      Tarkibiy tuzilmasi
-                    </p>
-                    <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
-                      {data?.tarkibiy_tuzilma
-                        ? data?.tarkibiy_tuzilma
-                        : "Mavjud emas"}
-                    </p>
-                  </>
-                )}
-              </article>
-
-              {/* Location */}
-              {data?.bolim_nomi ? (
-                <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                  {isLoading ? (
-                    <>
-                      <Skeleton className="w-16 h-4 mb-2" />
-                      <Skeleton className="w-28 h-5" />
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1">
-                        <MapPin className="w-3 h-3 md:w-4 md:h-4" />
-                        Bo'lim nomi
-                      </p>
-                      <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
-                        {data?.bolim_nomi ? data?.bolim_nomi : "Mavjud emas"}
-                      </p>
-                    </>
-                  )}
-                </article>
-              ) : (
-                <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                  {isLoading ? (
-                    <>
-                      <Skeleton className="w-16 h-4 mb-2" />
-                      <Skeleton className="w-28 h-5" />
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1">
-                        <MapPin className="w-3 h-3 md:w-4 md:h-4" />
-                        Bekati
-                      </p>
-                      <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
-                        {data?.bekat_nomi ? data?.bekat_nomi : "Mavjud emas"}
-                      </p>
-                    </>
-                  )}
-                </article>
-              )}
-
-              {/* Status */}
-              <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                {isLoading ? (
-                  <>
-                    <Skeleton className="w-16 h-4 mb-2" />
-                    <Skeleton className="w-20 h-5" />
-                  </>
-                ) : (
-                  <>
-                    <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
-                      Status
-                    </p>
-                    <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
-                      {data?.status == true ? "Faol" : "Faol emas"}
-                    </p>
-                  </>
-                )}
-              </article>
-
-              {/* Passport */}
-              <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                {isLoading ? (
-                  <>
-                    <Skeleton className="w-28 h-4 mb-2" />
-                    <Skeleton className="w-32 h-5" />
-                  </>
-                ) : (
-                  <>
-                    <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1">
-                      <FileCheck className="w-3 h-3 md:w-4 md:h-4" />
-                      Passport
-                    </p>
-                    <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
-                      {data?.passport_seriya
-                        ? data?.passport_seriya
-                        : "Mavjud emas"}
-                    </p>
-                  </>
-                )}
-              </article>
-
-              {/* Date Created */}
-              <article className="bg-white dark:bg-slate-800/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                {isLoading ? (
-                  <>
-                    <Skeleton className="w-24 h-4 mb-2" />
-                    <Skeleton className="w-36 h-5" />
-                  </>
-                ) : (
-                  <>
-                    <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1">
-                      <Calendar className="w-3 h-3 md:w-4 md:h-4" />
-                      Yaratilgan sana
-                    </p>
-                    <p className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100">
-                      {data?.created_at}
-                    </p>
-                  </>
-                )}
-              </article>
-            </div>
-          </section>
-
-          {/* Footer Info Section */}
-          <footer className="dark:bg-slate-900/30 rounded-lg p-4 md:p-6 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-            {isLoading ? (
-              <>
-                <Skeleton className="w-32 h-4" />
-                <Skeleton className="w-28 h-4" />
-              </>
-            ) : (
-              <>
-                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                  <Shield className="w-4 h-4 flex-shrink-0" />
-                  <span>
-                    Profil yaratuvchi:{" "}
-                    <span className="font-semibold text-slate-900 dark:text-slate-100">
-                      {data?.created_by ? data?.created_by : "Admin"}
-                    </span>
-                  </span>
-                </div>
-                <span className="text-xs text-slate-500 dark:text-slate-500">
-                  Profil kodi: Saqlanuvchan
-                </span>
-              </>
-            )}
-          </footer>
-        </CardContent>
-        <EditUserForm
-          data={data}
-          open={isDialogOpen}
-          setOpen={setIsDialogOpen}
-        />
-      </div>
-    </Card>
-  );
+			<EditUserForm data={data} open={isDialogOpen} setOpen={setIsDialogOpen} />
+		</>
+	)
 }

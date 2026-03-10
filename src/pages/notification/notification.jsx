@@ -1,176 +1,451 @@
-"use client";
+'use client'
 
-import { useState, useMemo } from "react";
-import { Bell, Search, ChevronLeft, ChevronRight } from "lucide-react";
-import { format } from "date-fns";
-
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { formatDistanceToNow } from 'date-fns'
+import { uz } from 'date-fns/locale'
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+	Bell,
+	CheckCheck,
+	CheckCircle2,
+	ChevronLeft,
+	ChevronRight,
+	Clock,
+	Eye,
+	Package,
+	Search,
+	X,
+	XCircle,
+} from 'lucide-react'
+import { useMemo, useState } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
+import { Input } from '@/components/ui/input'
 
 import {
-  useNotificationsQuery,
-  useNotificationViewMutation,
-} from "@/services/api";
-import { toast } from "sonner";
+	useNotificationsQuery,
+	useNotificationViewMutation,
+} from '@/services/api'
+import { toast } from 'sonner'
 
+// ─── Notification type config ────────────────────────────────────────────────
+function getNotifConfig(title = '') {
+	if (title.toLowerCase().includes('tasdiqlandi')) {
+		return {
+			icon: <CheckCircle2 size={16} />,
+			color: 'text-emerald-500',
+			bg: 'bg-emerald-500/10',
+			border: 'border-emerald-500/20',
+			dot: 'bg-emerald-500',
+			badge: 'bg-emerald-500/15 text-emerald-600',
+		}
+	}
+	if (title.toLowerCase().includes('rad etildi')) {
+		return {
+			icon: <XCircle size={16} />,
+			color: 'text-rose-500',
+			bg: 'bg-rose-500/10',
+			border: 'border-rose-500/20',
+			dot: 'bg-rose-500',
+			badge: 'bg-rose-500/15 text-rose-600',
+		}
+	}
+	return {
+		icon: <Package size={16} />,
+		color: 'text-blue-500',
+		bg: 'bg-blue-500/10',
+		border: 'border-blue-500/20',
+		dot: 'bg-blue-500',
+		badge: 'bg-blue-500/15 text-blue-600',
+	}
+}
+
+// ─── Avatar ───────────────────────────────────────────────────────────────────
+function UserAvatar({ username, size = 'sm' }) {
+	const initials = username?.slice(0, 2).toUpperCase() || '??'
+	const colors = [
+		'bg-violet-500',
+		'bg-blue-500',
+		'bg-emerald-500',
+		'bg-amber-500',
+		'bg-rose-500',
+		'bg-cyan-500',
+	]
+	const color = colors[username?.charCodeAt(0) % colors.length] || colors[0]
+	const sizeClass = size === 'sm' ? 'w-6 h-6 text-[10px]' : 'w-7 h-7 text-xs'
+	return (
+		<div
+			className={`${sizeClass} ${color} rounded-full flex items-center justify-center text-white font-bold ring-2 ring-background`}
+		>
+			{initials}
+		</div>
+	)
+}
+
+// ─── Seen Users Row ───────────────────────────────────────────────────────────
+function SeenUsers({ usernames = [] }) {
+	if (!usernames.length) return null
+	const MAX = 3
+	const visible = usernames.slice(0, MAX)
+	const extra = usernames.length - MAX
+
+	return (
+		<div className='flex items-center gap-1.5 mt-2.5'>
+			<Eye size={11} className='text-muted-foreground' />
+			<div className='flex items-center'>
+				{visible.map((u, i) => (
+					<div key={u} style={{ marginLeft: i === 0 ? 0 : -6 }}>
+						<UserAvatar username={u} size='sm' />
+					</div>
+				))}
+				{extra > 0 && (
+					<div
+						className='w-6 h-6 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[9px] font-bold text-muted-foreground'
+						style={{ marginLeft: -6 }}
+					>
+						+{extra}
+					</div>
+				)}
+			</div>
+			<span className='text-[10px] text-muted-foreground'>
+				{usernames.length === 1
+					? `${usernames[0]} ko'rdi`
+					: `${usernames.length} kishi ko'rdi`}
+			</span>
+		</div>
+	)
+}
+
+// ─── Single Notification Card ─────────────────────────────────────────────────
+function NotifCard({ item, onRead, onAlreadyRead }) {
+	const cfg = getNotifConfig(item.title)
+
+	return (
+		<div
+			onClick={() => (item.is_read ? onAlreadyRead(item) : onRead(item))}
+			className={`
+				group relative rounded-2xl border p-4 cursor-pointer
+				transition-all duration-200 hover:shadow-md hover:-translate-y-[1px]
+				${
+					item.is_read
+						? 'bg-card border-border/50 hover:border-border'
+						: `${cfg.bg} ${cfg.border} hover:shadow-${cfg.dot}/10`
+				}
+			`}
+		>
+			{/* Unread dot */}
+			{!item.is_read && (
+				<span
+					className={`absolute top-3.5 right-3.5 w-2 h-2 rounded-full ${cfg.dot} animate-pulse`}
+				/>
+			)}
+
+			<div className='flex gap-3'>
+				{/* Icon */}
+				<div
+					className={`mt-0.5 flex-shrink-0 w-8 h-8 rounded-xl ${item.is_read ? 'bg-muted' : cfg.bg} flex items-center justify-center ${cfg.color}`}
+				>
+					{cfg.icon}
+				</div>
+
+				{/* Content */}
+				<div className='flex-1 min-w-0'>
+					<div className='flex items-start justify-between gap-2'>
+						<p
+							className={`text-sm font-semibold leading-snug ${item.is_read ? 'text-foreground/80' : 'text-foreground'}`}
+						>
+							{item.title}
+						</p>
+					</div>
+
+					<p className='text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed'>
+						{item.message}
+					</p>
+
+					{/* Footer */}
+					<div className='flex items-center justify-between mt-2.5'>
+						<div className='flex items-center gap-1 text-[10px] text-muted-foreground'>
+							<Clock size={10} />
+							<span>
+								{formatDistanceToNow(new Date(item.created_at), {
+									addSuffix: true,
+									locale: uz,
+								})}
+							</span>
+						</div>
+
+						{item.is_read && item.read_time && (
+							<div className='flex items-center gap-1 text-[10px] text-emerald-500'>
+								<CheckCheck size={11} />
+								<span>{item.read_time}</span>
+							</div>
+						)}
+					</div>
+
+					{/* Seen users */}
+					<SeenUsers usernames={item.seen_usernames} />
+				</div>
+			</div>
+		</div>
+	)
+}
+
+// ─── Filter Tab ───────────────────────────────────────────────────────────────
+function FilterTab({ label, active, count, onClick }) {
+	return (
+		<button
+			onClick={onClick}
+			className={`
+				relative px-3 py-1.5 rounded-lg text-xs font-medium transition-all
+				${
+					active
+						? 'bg-primary text-primary-foreground shadow-sm'
+						: 'text-muted-foreground hover:text-foreground hover:bg-muted'
+				}
+			`}
+		>
+			{label}
+			{count > 0 && (
+				<span
+					className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold
+					${active ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'}`}
+				>
+					{count}
+				</span>
+			)}
+		</button>
+	)
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 export default function Notification() {
-  const [mainID, setMainID] = useState(null);
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const limit = 20;
+	const [page, setPage] = useState(1)
+	const [search, setSearch] = useState('')
+	const [filter, setFilter] = useState('all') // all | unread | read
+	const limit = 20
 
-  // 🔔 Notifications list
-  const { data, isLoading } = useNotificationsQuery({
-    page,
-    limit,
-    search,
-  });
+	const { data, isLoading } = useNotificationsQuery({ page, limit, search })
 
-  const notifications = data?.results || [];
-  const totalCount = data?.count || 0;
-  const totalPages = Math.ceil(totalCount / limit);
+	const notifications = data?.results || []
+	const totalCount = data?.count || 0
+	const totalPages = Math.ceil(totalCount / limit)
 
-  // 🔎 Search filter (frontend)
-  const filteredNotifications = useMemo(() => {
-    return notifications.filter((item) =>
-      item.title.toLowerCase().includes(search.toLowerCase()),
-    );
-  }, [notifications, search]);
+	const [markRead, { isLoading: marking }] = useNotificationViewMutation()
 
-  // 🔴 Unread count
-  const unreadCount = notifications.filter((item) => !item.is_read).length;
+	const unreadCount = notifications.filter(n => !n.is_read).length
+	const readCount = notifications.filter(n => n.is_read).length
 
-  // 📌 Selected notification detail
-  const [MainIDDAta, { isLoading: notificationLoads }] =
-    useNotificationViewMutation();
+	const filtered = useMemo(() => {
+		return notifications
+			.filter(n => {
+				if (filter === 'unread') return !n.is_read
+				if (filter === 'read') return n.is_read
+				return true
+			})
+			.filter(
+				n =>
+					n.title.toLowerCase().includes(search.toLowerCase()) ||
+					n.message.toLowerCase().includes(search.toLowerCase()),
+			)
+	}, [notifications, filter, search])
 
-  const sumbit = async (item) => {
-    const formData = {
-      is_read: true,
-    };
-    try {
-      await MainIDDAta({ formData, id: item.id }).unwrap();
-      toast.success("O'qildi!");
-    } catch (error) {
-      console.log(error);
-      toast.error("Nimadir xato ketdi!");
-    }
-  };
+	const handleRead = async item => {
+		try {
+			await markRead({ formData: { is_read: true }, id: item.id }).unwrap()
+			toast.success("Xabar o'qildi!", {
+				description: item.title,
+				icon: <CheckCircle2 size={16} className='text-emerald-500' />,
+			})
+		} catch {
+			toast.error('Xatolik yuz berdi!')
+		}
+	}
 
-  const repeadRead = (item) => {
-    toast.warning(`Xabar ${item.read_time} sanada o'qilgan!`);
-  };
+	const handleAlreadyRead = item => {
+		toast.info(`${item.read_time} da o'qilgan`, {
+			description: item.title,
+			icon: <CheckCheck size={16} />,
+		})
+	}
 
-  console.log(data);
-  return (
-    <Drawer direction="left">
-      <DrawerTrigger asChild>
-        <Button variant="default" size="icon" className="relative">
-          <Bell size={18} />
-          {unreadCount > 0 && (
-            <Badge
-              variant="destructive"
-              className="absolute -top-2 -right-2 px-2 py-0 text-xs"
-            >
-              {unreadCount}
-            </Badge>
-          )}
-        </Button>
-      </DrawerTrigger>
+	return (
+		<Drawer direction='left'>
+			{/* ── Trigger ── */}
+			<DrawerTrigger asChild>
+				<Button
+					variant='ghost'
+					size='icon'
+					className='relative w-9 h-9 rounded-xl hover:bg-muted transition-all'
+				>
+					<Bell size={18} />
+					{unreadCount > 0 && (
+						<span className='absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-background'>
+							{unreadCount > 9 ? '9+' : unreadCount}
+						</span>
+					)}
+				</Button>
+			</DrawerTrigger>
 
-      <DrawerContent className="w-[400px] p-0 flex flex-col">
-        {/* Header */}
-        <DrawerHeader className="border-b">
-          <DrawerTitle>Bildirishnomalar</DrawerTitle>
-        </DrawerHeader>
+			{/* ── Panel ── */}
+			<DrawerContent className='w-[420px] p-0 flex flex-col h-full rounded-r-2xl overflow-hidden border-r'>
+				{/* Header */}
+				<div className='px-5 pt-5 pb-4 border-b bg-card'>
+					<div className='flex items-center justify-between mb-4'>
+						<div>
+							<h2 className='text-base font-bold tracking-tight'>
+								Bildirishnomalar
+							</h2>
+							<p className='text-xs text-muted-foreground mt-0.5'>
+								{unreadCount > 0
+									? `${unreadCount} ta yangi xabar`
+									: "Barcha xabarlar o'qilgan"}
+							</p>
+						</div>
+						<div className='w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center'>
+							<Bell size={18} className='text-primary' />
+						</div>
+					</div>
 
-        {/* Search */}
-        <div className="p-4 border-b">
-          <div className="relative">
-            <Search
-              size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-            />
-            <Input
-              placeholder="Qidirish..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-        </div>
+					{/* Search */}
+					<div className='relative'>
+						<Search
+							size={14}
+							className='absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground'
+						/>
+						<Input
+							placeholder='Qidirish...'
+							value={search}
+							onChange={e => {
+								setSearch(e.target.value)
+								setPage(1)
+							}}
+							className='pl-9 h-9 text-sm rounded-xl bg-muted/50 border-transparent focus:border-primary focus:bg-background transition-all'
+						/>
+						{search && (
+							<button
+								onClick={() => setSearch('')}
+								className='absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground'
+							>
+								<X size={13} />
+							</button>
+						)}
+					</div>
 
-        {/* Notification list */}
-        <div className="flex-1 overflow-y-auto px-4 py-2 space-y-3">
-          {isLoading && (
-            <p className="text-sm text-muted-foreground">Yuklanmoqda...</p>
-          )}
+					{/* Filter tabs */}
+					<div className='flex gap-1 mt-3'>
+						<FilterTab
+							label='Barchasi'
+							active={filter === 'all'}
+							count={0}
+							onClick={() => setFilter('all')}
+						/>
+						<FilterTab
+							label='Yangi'
+							active={filter === 'unread'}
+							count={unreadCount}
+							onClick={() => setFilter('unread')}
+						/>
+						<FilterTab
+							label="O'qilgan"
+							active={filter === 'read'}
+							count={readCount}
+							onClick={() => setFilter('read')}
+						/>
+					</div>
+				</div>
 
-          {!isLoading && filteredNotifications.length === 0 && (
-            <p className="text-sm text-muted-foreground">
-              Bildirishnoma topilmadi
-            </p>
-          )}
+				{/* List */}
+				<div className='flex-1 overflow-y-auto px-4 py-3 space-y-2.5'>
+					{isLoading && (
+						<div className='space-y-2.5 pt-2'>
+							{[...Array(4)].map((_, i) => (
+								<div
+									key={i}
+									className='rounded-2xl border bg-muted/30 h-28 animate-pulse'
+								/>
+							))}
+						</div>
+					)}
 
-          {filteredNotifications.map((item) => (
-            <div
-              onClick={() => (item.is_read ? repeadRead(item) : sumbit(item))}
-              key={item.id}
-              className={`rounded-xl border p-4 transition hover:bg-muted/40 cursor-pointer ${
-                !item.is_read ? "bg-muted/50 border-primary" : ""
-              }`}
-            >
-              <div className="flex justify-between items-start mb-1">
-                <h4 className="text-sm font-semibold">{item.title}</h4>
-                <Badge variant={item.is_read ? "secondary" : "default"}>
-                  {item.is_read ? "O‘qildi" : "Yangi"}
-                </Badge>
-              </div>
+					{!isLoading && filtered.length === 0 && (
+						<div className='flex flex-col items-center justify-center py-16 text-center'>
+							<div className='w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-3'>
+								<Bell size={22} className='text-muted-foreground' />
+							</div>
+							<p className='text-sm font-medium text-foreground/70'>
+								Bildirishnoma topilmadi
+							</p>
+							<p className='text-xs text-muted-foreground mt-1'>
+								Qidiruv yoki filtrni o'zgartiring
+							</p>
+						</div>
+					)}
 
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {item.message}
-              </p>
+					{!isLoading &&
+						filtered.map(item => (
+							<NotifCard
+								key={item.id}
+								item={item}
+								onRead={handleRead}
+								onAlreadyRead={handleAlreadyRead}
+							/>
+						))}
+				</div>
 
-              <div className="text-xs text-muted-foreground mt-2">
-                {format(new Date(item.created_at), "dd.MM.yyyy HH:mm")}
-              </div>
-            </div>
-          ))}
-        </div>
+				{/* Pagination */}
+				{totalPages > 1 && (
+					<div className='border-t bg-card px-4 py-3 flex items-center justify-between gap-2'>
+						<Button
+							size='sm'
+							variant='outline'
+							disabled={page === 1}
+							onClick={() => setPage(p => p - 1)}
+							className='h-8 w-8 p-0 rounded-xl'
+						>
+							<ChevronLeft size={15} />
+						</Button>
 
-        {/* Pagination */}
-        <div className="border-t p-3 flex items-center justify-between">
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={page === 1}
-            onClick={() => setPage((prev) => prev - 1)}
-          >
-            <ChevronLeft size={16} />
-          </Button>
+						<div className='flex items-center gap-1'>
+							{[...Array(Math.min(totalPages, 5))].map((_, i) => {
+								const p = i + 1
+								return (
+									<button
+										key={p}
+										onClick={() => setPage(p)}
+										className={`w-7 h-7 rounded-lg text-xs font-medium transition-all
+											${
+												page === p
+													? 'bg-primary text-primary-foreground'
+													: 'text-muted-foreground hover:bg-muted'
+											}`}
+									>
+										{p}
+									</button>
+								)
+							})}
+							{totalPages > 5 && (
+								<span className='text-xs text-muted-foreground px-1'>...</span>
+							)}
+						</div>
 
-          <span className="text-sm text-muted-foreground">
-            {page} / {totalPages || 1}
-          </span>
+						<Button
+							size='sm'
+							variant='outline'
+							disabled={page === totalPages}
+							onClick={() => setPage(p => p + 1)}
+							className='h-8 w-8 p-0 rounded-xl'
+						>
+							<ChevronRight size={15} />
+						</Button>
+					</div>
+				)}
 
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={page === totalPages}
-            onClick={() => setPage((prev) => prev + 1)}
-          >
-            <ChevronRight size={16} />
-          </Button>
-        </div>
-      </DrawerContent>
-    </Drawer>
-  );
+				{/* Footer */}
+				<div className='px-4 pb-4 pt-2 text-center'>
+					<p className='text-[10px] text-muted-foreground'>
+						Jami {totalCount} ta bildirishnoma
+					</p>
+				</div>
+			</DrawerContent>
+		</Drawer>
+	)
 }

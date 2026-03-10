@@ -1,729 +1,684 @@
-import { useEffect, useState } from "react";
+import { Button } from '@/components/ui/button'
 import {
-  ArrowUpRightIcon,
-  CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
-  CircleAlert,
-  CircleCheckBig,
-  List,
-  Loader2,
-  Reply,
-  Search,
-  Send,
-  SendHorizontal,
-  XCircle,
-} from "lucide-react";
+	Card,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@/components/ui/card'
 import {
-  Banner,
-  BannerAction,
-  BannerClose,
-  BannerIcon,
-  BannerTitle,
-} from "@/components/ui/shadcn-io/banner";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select'
 import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+	Banner,
+	BannerAction,
+	BannerClose,
+	BannerIcon,
+	BannerTitle,
+} from '@/components/ui/shadcn-io/banner'
 import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { ScrollArea, ScrollBar } from "./ui/scroll-area";
-import { Input } from "./input";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Badge } from "./ui/badge";
+	Sheet,
+	SheetClose,
+	SheetContent,
+	SheetDescription,
+	SheetFooter,
+	SheetHeader,
+	SheetTitle,
+	SheetTrigger,
+} from '@/components/ui/sheet'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
-  useMEQuery,
-  usePprJarayondaForFindingQuery,
-  usePPrniJonatishPostMutation,
-  usePPRtastiqlashGetForFindQuery,
-  usePPRtastiqlashGetQuery,
-  usePPRtastiqlashPOStMutation,
-  usePprYuborishMutation,
-} from "@/services/api";
-import { Label } from "./ui/label";
-import { Textarea } from "./ui/textarea";
-import { toast } from "sonner";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+	useMEQuery,
+	usePprJarayondaForFindingQuery,
+	usePPrniJonatishPostMutation,
+	usePPRtastiqlashGetQuery,
+	usePPRtastiqlashPOStMutation,
+	usePprYuborishMutation,
+} from '@/services/api'
+import { IconError404 } from '@tabler/icons-react'
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+	CheckCircle2,
+	ChevronLeft,
+	ChevronRight,
+	CircleAlert,
+	CircleCheckBig,
+	List,
+	Loader2,
+	Reply,
+	Search,
+	Send,
+	SendHorizontal,
+	X,
+	XCircle,
+} from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { toast } from 'sonner'
+import { Input } from './input'
+import { Badge } from './ui/badge'
 import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "./ui/empty";
-import { IconError404, IconFolderCode } from "@tabler/icons-react";
-import { useSelector } from "react-redux";
+	Empty,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyMedia,
+	EmptyTitle,
+} from './ui/empty'
+import { Label } from './ui/label'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
+import { ScrollArea } from './ui/scroll-area'
+import { Textarea } from './ui/textarea'
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 
-export default function Example() {
-  const now = new Date();
-  const currentYear = now.getFullYear(); // yil
-  const currentMonth = now.getMonth() + 1;
-  const [page, setPage] = useState(1);
-  const limit = 10;
-  const [id, setId] = useState(null);
-  const [open, setOpen] = useState(false);
-  const [form, setFrom] = useState({
-    yuborish_paketi: 0,
-    status: "tasdiqlandi",
-    comment: "",
-  });
-  const [atkaz, setAtkaz] = useState({
-    comment: "",
-    status: "rad_etildi",
-  });
-  const [DataDate, setDataDate] = useState({
-    yil: currentYear.toString(),
-    oy: currentMonth.toString(),
-  });
-  const [PPrniJonatishPost, { isLoading: PprniJonatishPostLoading }] =
-    usePPrniJonatishPostMutation();
-  const [yuborildiText, setyuborildi] = useState("");
-  const [activeTab, setActiveTab] = useState("all");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [postTastiqlash, { isLoading: tastiqlashLoading }] =
-    usePPRtastiqlashPOStMutation();
-  const { data: me } = useMEQuery();
+// ─── Constants ────────────────────────────────────────────────────────────────
+const LIMIT = 10
+const YEARS = [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032]
+const MONTHS = [
+	'Yanvar',
+	'Fevral',
+	'Mart',
+	'Aprel',
+	'May',
+	'Iyun',
+	'Iyul',
+	'Avgust',
+	'Sentabr',
+	'Oktabr',
+	'Noyabr',
+	'Dekabr',
+]
+const STATUSES = [
+	{ name: 'Hammasi', value: 'all', icon: List },
+	{ name: 'Tasdiqlandi', value: 'tasdiqlandi', icon: CheckCircle2 },
+	{ name: 'Rad etildi', value: 'rad_etildi', icon: XCircle },
+	{ name: 'Yuborildi', value: 'yuborildi', icon: Send },
+]
 
-  useEffect(() => {
-    const handler = setTimeout(() => setDebouncedSearch(searchTerm), 300);
-    return () => clearTimeout(handler);
-  }, [searchTerm]);
+const BADGE_VARIANT = {
+	tasdiqlandi: 'success',
+	rad_etildi: 'destructive',
+	yuborildi: 'secondary',
+	jarayonda: 'outline',
+	bajarildi: 'default',
+}
 
-  const bolim = useSelector((state) => state.bolim.bolim);
+const now = new Date()
+const INITIAL_DATE = {
+	yil: String(now.getFullYear()),
+	oy: String(now.getMonth() + 1),
+}
 
-  const { data, isLoading } = usePPRtastiqlashGetQuery({
-    status: activeTab === "all" ? "" : activeTab,
-    search: debouncedSearch,
-    page,
-    limit,
-    bolim_category__nomi:
-      me?.role == "tarkibiy" || me?.role == "monitoring" ? bolim : "",
-  });
-  const { data: men, isLoading: mainLoad } = useMEQuery();
-  const { data: usePPRtastqlashforFind, isLoading: forFindLoad } =
-    usePPRtastiqlashGetForFindQuery();
-  const [yuborishPprText, { isLoading: loadYuborish }] =
-    usePprYuborishMutation();
-  const total = data?.count || 0;
-  const totalPages = Math.ceil(total / limit);
+// ─── Sub-components ────────────────────────────────────────────────────────────
 
-  const { data: jarayondaFind, isLoading: prosessLoading } =
-    usePprJarayondaForFindingQuery();
+/** Approval history popover content */
+function ApprovalHistory({ sts, step, onBack, onNext }) {
+	const maxSteps = sts?.tasdiqlashlar?.length ?? 0
+	const current = sts?.tasdiqlashlar?.[step]
 
-  const [sts, setSts] = useState(null);
-  const [step, setStep] = useState(0);
-  const finded_respect_btn = jarayondaFind?.results?.find((we) => {
-    return (
-      Number(DataDate.yil) === we.yil &&
-      Number(DataDate.oy) === we.oy &&
-      we.status === "jarayonda"
-    );
-  });
+	return (
+		<>
+			<div className='h-[180px] overflow-y-auto p-4 space-y-2'>
+				<div className='flex justify-between items-center'>
+					<p className='font-medium text-sm truncate max-w-[60%]'>
+						{current?.user ?? "Tasdiqlovchi ma'lumoti"}
+					</p>
+					<Badge variant={BADGE_VARIANT[current?.status] ?? 'default'}>
+						{current?.status}
+					</Badge>
+				</div>
+				<p className='text-sm text-muted-foreground break-words line-clamp-3'>
+					{current?.comment ?? sts?.comment ?? '—'}
+				</p>
+				<p className='text-xs text-muted-foreground'>
+					{current?.created_at
+						? new Date(current.created_at).toLocaleString('uz-UZ', {
+								year: 'numeric',
+								month: '2-digit',
+								day: '2-digit',
+								hour: '2-digit',
+								minute: '2-digit',
+							})
+						: 'Aniq emas'}
+				</p>
+			</div>
 
-  const tastiqlashPPR = async () => {
-    try {
-      const body = {
-        yuborish_paketi: sts.yuborish_id,
-        status: form.status,
-        comment: form.comment,
-      };
-      await postTastiqlash({ body }).unwrap();
-      toast.success("Muvaffaqiyatli tastiqlandi!");
-      setFrom({
-        yuborish_paketi: null,
-        comment: "",
-      });
-    } catch (error) {
-      console.log(error);
-      toast.error("Xatolik yuz berdi!");
-    }
-  };
+			{/* Step navigation */}
+			<div className='flex items-center justify-between border-t px-4 py-2'>
+				<Button
+					size='sm'
+					variant='ghost'
+					onClick={onBack}
+					disabled={step === 0}
+				>
+					<ChevronLeft className='h-4 w-4 mr-1' /> Ortga
+				</Button>
+				<span className='text-xs text-muted-foreground'>
+					{maxSteps > 0 ? step + 1 : 0} / {maxSteps}
+				</span>
+				<Button
+					size='sm'
+					variant='ghost'
+					onClick={onNext}
+					disabled={step >= maxSteps - 1 || maxSteps === 0}
+				>
+					Oldinga <ChevronRight className='h-4 w-4 ml-1' />
+				</Button>
+			</div>
+		</>
+	)
+}
 
-  async function yuborildiTextSumbit() {
-    const body = {
-      comment: yuborildiText,
-    };
-    try {
-      await yuborishPprText({ body, id: sts.yuborish_id }).unwrap();
-      toast.success("Muvaffaqiyatli yuborildi!");
-    } catch (error) {
-      console.log(error);
-      toast.error("Nimadir xato ketdi");
-    }
-  }
+/** Confirm / send popover form */
+function ActionPopover({
+	label,
+	icon: Icon,
+	onSubmit,
+	isLoading,
+	disabled,
+	textValue,
+	onTextChange,
+	colorClass,
+}) {
+	return (
+		<Popover>
+			<PopoverTrigger asChild>
+				<Button
+					size='sm'
+					variant='ghost'
+					className={`cursor-pointer ${colorClass}`}
+					disabled={disabled}
+				>
+					<Icon className='h-4 w-4 mr-1' /> {label}
+				</Button>
+			</PopoverTrigger>
+			<PopoverContent className='w-80'>
+				<div className='space-y-3'>
+					<div>
+						<h4 className='font-medium text-sm leading-none mb-1'>
+							PPRni {label.toLowerCase()}
+						</h4>
+						<p className='text-muted-foreground text-xs'>
+							Izoh qoldirishingiz mumkin
+						</p>
+					</div>
+					<Textarea
+						className='h-20 w-full resize-none text-sm'
+						value={textValue}
+						onChange={e => onTextChange(e.target.value)}
+						placeholder='Izoh...'
+					/>
+					<div className='flex justify-end'>
+						<Button
+							size='sm'
+							className='min-w-[80px]'
+							onClick={onSubmit}
+							disabled={isLoading || !textValue?.trim()}
+						>
+							{isLoading ? (
+								<Loader2 className='h-3 w-3 animate-spin' />
+							) : (
+								'Saqlash'
+							)}
+						</Button>
+					</div>
+				</div>
+			</PopoverContent>
+		</Popover>
+	)
+}
 
-  async function gonnaWork() {
-    try {
-      await PPrniJonatishPost(DataDate).unwrap();
-      toast.success("Muvaffaqiyatli yuborildi!");
-    } catch (error) {
-      console.log(error);
+// ─── Main Component ────────────────────────────────────────────────────────────
+export default function PPRTasdiqlash() {
+	const [page, setPage] = useState(1)
+	const [sts, setSts] = useState(null)
+	const [step, setStep] = useState(0)
+	const [activeTab, setActiveTab] = useState('all')
+	const [searchTerm, setSearchTerm] = useState('')
+	const [debouncedSearch, setDebouncedSearch] = useState('')
+	const [DataDate, setDataDate] = useState(INITIAL_DATE)
+	const [confirmComment, setConfirmComment] = useState('')
+	const [sendComment, setSendComment] = useState('')
+	const [rejectComment, setRejectComment] = useState('')
 
-      const errorMessage =
-        error?.data?.detail ||
-        error?.data?.message ||
-        error?.data?.[0] ||
-        "Xatolik yuz berdi";
+	// API hooks
+	const { data: me } = useMEQuery()
+	const bolim = useSelector(state => state.bolim.bolim)
 
-      toast.error(errorMessage);
-    }
-  }
+	const { data, isLoading } = usePPRtastiqlashGetQuery({
+		status: activeTab === 'all' ? '' : activeTab,
+		search: debouncedSearch,
+		page,
+		limit: LIMIT,
+		bolim_category__nomi:
+			me?.role === 'tarkibiy' || me?.role === 'monitoring' ? bolim : '',
+	})
 
-  async function atkazWork() {
-    const body = {
-      comment: atkaz.comment,
-      yuborish_paketi: sts.yuborish_id,
-      status: atkaz.status,
-    };
-    try {
-      await postTastiqlash({ body }).unwrap();
-      toast.success("Qaytarildi!");
-      setAtkaz({
-        comment: "",
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
+	const { data: jarayondaFind } = usePprJarayondaForFindingQuery()
+	const [postTastiqlash, { isLoading: tastiqlashLoading }] =
+		usePPRtastiqlashPOStMutation()
+	const [yuborishPprText, { isLoading: loadYuborish }] =
+		usePprYuborishMutation()
+	const [PPrniJonatishPost, { isLoading: jonatishLoading }] =
+		usePPrniJonatishPostMutation()
 
-  const status = [
-    { name: "Hammasi", value: "all", icon: List },
-    { name: "Tasdiqlandi", value: "tasdiqlandi", icon: CheckCircle2 },
-    { name: "Rad etildi", value: "rad_etildi", icon: XCircle },
-    { name: "Yuborildi", value: "yuborildi", icon: Send },
-  ];
+	// Debounce search
+	useEffect(() => {
+		const t = setTimeout(() => setDebouncedSearch(searchTerm), 300)
+		return () => clearTimeout(t)
+	}, [searchTerm])
 
-  const getVariant = (status) => {
-    switch (status) {
-      case "tasdiqlandi":
-        return "success";
-      case "rad_etildi":
-        return "destructive";
-      case "yuborildi":
-        return "secondary";
-      case "jarayonda":
-        return "outline";
-      case "bajarildi":
-        return "default";
-      default:
-        return "default";
-    }
-  };
+	// Reset page on filter change
+	useEffect(() => {
+		setPage(1)
+	}, [activeTab, debouncedSearch])
 
-  const maxSteps = sts?.tasdiqlashlar?.length || 0;
-  const current = sts?.tasdiqlashlar?.[step];
+	// Reset step when selected item changes
+	useEffect(() => {
+		setStep(0)
+	}, [sts])
 
-  useEffect(() => {
-    setStep(0);
-  }, [sts]);
+	const totalPages = Math.ceil((data?.count ?? 0) / LIMIT)
 
-  useEffect(() => {
-    setPage(1);
-  }, [activeTab, debouncedSearch]);
+	const finded_respect_btn = useMemo(
+		() =>
+			jarayondaFind?.results?.find(
+				w =>
+					Number(DataDate.yil) === w.yil &&
+					Number(DataDate.oy) === w.oy &&
+					w.status === 'jarayonda',
+			),
+		[jarayondaFind, DataDate],
+	)
 
-  const next = (e) => {
-    e.stopPropagation();
-    setStep((prev) => Math.min(prev + 1, maxSteps - 1));
-  };
+	// ── Handlers ──────────────────────────────────────────────────────────────
+	const handleConfirm = useCallback(async () => {
+		try {
+			await postTastiqlash({
+				body: {
+					yuborish_paketi: sts.yuborish_id,
+					status: 'tasdiqlandi',
+					comment: confirmComment,
+				},
+			}).unwrap()
+			toast.success('Muvaffaqiyatli tastiqlandi!')
+			setConfirmComment('')
+		} catch {
+			toast.error('Xatolik yuz berdi!')
+		}
+	}, [sts, confirmComment, postTastiqlash])
 
-  const back = (e) => {
-    e.stopPropagation();
-    setStep((prev) => Math.max(prev - 1, 0));
-  };
+	const handleSend = useCallback(async () => {
+		try {
+			await yuborishPprText({
+				body: { comment: sendComment },
+				id: sts.yuborish_id,
+			}).unwrap()
+			toast.success('Muvaffaqiyatli yuborildi!')
+			setSendComment('')
+		} catch {
+			toast.error('Nimadir xato ketdi')
+		}
+	}, [sts, sendComment, yuborishPprText])
 
-  // for pagenation
-  const rightPage = () => {
-    if (page < totalPages) {
-      setPage((prev) => prev + 1);
-    }
-  };
+	const handleReject = useCallback(async () => {
+		try {
+			await postTastiqlash({
+				body: {
+					comment: rejectComment,
+					yuborish_paketi: sts.yuborish_id,
+					status: 'rad_etildi',
+				},
+			}).unwrap()
+			toast.success('Qaytarildi!')
+			setRejectComment('')
+		} catch {
+			toast.error('Xatolik yuz berdi!')
+		}
+	}, [sts, rejectComment, postTastiqlash])
 
-  function leftPage() {
-    if (page > 1) {
-      setPage((prev) => prev - 1);
-    }
-  }
+	const handleSubmitDate = useCallback(async () => {
+		try {
+			await PPrniJonatishPost(DataDate).unwrap()
+			toast.success('Muvaffaqiyatli yuborildi!')
+		} catch (error) {
+			toast.error(
+				error?.data?.detail ||
+					error?.data?.message ||
+					error?.data?.[0] ||
+					'Xatolik yuz berdi',
+			)
+		}
+	}, [DataDate, PPrniJonatishPost])
 
-  return (
-    <>
-      <Sheet>
-        <Banner className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md rounded-xl">
-          <BannerIcon icon={CircleAlert} />
-          <BannerTitle>PPR jadvalni tastiqlang!</BannerTitle>
-          <SheetTrigger asChild>
-            <BannerAction
-              className={"text-white hover:text-white/40"}
-              disabled={isLoading || forFindLoad || prosessLoading}
-            >
-              Batafsil ko'rish
-            </BannerAction>
-          </SheetTrigger>
-          <BannerClose className={"text-white hover:text-white"} />
-        </Banner>
-        <SheetContent className="w-full sm:w-[500px] pb-82">
-          <SheetHeader className="p-0 px-2 pt-5 border-b pb-2">
-            <SheetTitle>PPR jadvalidagi ishlar</SheetTitle>
-            <SheetDescription>
-              Tuzilma raxbari va bo'lim raxbarlari bilan oylik PPR jadvani
-              tastiqlab olish
-            </SheetDescription>
+	const isBolim = me?.role === 'bolim'
 
-            <div>
-              <Input
-                placeholder="Search..."
-                leftIcon={<Search className="w-4 h-4" />}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                clearable
-                onClear={() => setSearchTerm("")}
-                className="mt-2 rounded-lg"
-              />
-            </div>
+	return (
+		<Sheet>
+			{/* ── Floating Banner ── */}
+			<Banner
+				className='fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md rounded-xl
+                   border border-primary/20 bg-primary shadow-lg shadow-primary/20'
+			>
+				<BannerIcon icon={CircleAlert} />
+				<BannerTitle className='font-medium tracking-tight'>
+					PPR jadvalni tastiqlang!
+				</BannerTitle>
+				<SheetTrigger asChild>
+					<BannerAction className='text-primary-foreground hover:text-primary-foreground/70 font-medium'>
+						Batafsil ko'rish
+					</BannerAction>
+				</SheetTrigger>
+				<BannerClose className='text-primary-foreground hover:text-primary-foreground/70' />
+			</Banner>
 
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full mt-2"
-            >
-              <TabsList className="grid grid-cols-4 w-full">
-                {status.map((st) => (
-                  <TabsTrigger
-                    key={st.value}
-                    value={st.value}
-                    className="w-full"
-                  >
-                    {st.name}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
+			{/* ── Sheet Panel ── */}
+			<SheetContent className='w-full sm:w-[480px] flex flex-col p-0 gap-0'>
+				{/* Header */}
+				<SheetHeader className='px-5 pt-5 pb-3 border-b shrink-0 space-y-3'>
+					<div>
+						<SheetTitle className='text-base font-semibold tracking-tight'>
+							PPR jadvalidagi ishlar
+						</SheetTitle>
+						<SheetDescription className='text-xs mt-0.5 leading-snug'>
+							Tuzilma va bo'lim raxbarlari bilan oylik PPR jadvalni tasdiqlab
+							olish
+						</SheetDescription>
+					</div>
 
-            <div className="flex items-center justify-between mt-1">
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={leftPage}
-                disabled={page === 1}
-              >
-                <ChevronLeft className="h-4 w-4 mr-1" /> Ortga
-              </Button>
-              <span className="text-xs text-muted-foreground">
-                {page}/{totalPages}
-              </span>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={rightPage}
-                disabled={page === totalPages}
-              >
-                Oldinga <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
-            </div>
-          </SheetHeader>
+					{/* Search */}
+					<div className='relative'>
+						<Search className='absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none' />
+						<Input
+							placeholder='Qidirish...'
+							value={searchTerm}
+							onChange={e => setSearchTerm(e.target.value)}
+							className='pl-9 pr-8 h-8 text-sm rounded-lg'
+						/>
+						{searchTerm && (
+							<button
+								onClick={() => setSearchTerm('')}
+								className='absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground'
+							>
+								<X className='h-3.5 w-3.5' />
+							</button>
+						)}
+					</div>
 
-          <ScrollArea className="h-full w-full p-2">
-            {data?.results?.length === 0 && (
-              <Empty>
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <IconError404 stroke={2} />
-                  </EmptyMedia>
-                  <EmptyTitle>Ma'lumot topilmadi</EmptyTitle>
-                  <EmptyDescription>
-                    Iltimos qaytadan urinib ko'rishingizni so'raymiz
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            )}
-            {isLoading || mainLoad ? (
-              <div className="flex justify-center p-10">
-                <Loader2 className="animate-spin" />
-              </div>
-            ) : (
-              data?.results?.map((kiss, index) => (
-                <Popover key={kiss.id || index}>
-                  <PopoverTrigger asChild>
-                    <Card
-                      onClick={() => setSts(kiss)}
-                      className="mt-3 cursor-pointer hover:bg-accent/50 transition-colors"
-                    >
-                      <CardHeader>
-                        <CardTitle className="flex justify-between items-center text-base">
-                          <span>
-                            {kiss.yil}-yil {kiss.oy_nomi}
-                          </span>
-                          <Badge variant={getVariant(kiss.status)}>
-                            {kiss.status}
-                          </Badge>
-                        </CardTitle>
-                        <CardDescription className="flex justify-between items-center w-full">
-                          <span>Yaratuvchi: {kiss.yaratuvchi_user}</span>
-                          <span>Sana: {kiss.yaratilgan_sana}</span>
-                        </CardDescription>
-                      </CardHeader>
-                    </Card>
-                  </PopoverTrigger>
-                  <PopoverContent align="end" className="w-[400px] p-0">
-                    <div className="h-[200px] overflow-y-auto p-4 space-y-3">
-                      <div className="p-4 space-y-3">
-                        <div className="flex justify-between items-center">
-                          <p className="font-medium text-sm">
-                            {current?.user || "Tasdiqlovchi ma'lumoti"}
-                          </p>
-                          <Badge variant={getVariant(current?.status)}>
-                            {current?.status}
-                          </Badge>
-                        </div>
+					{/* Status tabs */}
+					<Tabs value={activeTab} onValueChange={setActiveTab}>
+						<TabsList className='grid grid-cols-4 w-full h-8'>
+							{STATUSES.map(st => (
+								<TabsTrigger
+									key={st.value}
+									value={st.value}
+									className='text-xs px-1'
+								>
+									{st.name}
+								</TabsTrigger>
+							))}
+						</TabsList>
+					</Tabs>
 
-                        <p className="text-sm text-muted-foreground break-words">
-                          {current?.comment || kiss.comment}
-                        </p>
+					{/* Pagination mini */}
+					<div className='flex items-center justify-between'>
+						<Button
+							size='sm'
+							variant='ghost'
+							onClick={() => setPage(p => Math.max(p - 1, 1))}
+							disabled={page === 1}
+							className='h-7 text-xs'
+						>
+							<ChevronLeft className='h-3.5 w-3.5 mr-0.5' /> Ortga
+						</Button>
+						<span className='text-xs text-muted-foreground tabular-nums'>
+							{page} / {totalPages || 1}
+						</span>
+						<Button
+							size='sm'
+							variant='ghost'
+							onClick={() => setPage(p => Math.min(p + 1, totalPages))}
+							disabled={page >= totalPages}
+							className='h-7 text-xs'
+						>
+							Oldinga <ChevronRight className='h-3.5 w-3.5 ml-0.5' />
+						</Button>
+					</div>
+				</SheetHeader>
 
-                        <p className="text-sm text-muted-foreground">
-                          {current?.created_at
-                            ? new Date(current.created_at).toLocaleString(
-                                "uz-UZ",
-                                {
-                                  year: "numeric",
-                                  month: "2-digit",
-                                  day: "2-digit",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                  second: "2-digit",
-                                },
-                              )
-                            : "Aniq emas"}
-                        </p>
-                      </div>
+				{/* List */}
+				<ScrollArea className='flex-1 px-4 py-3'>
+					{isLoading ? (
+						<div className='flex justify-center items-center h-40'>
+							<Loader2 className='animate-spin h-6 w-6 text-muted-foreground' />
+						</div>
+					) : data?.results?.length === 0 ? (
+						<Empty className='py-10'>
+							<EmptyHeader>
+								<EmptyMedia variant='icon'>
+									<IconError404
+										stroke={1.5}
+										className='h-10 w-10 text-muted-foreground'
+									/>
+								</EmptyMedia>
+								<EmptyTitle className='text-sm'>Ma'lumot topilmadi</EmptyTitle>
+								<EmptyDescription className='text-xs'>
+									Iltimos qaytadan urinib ko'ring
+								</EmptyDescription>
+							</EmptyHeader>
+						</Empty>
+					) : (
+						<div className='space-y-2'>
+							{data.results.map((item, index) => (
+								<Popover key={item.id ?? index}>
+									<PopoverTrigger asChild>
+										<Card
+											onClick={() => setSts(item)}
+											className='cursor-pointer hover:bg-accent/60 transition-colors duration-150 border border-border/60'
+										>
+											<CardHeader className='px-4 py-3'>
+												<CardTitle className='flex justify-between items-center text-sm font-medium'>
+													<span>
+														{item.yil}-yil {item.oy_nomi}
+													</span>
+													<Badge
+														variant={BADGE_VARIANT[item.status] ?? 'default'}
+														className='text-xs'
+													>
+														{item.status}
+													</Badge>
+												</CardTitle>
+												<CardDescription className='flex justify-between items-center text-xs mt-0.5'>
+													<span className='truncate max-w-[55%]'>
+														Yaratuvchi: {item.yaratuvchi_user}
+													</span>
+													<span className='text-muted-foreground/70'>
+														{item.yaratilgan_sana}
+													</span>
+												</CardDescription>
+											</CardHeader>
+										</Card>
+									</PopoverTrigger>
 
-                      {/* 👇 MUHIM */}
-                    </div>
+									<PopoverContent
+										align='end'
+										className='w-[380px] p-0 shadow-lg'
+									>
+										{/* History */}
+										<ApprovalHistory
+											sts={sts}
+											step={step}
+											onBack={e => {
+												e.stopPropagation()
+												setStep(p => Math.max(p - 1, 0))
+											}}
+											onNext={e => {
+												e.stopPropagation()
+												setStep(p =>
+													Math.min(
+														p + 1,
+														(sts?.tasdiqlashlar?.length ?? 1) - 1,
+													),
+												)
+											}}
+										/>
 
-                    <div className="flex items-center justify-between border-t px-4 py-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={back}
-                        disabled={step === 0}
-                      >
-                        <ChevronLeft className="h-4 w-4 mr-1" /> Ortga
-                      </Button>
-                      <span className="text-xs text-muted-foreground">
-                        {maxSteps > 0 ? step + 1 : 0} / {maxSteps}
-                      </span>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={next}
-                        disabled={step === maxSteps - 1 || maxSteps === 0}
-                      >
-                        Oldinga <ChevronRight className="h-4 w-4 ml-1" />
-                      </Button>
-                    </div>
-                    <div className="flex items-center justify-between gap-4 border-t px-4 py-2">
-                      {men.role == "bolim" ? (
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="ghous"
-                              className="cursor-pointer text-green-600"
-                              // onClick={yuborildiTextSumbit}
-                              disabled={
-                                kiss.status == "tasdiqlandi" ||
-                                kiss.status == "yuborildi" ||
-                                kiss.status == "bajarildi"
-                              }
-                            >
-                              <Send className="h-4 w-4 mr-1" /> Yuborish
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-80">
-                            <div className="grid gap-4">
-                              <div className="space-y-2">
-                                <h4 className="leading-none font-medium">
-                                  PPRni tastiqlash
-                                </h4>
-                                <p className="text-muted-foreground text-sm">
-                                  Tastiqlash bo'yicha izoh qoldirishingiz mumkin
-                                </p>
-                              </div>
-                              <div className="grid gap-2">
-                                <div>
-                                  <Textarea
-                                    className="col-span-2 h-8 w-full"
-                                    value={yuborildiText}
-                                    onChange={(e) => {
-                                      setyuborildi(e.target.value);
-                                    }}
-                                  />
-                                </div>
-                                <div className="flex justify-end">
-                                  <Button
-                                    size="sm"
-                                    disabled={
-                                      loadYuborish || yuborildiText === ""
-                                    }
-                                    className="w-20"
-                                    onClick={yuborildiTextSumbit}
-                                  >
-                                    Saqlash
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                      ) : (
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="ghous"
-                              className="cursor-pointer text-green-600"
-                              disabled={kiss.status == "tasdiqlandi"}
-                            >
-                              <CircleCheckBig className="h-4 w-4 mr-1" />{" "}
-                              Tastiqlash
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-80">
-                            <div className="grid gap-4">
-                              <div className="space-y-2">
-                                <h4 className="leading-none font-medium">
-                                  PPRni tastiqlash
-                                </h4>
-                                <p className="text-muted-foreground text-sm">
-                                  Tastiqlash bo'yicha izoh qoldirishingiz mumkin
-                                </p>
-                              </div>
-                              <div className="grid gap-2">
-                                <div>
-                                  <Textarea
-                                    value={form.comment}
-                                    className="col-span-2 h-8 w-full"
-                                    onChange={(e) => {
-                                      setFrom((prev) => ({
-                                        ...prev,
-                                        comment: e.target.value,
-                                      }));
-                                    }}
-                                  />
-                                </div>
-                                <div className="flex justify-end">
-                                  <Button
-                                    size="sm"
-                                    disabled={
-                                      men.role == "monitoring" ||
-                                      form.comment == "" ||
-                                      tastiqlashLoading
-                                    }
-                                    className={`w-20 ${tastiqlashLoading ? "w-30" : "w-20"}`}
-                                    onClick={tastiqlashPPR}
-                                  >
-                                    {tastiqlashLoading
-                                      ? "Saqlanmoqda..."
-                                      : "Saqlash"}
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                      )}
+										{/* Action buttons */}
+										<div className='flex items-center justify-between border-t px-3 py-2 bg-muted/30'>
+											{isBolim ? (
+												<ActionPopover
+													label='Yuborish'
+													icon={Send}
+													colorClass='text-primary'
+													textValue={sendComment}
+													onTextChange={setSendComment}
+													onSubmit={handleSend}
+													isLoading={loadYuborish}
+													disabled={
+														item.status === 'tasdiqlandi' ||
+														item.status === 'yuborildi' ||
+														item.status === 'bajarildi'
+													}
+												/>
+											) : (
+												<ActionPopover
+													label='Tastiqlash'
+													icon={CircleCheckBig}
+													colorClass='text-green-600 dark:text-green-400'
+													textValue={confirmComment}
+													onTextChange={setConfirmComment}
+													onSubmit={handleConfirm}
+													isLoading={tastiqlashLoading}
+													disabled={
+														item.status === 'tasdiqlandi' ||
+														me?.role === 'monitoring'
+													}
+												/>
+											)}
 
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            size="sm"
-                            variant="ghous"
-                            className={"text-red-600"}
-                            disabled={
-                              men.role !== "tarkibiy" ||
-                              kiss?.status == "bajarildi" ||
-                              kiss?.status == "tasdiqlandi" ||
-                              kiss?.status == "rad_etildi"
-                            }
-                          >
-                            Qaytarish <Reply className="h-4 w-4 ml-1" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-80">
-                          <div className="grid gap-4">
-                            <div className="space-y-2">
-                              <h4 className="leading-none font-medium">
-                                PPRni tastiqlash
-                              </h4>
-                              <p className="text-muted-foreground text-sm">
-                                Tastiqlash bo'yicha izoh qoldirishingiz mumkin
-                              </p>
-                            </div>
-                            <div className="grid gap-2">
-                              <div>
-                                <Textarea
-                                  value={atkaz.comment}
-                                  className="col-span-2 h-8 w-full"
-                                  onChange={(e) => {
-                                    setAtkaz((prev) => ({
-                                      ...prev,
-                                      comment: e.target.value,
-                                    }));
-                                  }}
-                                />
-                              </div>
-                              <div className="flex justify-end">
-                                <Button
-                                  size="sm"
-                                  className="w-20"
-                                  onClick={atkazWork}
-                                  disabled={tastiqlashLoading}
-                                >
-                                  Saqlash
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              ))
-            )}
-          </ScrollArea>
+											<ActionPopover
+												label='Qaytarish'
+												icon={Reply}
+												colorClass='text-destructive'
+												textValue={rejectComment}
+												onTextChange={setRejectComment}
+												onSubmit={handleReject}
+												isLoading={tastiqlashLoading}
+												disabled={
+													me?.role !== 'tarkibiy' ||
+													item.status === 'bajarildi' ||
+													item.status === 'tasdiqlandi' ||
+													item.status === 'rad_etildi'
+												}
+											/>
+										</div>
+									</PopoverContent>
+								</Popover>
+							))}
+						</div>
+					)}
+				</ScrollArea>
 
-          <SheetFooter className="absolute bottom-0 left-0 w-full p-6 bg-background border-t ">
-            <div className="flex gap-5">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button type="submit" className="w-full mb-2">
-                    PPR sanasini jo'natish
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80">
-                  <div className="flex items-center justify-start gap-5">
-                    {/* YIL */}
-                    <div className="space-y-2">
-                      <Label>Yilni tanlang</Label>
-                      <Select
-                        value={DataDate.yil}
-                        onValueChange={(value) =>
-                          setDataDate((prev) => ({
-                            ...prev,
-                            yil: value,
-                          }))
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Yilni tanlang" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            {[
-                              2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032,
-                            ].map((year) => (
-                              <SelectItem key={year} value={String(year)}>
-                                {year}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </div>
+				{/* Footer */}
+				<SheetFooter className='shrink-0 px-5 py-4 border-t bg-background'>
+					<div className='flex gap-3 w-full'>
+						<Popover>
+							<PopoverTrigger asChild>
+								<Button className='flex-1 h-9 text-sm font-medium'>
+									PPR sanasini jo'natish
+								</Button>
+							</PopoverTrigger>
+							<PopoverContent className='w-72'>
+								<p className='text-sm font-medium mb-3'>Sana tanlang</p>
+								<div className='flex gap-3'>
+									{/* Year */}
+									<div className='flex-1 space-y-1.5'>
+										<Label className='text-xs text-muted-foreground'>Yil</Label>
+										<Select
+											value={DataDate.yil}
+											onValueChange={v => setDataDate(p => ({ ...p, yil: v }))}
+										>
+											<SelectTrigger className='h-8 text-sm'>
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectGroup>
+													{YEARS.map(y => (
+														<SelectItem
+															key={y}
+															value={String(y)}
+															className='text-sm'
+														>
+															{y}
+														</SelectItem>
+													))}
+												</SelectGroup>
+											</SelectContent>
+										</Select>
+									</div>
 
-                    {/* OY */}
-                    <div className="space-y-2">
-                      <Label>Oyni tanlang</Label>
-                      <Select
-                        value={DataDate.oy}
-                        onValueChange={(value) =>
-                          setDataDate((prev) => ({
-                            ...prev,
-                            oy: value,
-                          }))
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Oyni tanlang" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            {[
-                              "Yanvar",
-                              "Fevral",
-                              "Mart",
-                              "Aprel",
-                              "May",
-                              "Iyun",
-                              "Iyul",
-                              "Avgust",
-                              "Sentabr",
-                              "Oktabr",
-                              "Noyabr",
-                              "Dekabr",
-                            ].map((month, index) => (
-                              <SelectItem key={index} value={String(index + 1)}>
-                                {month}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  {/* BUTTON */}
-                  <div className="flex justify-end">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          size="sm"
-                          className="mt-2 cursor-pointer"
-                          onClick={gonnaWork}
-                          disabled={!finded_respect_btn}
-                        >
-                          Jo'natish
-                          <SendHorizontal className="ml-2" size={15} />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Faqat to'ldirilgan oylarni yubora olasiz!</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                </PopoverContent>
-              </Popover>
-              <SheetClose asChild>
-                <Button variant="outline" className="w-full">
-                  Bekor qilish
-                </Button>
-              </SheetClose>
-            </div>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
-    </>
-  );
+									{/* Month */}
+									<div className='flex-1 space-y-1.5'>
+										<Label className='text-xs text-muted-foreground'>Oy</Label>
+										<Select
+											value={DataDate.oy}
+											onValueChange={v => setDataDate(p => ({ ...p, oy: v }))}
+										>
+											<SelectTrigger className='h-8 text-sm'>
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectGroup>
+													{MONTHS.map((m, i) => (
+														<SelectItem
+															key={i}
+															value={String(i + 1)}
+															className='text-sm'
+														>
+															{m}
+														</SelectItem>
+													))}
+												</SelectGroup>
+											</SelectContent>
+										</Select>
+									</div>
+								</div>
+
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<div className='mt-3 flex justify-end'>
+											<Button
+												size='sm'
+												className='h-8 text-sm'
+												onClick={handleSubmitDate}
+												disabled={!finded_respect_btn || jonatishLoading}
+											>
+												{jonatishLoading ? (
+													<Loader2 className='h-3.5 w-3.5 animate-spin mr-1' />
+												) : (
+													<SendHorizontal className='h-3.5 w-3.5 mr-1' />
+												)}
+												Jo'natish
+											</Button>
+										</div>
+									</TooltipTrigger>
+									<TooltipContent side='bottom' className='text-xs'>
+										Faqat to'ldirilgan oylarni yubora olasiz!
+									</TooltipContent>
+								</Tooltip>
+							</PopoverContent>
+						</Popover>
+
+						<SheetClose asChild>
+							<Button variant='outline' className='flex-1 h-9 text-sm'>
+								Bekor qilish
+							</Button>
+						</SheetClose>
+					</div>
+				</SheetFooter>
+			</SheetContent>
+		</Sheet>
+	)
 }
