@@ -58,19 +58,6 @@ export function AppSidebar({ ...props }) {
     ],
     navMain: [
       {
-        title: t("20_20251120"),
-        url: "",
-        icon: Gauge,
-        isActive: true,
-        items: [
-          {
-            title: "Dashboard",
-            url: "/Kompleks",
-            roles: ["admin", "monitoring", "tarkibiy", "bekat", "bolim"],
-          },
-        ],
-      },
-      {
         title: t("24_20251120"),
         url: "#",
         icon: ScrollText,
@@ -85,6 +72,11 @@ export function AppSidebar({ ...props }) {
             url: "Kelgan-Arizalar",
             roles: ["admin", "monitoring", "tarkibiy", "bekat", "bolim"],
           },
+          {
+            title: "Ariza Taqvim",
+            url: "Taqvim",
+            roles: ["admin", "monitoring", "tarkibiy", "bekat", "bolim"],
+          },
         ],
       },
       {
@@ -93,7 +85,7 @@ export function AppSidebar({ ...props }) {
         icon: NotebookPen,
         items: [
           {
-            title: "Oylik reja",
+            title: "PPR Taqvim",
             url: "oy",
             roles: ["admin", "monitoring", "tarkibiy", "bekat", "bolim"],
           },

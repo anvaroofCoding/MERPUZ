@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { useTheme } from "@/context/ThemeContext";
 import { loadLanguage } from "@/i18n/loadLanguage";
 import {
   Bell,
@@ -24,18 +25,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 export default function SettingsPanel() {
   const { t } = useTranslation();
-  const [darkMode, setDarkMode] = useState(
-    localStorage.getItem("theme") === "dark",
-  );
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [darkMode]);
+  const { theme, toggleTheme } = useTheme();
+
   const [langs, setLang] = useState(() => localStorage.getItem("language"));
   useEffect(() => {
     const changeLang = async () => {
@@ -76,10 +67,10 @@ export default function SettingsPanel() {
         {/* DARK MODE */}
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-2 text-sm font-medium">
-            {darkMode ? <Moon size={16} /> : <Sun size={16} />}
+            {theme === "dark" ? <Moon size={16} /> : <Sun size={16} />}
             {t("1_20251120")}
           </span>
-          <Switch checked={darkMode} onCheckedChange={setDarkMode} />
+          <Switch checked={theme === "dark"} onCheckedChange={toggleTheme} />
         </div>
 
         <Separator />

@@ -30,6 +30,7 @@ import PprMonth from "@/pages/ppr.month/ppr.month";
 import PprMonthDetails from "@/pages/ppr.month/ppr.month.details";
 import Counter from "@/pages/test/test";
 import Login from "@/auth/login";
+import Taqvim from "@/pages/application-taqvim/taqvim";
 
 export const router = createBrowserRouter([
   // =========================
@@ -38,7 +39,6 @@ export const router = createBrowserRouter([
   { path: "/no-token-and-go-login", element: <Login /> },
   { path: "/Error-401", element: <Error401 /> },
   { path: "/Error-500", element: <Error500 /> },
-  { path: "/Programm/:MainTitle", element: <Programm /> },
   { path: "*", element: <Error_Page /> },
 
   // =========================
@@ -67,6 +67,11 @@ export const router = createBrowserRouter([
             element: <Dashboard />,
           },
 
+          {
+            path: "Taqvim/:MainTitle/:than_title",
+            element: <Taqvim />,
+          },
+
           // =========================
           // SETTINGS
           // =========================
@@ -80,6 +85,8 @@ export const router = createBrowserRouter([
               </RoleProtected>
             ),
           },
+
+          { path: "/Programm/:MainTitle", element: <Programm /> },
 
           // =========================
           // USERS

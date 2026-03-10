@@ -32,14 +32,13 @@ export default function Aplication_Detail() {
     { label: "Jarayonda", value: "jarayonda" },
     { label: "Qabul qilindi", value: "qabul_qilindi" },
     { label: "Bajarilgan", value: "bajarilgan" },
+    { label: "Tasdiqlanmoqda", value: "tasdiqlanmoqda" },
     { label: "Qaytarilgan", value: "qaytarildi" },
+    { label: "Rad etildi", value: "rad_etildi" },
   ];
 
   const statusVariantMap = {
     bajarilgan: "success",
-    qaytarildi: "destructive",
-    "qabul qilindi": "default",
-    jarayonda: "warning",
   };
 
   const startResize = () => !isMobile && setIsResizing(true);

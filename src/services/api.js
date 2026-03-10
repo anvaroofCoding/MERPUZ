@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 const baseQuery = fetchBaseQuery({
-  baseUrl: "https://pprs-7o08.onrender.com/api",
+  baseUrl: "http://88.88.150.151:9000/api",
   prepareHeaders: (headers) => {
     const token = localStorage.getItem("access");
     if (token) {
@@ -477,9 +477,22 @@ export const api = createApi({
       query: () => `/dashboard/main-stats/`,
       providesTags: ["MainTag"],
     }),
+    AddAplicationsStepsBajarildi: builder.mutation({
+      query: ({ body }) => ({
+        url: `/ariza-status/`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["MainTag"],
+    }),
+    kelgan: builder.query({
+      query: () => `/kelgan-arizalar/?turi=ijro`,
+      providesTags: ["MainTag"],
+    }),
   }),
 });
 export const {
+  useAddAplicationsStepsBajarildiMutation,
   useNotificationViewMutation,
   useGridDaashoardQuery,
   useForDashboardQuery,

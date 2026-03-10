@@ -29,7 +29,7 @@ export function LoginsNewForm() {
         localStorage.setItem("access", res.access);
         localStorage.setItem("refresh", res.refresh);
         localStorage.setItem("life", form.password);
-        navigate("/Kompleks/Bosh sahifa/Kompleks Dashboard");
+        navigate("/");
       } else {
         toast.error("login yoki parol xato yozilgan!");
       }

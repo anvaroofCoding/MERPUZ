@@ -4,89 +4,60 @@ import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardAction,
-  CardDescription,
-  CardFooter,
   CardHeader,
+  CardDescription,
   CardTitle,
 } from "@/components/ui/card";
+
+import { Skeleton } from "@/components/ui/skeleton";
 import { useGridDaashoardQuery } from "@/services/api";
 
 export function SectionCards() {
   const { data, isLoading } = useGridDaashoardQuery();
+
+  const stats = data?.stats ? Object.values(data.stats) : [1, 2, 3, 4]; // loading paytida 4 skeleton chiqadi
+
   return (
-    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Yillik PPRLAR</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {data?.stats?.ppr?.count}ta
-          </CardTitle>
-          <CardAction>
-            {data?.stats?.ppr?.growth_percentage > 0 ? (
-              <Badge variant="outline">
-                <IconTrendingUp />
-                {data?.stats?.ppr?.growth_percentage}%
-              </Badge>
-            ) : (
-              ""
-            )}
-          </CardAction>
-        </CardHeader>
-      </Card>
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Mavjud Arizalar</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {data?.stats?.total_arizalar?.count}ta
-          </CardTitle>
-          <CardAction>
-            {data?.stats?.total_arizalar?.growth_percentage > 0 ? (
-              <Badge variant="outline">
-                <IconTrendingUp />
-                {data?.stats?.total_arizalar?.growth_percentage}%
-              </Badge>
-            ) : (
-              ""
-            )}
-          </CardAction>
-        </CardHeader>
-      </Card>
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Bajarilgan arizalar</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {data?.stats?.completed_arizalar?.count}ta
-          </CardTitle>
-          <CardAction>
-            {data?.stats?.total_arizalar?.growth_percentage > 0 ? (
-              <Badge variant="outline">
-                <IconTrendingUp />
-                {data?.stats?.total_arizalar?.growth_percentage}%
-              </Badge>
-            ) : (
-              ""
-            )}
-          </CardAction>
-        </CardHeader>
-      </Card>
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Foydalanuvchilar</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {data?.user_growth?.total_users}ta
-          </CardTitle>
-          <CardAction>
-            {data?.user_growth?.new_users_this_month > 0 ? (
-              <Badge variant="outline">
-                <IconTrendingUp />
-                Bu oy {data?.user_growth?.new_users_this_month}ta qo'shildi
-              </Badge>
-            ) : (
-              ""
-            )}
-          </CardAction>
-        </CardHeader>
-      </Card>
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      {stats.map((item, index) => {
+        const growth = item?.growth_percentage ?? 0;
+
+        return (
+          <Card key={index} className="relative overflow-hidden">
+            <CardHeader>
+              {/* Title */}
+              {isLoading ? (
+                <Skeleton className="h-4 w-28" />
+              ) : (
+                <CardDescription>{item.title}</CardDescription>
+              )}
+
+              {/* Count */}
+              {isLoading ? (
+                <Skeleton className="h-8 w-20 mt-2" />
+              ) : (
+                <CardTitle className="text-3xl font-semibold tabular-nums">
+                  {item.count} ta
+                </CardTitle>
+              )}
+
+              {/* Growth */}
+              {!isLoading && (
+                <CardAction>
+                  <Badge variant="outline" className="flex gap-1 items-center">
+                    {growth >= 0 ? (
+                      <IconTrendingUp size={16} />
+                    ) : (
+                      <IconTrendingDown size={16} />
+                    )}
+                    {Math.abs(growth)}%
+                  </Badge>
+                </CardAction>
+              )}
+            </CardHeader>
+          </Card>
+        );
+      })}
     </div>
   );
 }

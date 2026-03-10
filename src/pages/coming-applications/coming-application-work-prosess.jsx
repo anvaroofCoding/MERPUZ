@@ -15,22 +15,29 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useChangeComingAplicationMutation, useMEQuery } from "@/services/api";
 import { Check, CloudDownload, Loader, Send } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 export default function Coming_Application_Details_Work_Pogress({ data }) {
+  console.log(data);
   const [openShet, setOpenShet] = useState(false);
   const { data: me } = useMEQuery();
   const [form, setForm] = useState({
     comment: "",
-    status: "qaytarildi",
+    status: "bajarilmoqda",
     ilovalar: null,
     akt_file: null,
   });
+
   const statusOptions = [
     { label: "Qaytarish", value: "qaytarildi" },
-    { label: "Qabul qilish", value: "qabul qilindi" },
-    { label: "Bajarish", value: "bajarilgan" },
+    { label: "Bajarilmoqda", value: "bajarilmoqda" },
+    { label: "Tasdiqlanmoqda", value: "tasdiqlanmoqda" },
   ];
+  const statusOptions3 = [
+    { label: "Bajarilmoqda", value: "bajarilmoqda" },
+    { label: "Tasdiqlanmoqda", value: "tasdiqlanmoqda" },
+  ];
+  const statusOptions1 = [{ label: "Tasdiqlanmoqda", value: "tasdiqlanmoqda" }];
   const [ChangeComingApplication, { isLoading: isLoadingComing }] =
     useChangeComingAplicationMutation();
   const isFormComplete = () => form.comment.trim() !== "";
@@ -38,7 +45,9 @@ export default function Coming_Application_Details_Work_Pogress({ data }) {
     const fd = new FormData();
     fd.append("comment", form.comment);
     fd.append("ariza", data?.id);
-    fd.append("holat", form.status);
+    data?.status == "tasdiqlanmoqda" || data?.status == "rad_etildi"
+      ? fd.append("holat", "tasdiqlanmoqda")
+      : fd.append("holat", form.status);
     if (form.akt_file) fd.append("akt_file", form.akt_file);
     if (form.ilovalar) fd.append("ilovalar", form.ilovalar);
     await toast.promise(ChangeComingApplication({ body: fd }).unwrap(), {
@@ -48,7 +57,7 @@ export default function Coming_Application_Details_Work_Pogress({ data }) {
     });
     setForm({
       comment: "",
-      status: "qaytarildi",
+      status: "",
       akt_file: null,
       ilovalar: null,
     });
@@ -75,7 +84,7 @@ export default function Coming_Application_Details_Work_Pogress({ data }) {
   const deleteShetInformation = () => {
     setForm({
       comment: "",
-      status: "qaytarildi",
+      status: "",
       akt_file: null,
       ilovalar: null,
     });
@@ -109,97 +118,91 @@ export default function Coming_Application_Details_Work_Pogress({ data }) {
         return (
           <div
             key={step.id}
-            className={`flex ${isMe ? "justify-end" : "justify-start"}`}
+            className={`flex w-full px-3 mb-2 ${
+              isMe ? "justify-end" : "justify-start"
+            }`}
           >
             <div
-              className={`relative max-w-[75%] p-3 rounded-2xl shadow-md
-              ${
-                isMe
-                  ? "bg-blue-500 text-white rounded-br-none"
-                  : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-bl-none"
-              }`}
+              className={`
+        relative max-w-[78%] px-4 py-2 rounded-2xl text-sm shadow-sm
+        ${
+          isMe
+            ? "bg-primary text-primary-foreground rounded-br-md"
+            : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded-bl-md border"
+        }
+      `}
             >
-              <div className="flex justify-between gap-5 items-center mb-5 text-[10px]">
-                {!isMe && (
-                  <span className="font-semibold">{step.created_by}</span>
-                )}
-                <span className={isMe ? "text-white" : "dark:text-gray-300"}>
-                  {formattedDate}
-                </span>
-                {isMe && <span className="font-semibold ">Men</span>}
-              </div>
+              {/* Sender */}
+              {!isMe && (
+                <p className="text-[12px] font-semibold text-primary mb-1">
+                  {step.created_by}
+                </p>
+              )}
 
-              {/* COMMENT */}
-              <p className="text-sm mb-2 break-words">{step.comment}</p>
+              {/* TEXT */}
+              {step.comment && (
+                <p className="whitespace-pre-wrap break-words leading-relaxed">
+                  {step.comment}
+                </p>
+              )}
 
-              {/* PHOTOS */}
-              {step.rasmlar?.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-2">
+              {/* IMAGES */}
+              {!!step.rasmlar?.length && (
+                <div className="mt-2 grid grid-cols-2 gap-2">
                   {step.rasmlar.map((url, idx) => (
                     <div key={idx} className="relative group">
                       <img
                         src={url}
-                        alt={`img-${idx}`}
-                        className="w-24 h-24 object-cover rounded-lg cursor-pointer transition transform "
+                        alt=""
+                        className="rounded-xl object-cover w-full max-h-52 cursor-pointer transition hover:opacity-90"
                         onClick={() => window.open(url, "_blank")}
                       />
-                      <Button
+                      <button
                         onClick={() =>
                           handleDownloadFile(url, `image-${idx}.jpg`)
                         }
-                        className="absolute bottom-1 right-1 p-1 rounded-full shadow opacity-0 group-hover:opacity-100 transition"
+                        className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition"
                       >
-                        <CloudDownload className="w-4 h-4" />
-                      </Button>
+                        ⬇
+                      </button>
                     </div>
                   ))}
                 </div>
               )}
 
-              {step.bildirgi && (
-                <div className="mt-1">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="rounded-full flex items-center gap-1 px-3 py-1"
-                    onClick={() =>
-                      handleDownloadFile(step.bildirgi, "bildirgi.pdf")
-                    }
+              {/* FILES */}
+              {["bildirgi", "ilovalar", "akt_file"]
+                .map((key) => step[key])
+                .filter(Boolean)
+                .map((file, i) => (
+                  <div
+                    key={i}
+                    onClick={() => handleDownloadFile(file, `file-${i}.pdf`)}
+                    className={`
+              mt-2 flex items-center gap-3 p-3 rounded-xl cursor-pointer transition
+              ${
+                isMe
+                  ? "bg-primary-foreground/20 hover:bg-primary-foreground/30"
+                  : "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+              }
+            `}
                   >
-                    <CloudDownload className="w-4 h-4" /> Bildirgi
-                  </Button>
-                </div>
-              )}
+                    <div className="text-lg">📄</div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">PDF File</p>
+                      <p className="text-[11px] opacity-60">Tap to download</p>
+                    </div>
+                  </div>
+                ))}
 
-              {step.ilovalar && (
-                <div className="mt-1">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="rounded-full flex items-center gap-1 px-3 py-1 bg-"
-                    onClick={() =>
-                      handleDownloadFile(step.ilovalar, "ilova.pdf")
-                    }
-                  >
-                    <CloudDownload className="w-4 h-4" /> Ilova
-                  </Button>
-                </div>
-              )}
-
-              {step.akt_file && (
-                <div className="mt-1">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="rounded-full flex items-center gap-1 px-3 py-1 bg-"
-                    onClick={() =>
-                      handleDownloadFile(step.akt_file, "ilova.pdf")
-                    }
-                  >
-                    <CloudDownload className="w-4 h-4" /> Akt
-                  </Button>
-                </div>
-              )}
+              {/* TIME */}
+              <div
+                className={`text-[10px] mt-1 text-right opacity-70 ${
+                  isMe ? "text-primary-foreground" : "text-zinc-400"
+                }`}
+              >
+                {formattedDate}
+              </div>
             </div>
           </div>
         );
@@ -208,16 +211,31 @@ export default function Coming_Application_Details_Work_Pogress({ data }) {
       {/* ADD NEW STEP */}
       <div className="mt-4 border-t border-border/30 pt-4 space-y-3">
         <div className="flex flex-col justify-center items-start gap-4">
-          <SegmentedButtonGroup
-            options={statusOptions}
-            value={form.status}
-            onChange={(value) =>
-              setForm((prev) => ({
-                ...prev,
-                status: value,
-              }))
-            }
-          />
+          {data?.status == "tasdiqlanmoqda" || data?.status == "rad_etildi" ? (
+            <SegmentedButtonGroup
+              options={statusOptions1}
+              value={form.status}
+              onChange={() =>
+                setForm((prev) => ({
+                  ...prev,
+                  status: "tasdiqlanmoqda",
+                }))
+              }
+            />
+          ) : (
+            <SegmentedButtonGroup
+              options={
+                data?.status == "bajarilmoqda" ? statusOptions3 : statusOptions
+              }
+              value={form.status}
+              onChange={(value) =>
+                setForm((prev) => ({
+                  ...prev,
+                  status: value,
+                }))
+              }
+            />
+          )}
         </div>
 
         <Textarea
@@ -227,7 +245,7 @@ export default function Coming_Application_Details_Work_Pogress({ data }) {
           className="w-full h-28 p-2 border border-border rounded-2xl text-sm "
         />
 
-        {form.status == "bajarilgan" ? (
+        {form.status == "tasdiqlanmoqda" ? (
           <Button
             onClick={() => {
               setOpenShet(true);

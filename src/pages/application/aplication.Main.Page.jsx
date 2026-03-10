@@ -214,13 +214,13 @@ export default function ApplicationMainPage({ id }) {
               </div>
               {/* Actions Dropdown */}
               <Button size="sm" onClick={() => setShowFileModal(true)}>
-                Bildirgi fayli <DownloadCloud className="ml-1" size={17} />
+                Bildirgi fayli <DownloadCloud className="ml-1" size={15} />
               </Button>
               {data?.ijro_muddati ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button size="sm">
-                      <MoreHorizontal className="w-5 h-5" />
+                      <MoreHorizontal size={15} />
                     </Button>
                   </DropdownMenuTrigger>
 

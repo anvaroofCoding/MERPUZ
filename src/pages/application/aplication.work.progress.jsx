@@ -1,16 +1,14 @@
 import { Button } from "@/components/ui/button";
-import { useAddAplicationsStepsMutation, useMEQuery } from "@/services/api";
 import {
-  CloudDownload,
-  Eye,
-  EyeOff,
-  Plus,
-  Send,
-  Upload,
-  X,
-} from "lucide-react";
+  useAddAplicationsStepsBajarildiMutation,
+  useAddAplicationsStepsMutation,
+  useMEQuery,
+} from "@/services/api";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Eye, EyeOff, Plus, Send, Upload, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
 
 export default function AplicationWorkChat({ data }) {
   const { data: me } = useMEQuery();
@@ -19,10 +17,14 @@ export default function AplicationWorkChat({ data }) {
     parol: "",
     photos: [],
     bildirgi: null,
+    status: "",
   });
+
+  console.log(form);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [AddAplicationsSteps] = useAddAplicationsStepsMutation();
+  const [addAplicationBajarildi] = useAddAplicationsStepsBajarildiMutation();
 
   const isFormComplete = () =>
     form.comment.trim() !== "" || form.photos.length > 0 || form.bildirgi;
@@ -30,6 +32,13 @@ export default function AplicationWorkChat({ data }) {
   const handlePhotoUpload = (e) => {
     const files = Array.from(e.target.files);
     setForm((prev) => ({ ...prev, photos: [...prev.photos, ...files] }));
+  };
+
+  const removeBildirgi = () => {
+    setForm((prev) => ({
+      ...prev,
+      bildirgi: null,
+    }));
   };
 
   const handleBildirgiUpload = (e) => {
@@ -45,6 +54,9 @@ export default function AplicationWorkChat({ data }) {
 
   const submitForm = async () => {
     const fd = new FormData();
+    if (data?.status == "tasdiqlanmoqda") {
+      fd.append("holat", form.status);
+    }
     fd.append("comment", form.comment);
     fd.append("parol", form.parol);
     fd.append("qayta_yuklandi", true);
@@ -61,25 +73,41 @@ export default function AplicationWorkChat({ data }) {
     setShowVerificationModal(false);
   };
 
-  const handleDownloadFile = async (url, filename = "file") => {
-    try {
-      const res = await fetch(url);
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(blobUrl);
-    } catch (err) {
-      console.error(err);
+  const submitForm2 = async () => {
+    const fd = new FormData();
+    if (data?.status == "tasdiqlanmoqda") {
+      fd.append("holat", form.status);
     }
+    fd.append("comment", form.comment);
+    fd.append("parol", form.parol);
+    fd.append("ariza", data?.id);
+    form.photos.forEach((p) => fd.append("photos", p));
+    if (form.bildirgi) fd.append("akt_file", form.bildirgi);
+
+    await toast.promise(addAplicationBajarildi({ body: fd }).unwrap(), {
+      loading: "Yuborilmoqda...",
+      success: "Yuborildi!",
+      error: "Xatolik!",
+    });
+
+    setForm({ comment: "", parol: "", photos: [], bildirgi: null, status: "" });
+    setShowVerificationModal(false);
+  };
+  const handleDownloadFile = (fileUrl, fileName = "file.pdf") => {
+    if (!fileUrl) return;
+
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.download = fileName;
+    link.target = "_blank";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
-    <div className="flex flex-col gap-3 w-full mx-auto px-2">
+    <div className="flex flex-col gap-3 w-full mx-auto">
       {/* CHAT MESSAGES */}
       {data?.steplar?.map((step) => {
         const d = new Date(step.sana);
@@ -106,115 +134,165 @@ export default function AplicationWorkChat({ data }) {
         return (
           <div
             key={step.id}
-            className={`flex ${isMe ? "justify-end" : "justify-start"}`}
+            className={`flex w-full mb-2 ${
+              isMe ? "justify-end" : "justify-start"
+            }`}
           >
             <div
-              className={`relative max-w-[75%]  p-3 rounded-2xl shadow-md
-              ${
-                isMe
-                  ? "bg-blue-500 text-white rounded-br-none"
-                  : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-bl-none"
-              }`}
+              className={`
+        relative max-w-[78%] px-4 py-2 rounded-2xl text-sm shadow-sm
+        ${
+          isMe
+            ? "bg-primary text-primary-foreground rounded-br-md"
+            : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded-bl-md border"
+        }
+      `}
             >
-              <div className="flex justify-between gap-5 mb-5 items-center mb-1 text-[10px]">
-                {!isMe && (
-                  <span className="font-semibold">{step.created_by}</span>
-                )}
-                <span className={isMe ? "text-white " : "dark:text-gray-300"}>
-                  {formattedDate}
-                </span>
-                {isMe && <span className="font-semibold ">Men</span>}
-              </div>
+              {/* Sender */}
+              {!isMe && (
+                <p className="text-[12px] font-semibold text-primary mb-1">
+                  {step.created_by}
+                </p>
+              )}
 
-              {/* COMMENT */}
-              <p className="text-sm mb-2 break-words">{step.comment}</p>
+              {/* TEXT */}
+              {step.comment && (
+                <p className="whitespace-pre-wrap break-words leading-relaxed">
+                  {step.comment}
+                </p>
+              )}
 
-              {/* PHOTOS */}
-              {step.rasmlar?.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-2">
+              {/* IMAGES */}
+              {!!step.rasmlar?.length && (
+                <div className="mt-2 grid grid-cols-2 gap-2">
                   {step.rasmlar.map((url, idx) => (
                     <div key={idx} className="relative group">
                       <img
                         src={url}
-                        alt={`img-${idx}`}
-                        className="w-24 h-24 object-cover rounded-lg cursor-pointer transition transform hover:scale-105"
+                        alt=""
+                        className="rounded-xl object-cover w-full max-h-52 cursor-pointer transition hover:opacity-90"
                         onClick={() => window.open(url, "_blank")}
                       />
-                      <Button
-                        variant="ghost"
+                      <button
                         onClick={() =>
                           handleDownloadFile(url, `image-${idx}.jpg`)
                         }
-                        className="absolute bottom-1 right-1 bg-white rounded-full shadow opacity-0 group-hover:opacity-100 transition px-1 py-0"
+                        className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition"
                       >
-                        <CloudDownload
-                          className="w-4 h-4 text-black"
-                          size={11}
-                        />
-                      </Button>
+                        ⬇
+                      </button>
                     </div>
                   ))}
                 </div>
               )}
 
-              {/* FILES */}
-              {step.bildirgi && (
-                <div className="mt-1">
-                  <Button
-                    size="sm"
-                    variant="solid"
-                    className="rounded-full flex items-center gap-1 px-3 py-1"
-                    onClick={() =>
-                      handleDownloadFile(step.bildirgi, "bildirgi.pdf")
-                    }
+              {["bildirgi", "ilovalar", "akt_file"]
+                .map((key) => step[key])
+                .filter(Boolean)
+                .map((file, i) => (
+                  <div
+                    key={i}
+                    onClick={() => handleDownloadFile(file, `file-${i}.pdf`)}
+                    className={`
+        mt-2 flex items-center gap-3 p-3 rounded-xl cursor-pointer transition
+        ${
+          isMe
+            ? "bg-primary-foreground/20 hover:bg-primary-foreground/30"
+            : "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+        }
+      `}
                   >
-                    <CloudDownload className="w-4 h-4" /> Bildirgi
-                  </Button>
-                </div>
-              )}
+                    <div className="text-lg">📄</div>
 
-              {step.ilovalar && (
-                <div className="mt-1">
-                  <Button
-                    size="sm"
-                    variant="solid"
-                    className="rounded-full flex items-center gap-1 px-3 py-1"
-                    onClick={() =>
-                      handleDownloadFile(step.ilovalar, "ilova.pdf")
-                    }
-                  >
-                    <CloudDownload className="w-4 h-4" /> Ilova
-                  </Button>
-                </div>
-              )}
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">PDF File</p>
+                      <p className="text-[11px] opacity-60">Tap to download</p>
+                    </div>
+                  </div>
+                ))}
 
-              {step.akt_file && (
-                <div className="mt-1">
-                  <Button
-                    size="sm"
-                    variant="solid"
-                    className="rounded-full flex items-center gap-1 px-3 py-1"
-                    onClick={() =>
-                      handleDownloadFile(step.akt_file, "ilova.pdf")
-                    }
-                  >
-                    <CloudDownload className="w-4 h-4" /> Akt
-                  </Button>
-                </div>
-              )}
+              {/* TIME */}
+              <div
+                className={`text-[10px] mt-1 text-right opacity-70 ${
+                  isMe ? "text-primary-foreground" : "text-zinc-400"
+                }`}
+              >
+                {formattedDate}
+              </div>
             </div>
           </div>
         );
       })}
 
       {/* ADD NEW STEP */}
-      <div className="mt-4 border-t border-border/30 pt-4 space-y-3">
-        <div className="flex flex-wrap gap-2">
-          <label className="flex items-center justify-center w-20 h-20 border-2 border-dashed border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100">
-            <div className="flex flex-col items-center gap-1">
-              <Plus className="w-5 h-5 text-blue-600" />
-              <span className="text-xs text-blue-600">Qo'sh</span>
-            </div>
+      <div className="border-t border-border/30 pt-3 space-y-3">
+        {data?.status == "tasdiqlanmoqda" ? (
+          <div className="w-full h-10">
+            <RadioGroup
+              value={form.status} // form.status bilan bog'laymiz
+              onValueChange={(val) => setForm({ ...form, status: val })}
+              className="flex items-center h-full gap-5"
+            >
+              <div className="flex items-center gap-2">
+                <RadioGroupItem value="bajarilgan" id="option-one" />
+                <Label htmlFor="option-one">Bajarildi</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <RadioGroupItem value="rad_etildi" id="option-two" />
+                <Label htmlFor="option-two">Rad etildi</Label>
+              </div>
+            </RadioGroup>
+          </div>
+        ) : (
+          ""
+        )}
+
+        {/* Photos preview */}
+        {form.photos.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {form.photos.map((p, i) => (
+              <div
+                key={i}
+                className="relative w-16 h-16 rounded-lg overflow-hidden"
+              >
+                <img
+                  src={URL.createObjectURL(p)}
+                  alt={`preview-${i}`}
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => removePhoto(i)}
+                  className="absolute top-0 right-0 bg-black/60 text-white w-5 h-5 flex items-center justify-center rounded-bl-md"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* File preview */}
+        {form.bildirgi && (
+          <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-xl text-sm">
+            <span className="flex items-center gap-2 truncate">
+              📎 {form.bildirgi.name}
+            </span>
+            <button
+              type="button"
+              onClick={removeBildirgi}
+              className="text-red-500 hover:text-red-600"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Input area */}
+        <div className="flex items-center gap-2 bg-muted/20 p-2 rounded-2xl border border-border/20">
+          {/* Photo upload */}
+          <label className="cursor-pointer flex items-center justify-center p-2 rounded-xl hover:bg-muted/50 transition bg-muted">
+            <Plus className="w-5 h-5 text-muted-foreground" />
             <input
               type="file"
               accept="image/*"
@@ -223,57 +301,41 @@ export default function AplicationWorkChat({ data }) {
               onChange={handlePhotoUpload}
             />
           </label>
-          {form.photos.map((p, i) => (
-            <div
-              key={i}
-              className="relative w-20 h-20 rounded-lg overflow- shadow-sm"
-            >
-              <img
-                src={URL.createObjectURL(p)}
-                alt={`preview-${i}`}
-                className="w-full h-full object-cover rounded-lg"
-              />
-              <button
-                type="button"
-                onClick={() => removePhoto(i)}
-                className="absolute -top-2 -right-2 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          ))}
-        </div>
 
-        <label className="flex items-center gap-2 px-3 py-2 border-2 border-dashed border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100">
-          <Upload size={16} className="text-blue-600" />{" "}
-          <span className="text-sm text-blue-600">Fayl yuklash</span>
-          <input
-            type="file"
-            className="hidden"
-            onChange={handleBildirgiUpload}
+          {/* File upload */}
+          <label className="cursor-pointer flex items-center justify-center p-2 rounded-xl hover:bg-muted/50 bg-muted transition">
+            <Upload className="w-5 h-5 text-muted-foreground" />
+            <input
+              type="file"
+              className="hidden"
+              onChange={handleBildirgiUpload}
+            />
+          </label>
+
+          {/* Textarea */}
+          <textarea
+            placeholder="Xabar yozing..."
+            value={form.comment}
+            onChange={(e) => setForm({ ...form, comment: e.target.value })}
+            className="flex-1 bg-transparent resize-none outline-none text-sm px-2 py-1 rounded-xl h-10 placeholder:text-muted-foreground"
+            rows={1}
           />
-        </label>
-        {form.bildirgi && (
-          <span className="text-xs text-green-600">{form.bildirgi.name}</span>
-        )}
 
-        <textarea
-          placeholder="Komment yozing..."
-          value={form.comment}
-          onChange={(e) => setForm({ ...form, comment: e.target.value })}
-          className="w-full h-28 p-2 border border-border rounded-2xl text-sm resize-none"
-        />
-
-        <Button
-          disabled={
-            !isFormComplete() ||
-            (data?.status !== "jarayonda" && data?.status !== "qaytarildi")
-          }
-          onClick={() => setShowVerificationModal(true)}
-          className="flex items-center justify-center gap-2"
-        >
-          <Send className="w-4 h-4" /> Yuborish
-        </Button>
+          {/* Send button */}
+          <Button
+            disabled={
+              !isFormComplete() ||
+              (data?.status !== "jarayonda" &&
+                data?.status !== "qaytarildi" &&
+                data?.status !== "tasdiqlanmoqda")
+            }
+            onClick={() => setShowVerificationModal(true)}
+            className="rounded-full h-10 w-10 p-0 flex items-center justify-center"
+            variant="default"
+          >
+            <Send className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
       {/* PASSWORD MODAL */}
@@ -305,7 +367,12 @@ export default function AplicationWorkChat({ data }) {
               >
                 Bekor qilish
               </Button>
-              <Button className="flex-1" onClick={submitForm}>
+              <Button
+                className="flex-1"
+                onClick={
+                  data?.status == "tasdiqlanmoqda" ? submitForm2 : submitForm
+                }
+              >
                 Tasdiqlash
               </Button>
             </div>

@@ -26,15 +26,14 @@ export default function ApplicationDetailPage() {
   const statusTabs = [
     { label: "Hammasi", value: "all" },
     { label: "Jarayonda", value: "jarayonda" },
-    { label: "Qabul qilindi", value: "qabul_qilindi" },
+    { label: "Bajarilmoqda", value: "bajarilmoqda" },
+    { label: "Tasdiqlamoqda", value: "tasdiqlanmoqda" },
     { label: "Bajarilgan", value: "bajarilgan" },
     { label: "Qaytarilgan", value: "qaytarildi" },
+    { label: "Rad etildi", value: "rad_etildi" },
   ];
   const statusVariantMap = {
     bajarilgan: "success",
-    qaytarildi: "destructive",
-    "qabul qilindi": "default",
-    jarayonda: "warning",
   };
   useEffect(() => {});
   return (
@@ -68,7 +67,7 @@ export default function ApplicationDetailPage() {
             <Tabs
               value={selectedTab}
               onValueChange={(val) => setSelectedTab(val)}
-              className="w-full"
+              className="w-190"
             >
               <TabsList className="w-full justify-start">
                 {statusTabs.map((tab) => (

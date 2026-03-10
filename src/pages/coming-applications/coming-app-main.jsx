@@ -31,9 +31,6 @@ import { useState } from "react";
 import Coming_Application_Details_Work_Pogress from "./coming-application-work-prosess";
 const statusVariantMap = {
   bajarilgan: "success",
-  qaytarildi: "destructive",
-  "qabul qilindi": "default",
-  jarayonda: "warning",
 };
 
 export default function Application_details_Main({ id }) {

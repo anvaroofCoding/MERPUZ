@@ -81,7 +81,6 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { DoubleSide } from "three";
 
 export default function Applications() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -114,24 +113,6 @@ export default function Applications() {
       turi: "",
       ijro_muddati: null,
       qayta_yuklandi: true,
-    });
-  };
-  const handleTuzilmaSelect = (value) => {
-    setForm((prev) => {
-      const exists = prev.targets?.find((item) => item.tuzilma === value);
-
-      if (exists) return prev;
-
-      return {
-        ...prev,
-        targets: [
-          ...prev.targets,
-          {
-            tuzilma: value,
-            extra_comment: "",
-          },
-        ],
-      };
     });
   };
 
