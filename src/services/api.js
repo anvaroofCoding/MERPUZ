@@ -508,9 +508,48 @@ export const api = createApi({
 			}),
 			invalidatesTags: ['MainTag'],
 		}),
+		xarid_tastiqlash: builder.query({
+			query: ({
+				page = 1,
+				limit = 50,
+				search = '',
+				status = '',
+				tuzilma_nomi = '',
+			}) => ({
+				url: '/xarid-kelganlar/',
+				params: { page, limit, search, status, tuzilma_nomi },
+			}),
+			providesTags: ['XaridTastiqlash'],
+			// total_pages ni ajratib olish (agar backend meta ichida yuborsa):
+			transformResponse: response => {
+				const total_pages = response.count ? Math.ceil(response.count / 50) : 1
+				return { ...response, total_pages }
+			},
+		}),
+		xarid_tastiqlash_post: builder.mutation({
+			query: ({ id, body }) => ({
+				url: `/xarid-kelganlar/${id}/qaror_qabul_qilish/`,
+				method: 'POST',
+				body,
+			}),
+			// Listni avtomatik yangilash uchun:
+			invalidatesTags: ['XaridTastiqlash'],
+		}),
+		xarid_tastiqlash_put: builder.mutation({
+			query: ({ id, body }) => ({
+				url: `/xarid-ariza/${id}/`,
+				method: 'PUT',
+				body,
+			}),
+			// Listni avtomatik yangilash uchun:
+			invalidatesTags: ['XaridTastiqlash'],
+		}),
 	}),
 })
 export const {
+	useXarid_tastiqlash_putMutation,
+	useXarid_tastiqlash_postMutation,
+	useXarid_tastiqlashQuery,
 	useXarid_postMutation,
 	useXaridQuery,
 	useKelganQuery,

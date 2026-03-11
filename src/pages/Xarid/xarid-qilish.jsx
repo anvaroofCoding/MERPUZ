@@ -48,6 +48,7 @@ import {
 	Filter,
 	Handshake,
 	Loader2,
+	MessageSquare,
 	Plus,
 	Search,
 	Send,
@@ -55,11 +56,12 @@ import {
 	X,
 	XCircle,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 
-// ─── STATUS CONFIG — faqat backend statuslari ─────────────────────────────────
+// ─── STATUS CONFIG ─────────────────────────────────────────────────────────────
 const statusConfig = {
 	yuborildi: {
 		label: 'Yuborildi',
@@ -93,14 +95,13 @@ const statusConfig = {
 // ─── STATUS BADGE ──────────────────────────────────────────────────────────────
 function StatusBadge({ status }) {
 	const config = statusConfig[status]
-	if (!config) {
+	if (!config)
 		return (
 			<span className='inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border bg-muted/50 text-muted-foreground border-border'>
 				<span className='w-1.5 h-1.5 rounded-full bg-muted-foreground' />
 				{status || "Noma'lum"}
 			</span>
 		)
-	}
 	const Icon = config.icon
 	return (
 		<span
@@ -115,80 +116,373 @@ function StatusBadge({ status }) {
 	)
 }
 
+// ─── COMMENT POPOVER ──────────────────────────────────────────────────────────
+function CommentPopover({ comment }) {
+	const [open, setOpen] = useState(false)
+	const [pos, setPos] = useState({ top: 0, left: 0 })
+	const triggerRef = useRef(null)
+
+	const handleClick = e => {
+		e.stopPropagation()
+		if (!open) {
+			const rect = triggerRef.current.getBoundingClientRect()
+			const popW = 280
+			let left = rect.left + rect.width / 2 - popW / 2
+			if (left < 8) left = 8
+			if (left + popW > window.innerWidth - 8)
+				left = window.innerWidth - popW - 8
+			setPos({ top: rect.bottom + 6, left })
+		}
+		setOpen(v => !v)
+	}
+
+	useEffect(() => {
+		if (!open) return
+		const close = e => {
+			if (triggerRef.current && !triggerRef.current.contains(e.target))
+				setOpen(false)
+		}
+		const onKey = e => e.key === 'Escape' && setOpen(false)
+		document.addEventListener('mousedown', close)
+		document.addEventListener('keydown', onKey)
+		return () => {
+			document.removeEventListener('mousedown', close)
+			document.removeEventListener('keydown', onKey)
+		}
+	}, [open])
+
+	if (!comment)
+		return <span className='text-muted-foreground/40 text-xs'>—</span>
+
+	const preview = comment.length > 40 ? comment.slice(0, 40) + '...' : comment
+
+	return (
+		<>
+			<button
+				ref={triggerRef}
+				onClick={handleClick}
+				className={cn(
+					'group flex items-start gap-1.5 text-left w-full cursor-pointer rounded-lg px-2 py-1.5 -mx-2 -my-1.5 transition-colors',
+					open
+						? 'bg-primary/8 text-foreground'
+						: 'hover:bg-muted/60 text-muted-foreground',
+				)}
+			>
+				<MessageSquare
+					className={cn(
+						'w-3.5 h-3.5 mt-0.5 flex-shrink-0 transition-colors',
+						open
+							? 'text-primary'
+							: 'text-muted-foreground/60 group-hover:text-muted-foreground',
+					)}
+				/>
+				<span className='text-xs leading-relaxed break-words'>{preview}</span>
+			</button>
+
+			{open &&
+				createPortal(
+					<div
+						className='fixed z-[99998] w-[280px]'
+						style={{ top: pos.top, left: pos.left }}
+						onClick={e => e.stopPropagation()}
+					>
+						<div className='absolute -top-[5px] left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-card border-t border-l border-border rotate-45' />
+						<div className='bg-card border border-border rounded-xl shadow-2xl overflow-hidden'>
+							<div className='flex items-center justify-between px-3.5 py-2.5 border-b border-border/60 bg-muted/30'>
+								<div className='flex items-center gap-1.5'>
+									<MessageSquare className='w-3.5 h-3.5 text-primary' />
+									<span className='text-xs font-semibold text-foreground'>
+										Izoh
+									</span>
+								</div>
+								<button
+									onClick={e => {
+										e.stopPropagation()
+										setOpen(false)
+									}}
+									className='w-5 h-5 rounded flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground'
+								>
+									<X className='w-3 h-3' />
+								</button>
+							</div>
+							<div className='px-3.5 py-3 max-h-48 overflow-y-auto'>
+								<p className='text-xs text-foreground/80 leading-relaxed whitespace-pre-wrap break-words'>
+									{comment}
+								</p>
+							</div>
+						</div>
+					</div>,
+					document.body,
+				)}
+		</>
+	)
+}
+
+// ─── STEP CHIP ─────────────────────────────────────────────────────────────────
+function StepChip({ status }) {
+	if (status === 'rad_etildi')
+		return (
+			<span className='inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500/15 border border-red-500/30 text-xs font-semibold text-red-600 dark:text-red-400 whitespace-nowrap'>
+				<XCircle className='w-3.5 h-3.5' /> Rad etildi
+			</span>
+		)
+	if (status === 'kelishildi' || status === 'tasdiqlandi')
+		return (
+			<span className='inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-xs font-semibold text-emerald-600 dark:text-emerald-400 whitespace-nowrap'>
+				<CheckCircle2 className='w-3.5 h-3.5' /> {statusConfig[status]?.label}
+			</span>
+		)
+	return (
+		<span className='inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-xs font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap'>
+			<Send className='w-3.5 h-3.5' /> Yuborildi
+		</span>
+	)
+}
+
+// ─── STEPS MODAL (portal) ─────────────────────────────────────────────────────
+function StepsModal({ steplar, total, doneCount, hasRad, pct, onClose }) {
+	useEffect(() => {
+		const h = e => e.key === 'Escape' && onClose()
+		window.addEventListener('keydown', h)
+		return () => window.removeEventListener('keydown', h)
+	}, [onClose])
+
+	return createPortal(
+		<div
+			className='fixed inset-0 z-[99999] flex items-center justify-center p-4'
+			onClick={onClose}
+		>
+			<div className='absolute inset-0 bg-black/50 backdrop-blur-sm' />
+			<div
+				className='relative bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden'
+				onClick={e => e.stopPropagation()}
+			>
+				{/* Header */}
+				<div className='flex items-center justify-between px-6 py-4 border-b border-border/60'>
+					<div>
+						<h3 className='text-base font-bold text-foreground'>
+							Bosqichlar holati
+						</h3>
+						<p className='text-xs text-muted-foreground mt-0.5'>
+							{doneCount} ta tasdiqlandi · {total} ta jami
+						</p>
+					</div>
+					<div className='flex items-center gap-2'>
+						{hasRad && (
+							<span className='inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-500/10 border border-red-500/25 text-xs font-bold text-red-600 dark:text-red-400'>
+								<XCircle className='w-3.5 h-3.5' /> Rad bor
+							</span>
+						)}
+						<button
+							onClick={onClose}
+							className='w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center transition-colors text-muted-foreground hover:text-foreground'
+						>
+							<X className='w-4 h-4' />
+						</button>
+					</div>
+				</div>
+
+				{/* Progress */}
+				<div className='px-6 py-3 bg-muted/30 border-b border-border/40 flex items-center gap-3'>
+					<div className='flex-1 h-2 bg-muted rounded-full overflow-hidden'>
+						<div
+							className={cn(
+								'h-full rounded-full transition-all duration-700',
+								hasRad
+									? 'bg-red-500'
+									: pct === 100
+										? 'bg-emerald-500'
+										: 'bg-primary',
+							)}
+							style={{ width: `${hasRad ? 100 : pct}%` }}
+						/>
+					</div>
+					<span className='text-sm font-bold tabular-nums text-muted-foreground'>
+						{hasRad ? '—' : `${pct}%`}
+					</span>
+				</div>
+
+				{/* Steps */}
+				<div className='overflow-y-auto max-h-[60vh]'>
+					{steplar.length === 0 ? (
+						<div className='px-6 py-10 text-center text-sm text-muted-foreground'>
+							Hali hech kim qaror qabul qilmagan
+						</div>
+					) : (
+						steplar.map((s, i) => {
+							const isDone =
+								s.status === 'kelishildi' || s.status === 'tasdiqlandi'
+							const isRad = s.status === 'rad_etildi'
+							return (
+								<div
+									key={s.id ?? i}
+									className={cn(
+										'flex gap-4 px-6 py-4',
+										i < steplar.length - 1 && 'border-b border-border/40',
+										isRad && 'bg-red-500/5',
+										isDone && 'bg-emerald-500/5',
+									)}
+								>
+									<div className='flex flex-col items-center gap-1 flex-shrink-0 pt-0.5'>
+										<div
+											className={cn(
+												'w-9 h-9 rounded-full flex items-center justify-center ring-2 ring-background shadow-sm',
+												isDone
+													? 'bg-emerald-500 text-white'
+													: isRad
+														? 'bg-red-500 text-white'
+														: 'bg-muted text-muted-foreground border border-border',
+											)}
+										>
+											{isDone ? (
+												<CheckCircle2 className='w-4 h-4' />
+											) : isRad ? (
+												<XCircle className='w-4 h-4' />
+											) : (
+												<span className='text-xs font-bold'>{i + 1}</span>
+											)}
+										</div>
+										{i < steplar.length - 1 && (
+											<div
+												className={cn(
+													'w-0.5 flex-1 min-h-[12px] rounded-full',
+													isDone
+														? 'bg-emerald-500/40'
+														: isRad
+															? 'bg-red-500/40'
+															: 'bg-border/60',
+												)}
+											/>
+										)}
+									</div>
+									<div className='flex-1 min-w-0'>
+										<div className='flex items-start justify-between gap-2 flex-wrap'>
+											<div>
+												<p className='text-sm font-bold text-foreground'>
+													{s.tuzilma_nomi}
+												</p>
+												<p className='text-xs text-muted-foreground'>
+													{s.user_nomi}
+												</p>
+											</div>
+											<StepChip status={s.status} />
+										</div>
+										{s.comment && (
+											<div className='mt-2 px-3 py-2 rounded-xl bg-muted/60 border border-border/40'>
+												<p className='text-xs text-foreground/80 leading-relaxed whitespace-pre-wrap break-words'>
+													{s.comment}
+												</p>
+											</div>
+										)}
+										{s.sana && (
+											<p className='text-[10px] text-muted-foreground/60 mt-2'>
+												{format(parseISO(s.sana), 'dd MMMM yyyy, HH:mm', {
+													locale: uz,
+												})}
+											</p>
+										)}
+									</div>
+								</div>
+							)
+						})
+					)}
+				</div>
+
+				<div className='px-6 py-3 border-t border-border/40 bg-muted/20 flex justify-end'>
+					<Button
+						size='sm'
+						variant='outline'
+						onClick={onClose}
+						className='h-8 text-xs px-4'
+					>
+						Yopish
+					</Button>
+				</div>
+			</div>
+		</div>,
+		document.body,
+	)
+}
+
 // ─── STEP PROGRESS ─────────────────────────────────────────────────────────────
-// step.status: yuborildi | kelishildi | tasdiqlandi | rad_etildi
 function StepProgress({ steplar = [], tuzilma = [] }) {
-	const tuzimaLength = tuzilma.length
-	const total = tuzimaLength || steplar.length
-
+	const [open, setOpen] = useState(false)
+	const total = tuzilma.length || steplar.length
 	const hasRad = steplar.some(s => s.status === 'rad_etildi')
-
 	const doneCount = steplar.filter(
 		s => s.status === 'kelishildi' || s.status === 'tasdiqlandi',
 	).length
-
 	const pct = total ? Math.round((doneCount / total) * 100) : 0
-
-	const dotStyle = s => {
+	const dotColor = s => {
 		if (s.status === 'tasdiqlandi' || s.status === 'kelishildi')
-			return 'bg-emerald-500 ring-emerald-500/30'
-		if (s.status === 'rad_etildi') return 'bg-red-500 ring-red-500/30'
-		return 'bg-muted border border-border ring-border/20'
+			return 'bg-emerald-500'
+		if (s.status === 'rad_etildi') return 'bg-red-500'
+		return 'bg-muted border border-border'
 	}
 
 	if (!steplar.length)
 		return (
-			<div className='flex items-center gap-2'>
-				<div className='flex-1 h-1.5 bg-muted rounded-full overflow-hidden'>
-					<div
-						className={cn(
-							'h-full rounded-full transition-all duration-500',
-							hasRad
-								? 'bg-red-500'
-								: pct === 100
-									? 'bg-emerald-500'
-									: 'bg-primary',
-						)}
-						style={{ width: `${hasRad ? 100 : pct}%` }}
+			<>
+				<button
+					onClick={e => {
+						e.stopPropagation()
+						setOpen(true)
+					}}
+					className='flex items-center gap-2 hover:opacity-70 transition-opacity cursor-pointer'
+				>
+					<div className='h-1.5 bg-muted rounded-full w-16' />
+					<span className='text-[10px] font-semibold tabular-nums text-muted-foreground'>
+						0/{total}
+					</span>
+				</button>
+				{open && (
+					<StepsModal
+						steplar={[]}
+						total={total}
+						doneCount={0}
+						hasRad={false}
+						pct={0}
+						onClose={() => setOpen(false)}
 					/>
-				</div>
-				<span className='text-[10px] font-semibold tabular-nums text-muted-foreground whitespace-nowrap'>
-					{doneCount}/{total}
-				</span>
-			</div>
+				)}
+			</>
 		)
 
 	return (
-		<div className='flex flex-col gap-1.5 min-w-[110px]'>
-			{/* Bar + raqam */}
-			<div className='flex items-center gap-2'>
-				<div className='flex-1 h-1.5 bg-muted rounded-full overflow-hidden'>
-					<div
-						className={cn(
-							'h-full rounded-full transition-all duration-500',
-							hasRad
-								? 'bg-red-500'
-								: pct === 100
-									? 'bg-emerald-500'
-									: 'bg-primary',
-						)}
-						style={{ width: `${hasRad ? 100 : pct}%` }}
-					/>
-				</div>
-				<span className='text-[10px] font-semibold tabular-nums text-muted-foreground whitespace-nowrap'>
-					{doneCount}/{total}
-				</span>
-			</div>
-
-			{/* Dot-lar */}
-			<div className='flex items-center gap-1'>
-				{steplar.map((s, i) => (
-					<div key={s.id ?? i} className='relative group/dot'>
-						{/* Dot */}
+		<>
+			<button
+				onClick={e => {
+					e.stopPropagation()
+					setOpen(true)
+				}}
+				className='flex flex-col gap-1.5 min-w-[100px] text-left group/prog cursor-pointer hover:opacity-80 transition-opacity'
+				title="Bosqichlarni ko'rish"
+			>
+				<div className='flex items-center gap-2'>
+					<div className='flex-1 h-1.5 bg-muted rounded-full overflow-hidden'>
 						<div
 							className={cn(
-								'w-5 h-5 rounded-full flex items-center justify-center ring-2 ring-background transition-all duration-150 group-hover/dot:scale-110',
-								dotStyle(s),
+								'h-full rounded-full transition-all duration-500',
+								hasRad
+									? 'bg-red-500'
+									: pct === 100
+										? 'bg-emerald-500'
+										: 'bg-primary',
+							)}
+							style={{ width: `${hasRad ? 100 : pct}%` }}
+						/>
+					</div>
+					<span className='text-[10px] font-semibold tabular-nums text-muted-foreground whitespace-nowrap'>
+						{doneCount}/{total}
+					</span>
+				</div>
+				<div className='flex items-center gap-1'>
+					{steplar.map((s, i) => (
+						<div
+							key={s.id ?? i}
+							className={cn(
+								'w-5 h-5 rounded-full flex items-center justify-center ring-2 ring-background transition-transform group-hover/prog:scale-110',
+								dotColor(s),
 							)}
 						>
 							{(s.status === 'kelishildi' || s.status === 'tasdiqlandi') && (
@@ -198,79 +492,31 @@ function StepProgress({ steplar = [], tuzilma = [] }) {
 								<XCircle className='w-3 h-3 text-white' />
 							)}
 						</div>
-
-						{/* Hover tooltip — yuqoriga chiqadi */}
-						<div className='absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 z-50 pointer-events-none opacity-0 group-hover/dot:opacity-100 transition-opacity duration-150'>
-							<div className='bg-popover border border-border rounded-xl shadow-xl px-3 py-2.5 text-left w-max max-w-[200px]'>
-								{/* Tuzilma + user */}
-								<p className='text-[12px] font-bold text-foreground leading-tight'>
-									{s.tuzilma_nomi}
-								</p>
-								<p className='text-[10px] text-muted-foreground mt-0.5'>
-									{s.user_nomi}
-								</p>
-
-								{/* Comment */}
-								{s.comment && (
-									<p className='text-[10px] text-foreground/70 mt-1.5 leading-relaxed line-clamp-3 border-t border-border/40 pt-1.5'>
-										{s.comment}
-									</p>
-								)}
-
-								{/* Status chip */}
-								<div className='mt-2 flex items-center gap-1'>
-									{s.status === 'rad_etildi' && (
-										<span className='inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/15 border border-red-500/30 text-[10px] font-semibold text-red-600 dark:text-red-400'>
-											<XCircle className='w-2.5 h-2.5' />
-											Rad etildi
-										</span>
-									)}
-									{(s.status === 'kelishildi' ||
-										s.status === 'tasdiqlandi') && (
-										<span className='inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400'>
-											<CheckCircle2 className='w-2.5 h-2.5' />
-											{statusConfig[s.status]?.label}
-										</span>
-									)}
-									{s.status === 'yuborildi' && (
-										<span className='inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/15 border border-blue-500/30 text-[10px] font-semibold text-blue-600 dark:text-blue-400'>
-											<Send className='w-2.5 h-2.5' />
-											Yuborildi
-										</span>
-									)}
-								</div>
-
-								{/* Sana */}
-								{s.sana && (
-									<p className='text-[9px] text-muted-foreground/60 mt-1.5'>
-										{format(parseISO(s.sana), 'dd MMM yyyy, HH:mm', {
-											locale: uz,
-										})}
-									</p>
-								)}
-
-								{/* Arrow */}
-								<div className='absolute top-full left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-popover border-b border-r border-border rotate-45 -mt-[5px]' />
-							</div>
-						</div>
-					</div>
-				))}
-
-				{/* Rad etildi warning chip — dots yonida */}
-				{hasRad && (
-					<span className='inline-flex items-center gap-1 ml-1 px-1.5 py-0.5 rounded-md bg-red-500/10 border border-red-500/25 text-[9px] font-bold text-red-600 dark:text-red-400 whitespace-nowrap'>
-						<XCircle className='w-2.5 h-2.5' />
-						Rad
-					</span>
-				)}
-			</div>
-		</div>
+					))}
+					{hasRad && (
+						<span className='inline-flex items-center gap-1 ml-1 px-1.5 py-0.5 rounded-md bg-red-500/10 border border-red-500/25 text-[9px] font-bold text-red-600 dark:text-red-400'>
+							<XCircle className='w-2.5 h-2.5' /> Rad
+						</span>
+					)}
+				</div>
+			</button>
+			{open && (
+				<StepsModal
+					steplar={steplar}
+					total={total}
+					doneCount={doneCount}
+					hasRad={hasRad}
+					pct={pct}
+					onClose={() => setOpen(false)}
+				/>
+			)}
+		</>
 	)
 }
 
 // ─── FAYL BUTTON ───────────────────────────────────────────────────────────────
 function FaylButton({ url }) {
-	if (!url) return <span className='text-muted-foreground text-sm'>—</span>
+	if (!url) return <span className='text-muted-foreground/40 text-xs'>—</span>
 	const filename = url.split('/').pop()
 	return (
 		<a
@@ -278,7 +524,7 @@ function FaylButton({ url }) {
 			target='_blank'
 			rel='noopener noreferrer'
 			onClick={e => e.stopPropagation()}
-			className='inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-medium bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 transition-colors max-w-[130px]'
+			className='inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-medium bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 transition-colors max-w-[120px]'
 		>
 			<FileText className='w-3 h-3 flex-shrink-0' />
 			<span className='truncate'>{filename}</span>
@@ -289,31 +535,25 @@ function FaylButton({ url }) {
 
 // ─── MAIN COMPONENT ────────────────────────────────────────────────────────────
 export default function XaridQilish() {
+	const navigate = useNavigate()
 	const [searchTerm, setSearchTerm] = useState('')
 	const [statusFilter, setStatusFilter] = useState('')
 	const [sortBy, setSortBy] = useState('')
-	const navigate = useNavigate()
 	const [page, setPage] = useState(1)
 	const limit = 50
 	const [show, setShow] = useState(false)
 	const [structureSearch, setStructureSearch] = useState('')
 	const [totalPages, setTotalPages] = useState(1)
-	const [form, setForm] = useState({
-		comment: '',
-		targets: [],
-		bildirgi: '',
-	})
-	const aplication_clear = () => {
-		setForm({
-			comment: '',
-			targets: [],
-			bildirgi: '',
-		})
-	}
+	const [form, setForm] = useState({ comment: '', targets: [], bildirgi: null })
+
+	const aplication_clear = () =>
+		setForm({ comment: '', targets: [], bildirgi: null })
+
 	const handleBildirgiUpload = e => {
 		const file = e.target.files[0]
-		if (file) setForm({ ...form, bildirgi: file })
+		if (file) setForm(prev => ({ ...prev, bildirgi: file }))
 	}
+
 	const handleStructureToggle = structure => {
 		setForm(prev => {
 			const exists = prev.targets.find(item => item.tuzilma === structure.id)
@@ -331,6 +571,7 @@ export default function XaridQilish() {
 			}
 		})
 	}
+
 	const { data, isLoading, total_pages } = useXaridQuery({
 		page,
 		limit,
@@ -345,54 +586,40 @@ export default function XaridQilish() {
 		useOptionTuzilmaQuery()
 	const [xarid_post, { isLoading: AplicationLoader, isError, error }] =
 		useXarid_postMutation()
+
 	useEffect(() => {
 		if (total_pages) setTotalPages(total_pages)
 	}, [total_pages])
+
+	useEffect(() => {
+		if (isError) {
+			if (error?.data?.comment) toast.error(error?.data?.comment[0])
+			if (error?.data?.fayl) toast.error(error?.data?.fayl[0])
+			if (error?.data?.message) toast.error(error?.data?.message[0])
+		}
+	}, [isError, error])
+
 	const filteredStructures =
 		OptionTuzilma?.filter(item =>
 			item?.tuzilma_nomi.toLowerCase().includes(structureSearch.toLowerCase()),
 		) || []
+
 	const isFormComplete = () =>
 		form.comment.trim() !== '' && form.targets.length > 0
+
 	const submitForm = async () => {
 		const fd = new FormData()
-
 		fd.append('comment', form.comment)
-
-		form.targets.forEach(item => {
-			fd.append('tuzilmalar', item.tuzilma)
-		})
-
+		form.targets.forEach(item => fd.append('tuzilmalar', item.tuzilma))
 		if (form.bildirgi) fd.append('fayl', form.bildirgi)
-
 		await toast.promise(xarid_post(fd).unwrap(), {
 			loading: 'Yuborilmoqda...',
 			success: 'Yuborildi!',
 			error: 'Xatolik!',
 		})
-
 		setShow(false)
 		aplication_clear()
 	}
-	const handleSubmit = async e => {
-		e.preventDefault()
-	}
-	useEffect(() => {
-		if (isError) {
-			if (error?.data?.comment) {
-				toast.error(error?.data?.comment[0])
-				aplication_clear()
-			}
-			if (error?.data?.fayl) {
-				toast.error(error?.data?.fayl[0])
-				aplication_clear()
-			}
-			if (error?.data?.message) {
-				toast.error(error?.data?.message[0])
-				aplication_clear()
-			}
-		}
-	}, [isError, error])
 
 	const statusFilterOptions = [
 		{ value: '', label: 'Barchasi' },
@@ -420,6 +647,7 @@ export default function XaridQilish() {
 				</div>
 
 				<div className='flex flex-wrap gap-2 items-center'>
+					{/* Status filter */}
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button
@@ -461,6 +689,7 @@ export default function XaridQilish() {
 						</DropdownMenuContent>
 					</DropdownMenu>
 
+					{/* Kimga filter */}
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button
@@ -468,8 +697,7 @@ export default function XaridQilish() {
 								size='sm'
 								className='h-10 gap-2 border-border/60 bg-card hover:bg-muted/60 font-medium'
 							>
-								Kimga
-								<ChevronDown className='w-3.5 h-3.5 opacity-50' />
+								Kimga <ChevronDown className='w-3.5 h-3.5 opacity-50' />
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent
@@ -504,6 +732,7 @@ export default function XaridQilish() {
 						</DropdownMenuContent>
 					</DropdownMenu>
 
+					{/* Ariza qo'shish toggle */}
 					{show ? (
 						<Button
 							variant='destructive'
@@ -514,8 +743,7 @@ export default function XaridQilish() {
 								aplication_clear()
 							}}
 						>
-							<X className='w-4 h-4' />
-							Yopish
+							<X className='w-4 h-4' /> Yopish
 						</Button>
 					) : (
 						<Button
@@ -523,8 +751,7 @@ export default function XaridQilish() {
 							className='h-10 gap-2 shadow-sm'
 							onClick={() => setShow(true)}
 						>
-							<Plus className='w-4 h-4' />
-							Ariza qo'shish
+							<Plus className='w-4 h-4' /> Ariza qo'shish
 						</Button>
 					)}
 				</div>
@@ -551,7 +778,7 @@ export default function XaridQilish() {
 					</CardHeader>
 
 					<CardContent className='px-6 py-5'>
-						<form className='space-y-5' onSubmit={handleSubmit}>
+						<form className='space-y-5' onSubmit={e => e.preventDefault()}>
 							{/* Tuzilmalar */}
 							<div className='space-y-3'>
 								<div>
@@ -569,7 +796,7 @@ export default function XaridQilish() {
 										onChange={e => setStructureSearch(e.target.value)}
 									/>
 								</div>
-								<div className='flex gap-2 overflow-x-auto pb-1'>
+								<div className='flex flex-wrap gap-1.5'>
 									{filteredStructures.length > 0 ? (
 										filteredStructures
 											.filter(
@@ -585,7 +812,7 @@ export default function XaridQilish() {
 														type='button'
 														onClick={() => handleStructureToggle(item)}
 														className={cn(
-															'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 border',
+															'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all border',
 															isSelected
 																? 'bg-primary text-primary-foreground border-primary shadow-sm shadow-primary/20'
 																: 'bg-muted/50 text-muted-foreground border-border/50 hover:border-primary/40 hover:text-foreground hover:bg-muted/80',
@@ -641,7 +868,9 @@ export default function XaridQilish() {
 									placeholder='Xabaringizni yozing...'
 									className='resize-none h-24 text-sm bg-card border-border/60'
 									value={form.comment}
-									onChange={e => setForm({ ...form, comment: e.target.value })}
+									onChange={e =>
+										setForm(prev => ({ ...prev, comment: e.target.value }))
+									}
 								/>
 							</div>
 
@@ -668,18 +897,17 @@ export default function XaridQilish() {
 								</Button>
 								{AplicationLoader ? (
 									<Button className='flex-1 text-sm h-9' disabled>
-										<Loader2 className='w-4 h-4 animate-spin mr-2' />
+										<Loader2 className='w-4 h-4 animate-spin mr-2' />{' '}
 										Yuborilmoqda...
 									</Button>
 								) : (
 									<Button
-										type='submit'
+										type='button'
 										className='flex-1 text-sm h-9 gap-2'
 										disabled={!isFormComplete()}
 										onClick={submitForm}
 									>
-										Jo'natish
-										<Send className='w-3.5 h-3.5' />
+										Jo'natish <Send className='w-3.5 h-3.5' />
 									</Button>
 								)}
 							</div>
@@ -693,16 +921,16 @@ export default function XaridQilish() {
 				<Table>
 					<TableHeader>
 						<TableRow className='bg-muted/40 hover:bg-muted/40 border-border/40'>
-							<TableHead className='w-[5%] text-xs font-semibold text-muted-foreground uppercase tracking-wide py-3 pl-4'>
+							<TableHead className='w-[4%] text-xs font-semibold text-muted-foreground uppercase tracking-wide py-3 pl-4'>
 								#
 							</TableHead>
 							<TableHead className='w-[20%] text-xs font-semibold text-muted-foreground uppercase tracking-wide'>
 								Tuzilmalar
 							</TableHead>
-							<TableHead className='w-[23%] text-xs font-semibold text-muted-foreground uppercase tracking-wide'>
+							<TableHead className='w-[22%] text-xs font-semibold text-muted-foreground uppercase tracking-wide'>
 								Izoh
 							</TableHead>
-							<TableHead className='w-[13%] text-xs font-semibold text-muted-foreground uppercase tracking-wide'>
+							<TableHead className='w-[12%] text-xs font-semibold text-muted-foreground uppercase tracking-wide'>
 								Status
 							</TableHead>
 							<TableHead className='w-[18%] text-xs font-semibold text-muted-foreground uppercase tracking-wide'>
@@ -711,7 +939,7 @@ export default function XaridQilish() {
 							<TableHead className='w-[12%] text-xs font-semibold text-muted-foreground uppercase tracking-wide'>
 								Fayl
 							</TableHead>
-							<TableHead className='w-[9%] text-xs font-semibold text-muted-foreground uppercase tracking-wide'>
+							<TableHead className='w-[12%] text-xs font-semibold text-muted-foreground uppercase tracking-wide'>
 								Sana
 							</TableHead>
 						</TableRow>
@@ -732,7 +960,6 @@ export default function XaridQilish() {
 							data.results.map((item, index) => (
 								<TableRow
 									key={item.id}
-									onClick={() => navigate(`${item.id}`)}
 									className={cn(
 										'border-border/30 transition-colors cursor-pointer',
 										index % 2 === 0
@@ -740,12 +967,14 @@ export default function XaridQilish() {
 											: 'bg-background/70 hover:bg-muted/30',
 									)}
 								>
+									{/* # */}
 									<TableCell className='py-3 pl-4'>
 										<span className='text-xs font-mono text-muted-foreground'>
 											{(page - 1) * limit + index + 1}
 										</span>
 									</TableCell>
 
+									{/* Tuzilmalar */}
 									<TableCell className='py-3'>
 										<div className='flex flex-wrap gap-1'>
 											{item?.tuzilma_nomlari?.length ? (
@@ -753,31 +982,33 @@ export default function XaridQilish() {
 													<Badge
 														key={i}
 														variant='secondary'
-														className='text-[11px] px-2 py-0.5 font-medium bg-muted/60'
+														className='text-[10px] px-1.5 py-0.5 font-medium bg-muted/60'
 													>
 														{name}
 													</Badge>
 												))
 											) : (
-												<span className='text-muted-foreground text-sm'>—</span>
+												<span className='text-muted-foreground/40 text-xs'>
+													—
+												</span>
 											)}
 										</div>
 									</TableCell>
 
-									<TableCell className='py-3 max-w-[200px]'>
-										<span className='text-sm text-muted-foreground line-clamp-2 leading-relaxed'>
-											{item?.comment
-												? item.comment.length > 80
-													? item.comment.slice(0, 80) + '...'
-													: item.comment
-												: '—'}
-										</span>
+									{/* Izoh — CommentPopover */}
+									<TableCell
+										className='py-3'
+										onClick={e => e.stopPropagation()}
+									>
+										<CommentPopover comment={item?.comment} />
 									</TableCell>
 
+									{/* Status */}
 									<TableCell className='py-3'>
 										<StatusBadge status={item.status} />
 									</TableCell>
 
+									{/* Bosqichlar */}
 									<TableCell className='py-3'>
 										<StepProgress
 											steplar={item.steplar || []}
@@ -785,6 +1016,7 @@ export default function XaridQilish() {
 										/>
 									</TableCell>
 
+									{/* Fayl */}
 									<TableCell
 										className='py-3'
 										onClick={e => e.stopPropagation()}
@@ -792,6 +1024,7 @@ export default function XaridQilish() {
 										<FaylButton url={item.fayl} />
 									</TableCell>
 
+									{/* Sana */}
 									<TableCell className='py-3'>
 										<div className='flex flex-col gap-0.5'>
 											<span className='text-xs font-medium text-foreground/80'>
