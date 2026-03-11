@@ -292,11 +292,11 @@ const StepCard = ({ step, index }) => {
 								{step.images.map((img, i) => (
 									<button
 										key={i}
-										onClick={() => setImgOpen(img)}
+										onClick={() => setImgOpen(img.image)}
 										className='w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border-2 border-border hover:border-primary transition-all hover:scale-105 shadow-sm'
 									>
 										<img
-											src={img}
+											src={img.image}
 											alt={`rasm-${i}`}
 											className='w-full h-full object-cover'
 										/>
@@ -337,6 +337,7 @@ const StepCard = ({ step, index }) => {
 export default function PprMonthDetails() {
 	const [open, setOpen] = useState(false)
 	const { id } = useParams()
+	console.log(id)
 	const { data, isLoading } = usePprMonthDetailsQuery(id)
 	const navigate = useNavigate()
 	const [form, setForm] = useState({
@@ -344,6 +345,7 @@ export default function PprMonthDetails() {
 		comment: '',
 		file: null,
 		images: [],
+		jadval: id,
 	})
 	const [postPpr, { isLoading: postPprLoading }] = usePPRbajarildiPOSTMutation()
 
@@ -351,7 +353,7 @@ export default function PprMonthDetails() {
 	const submit = async () => {
 		try {
 			const fd = new FormData()
-			fd.append('jadval', id)
+			fd.append('jadval', form.jadval)
 			fd.append('comment', form.comment)
 			form.bajarilgan_obyektlar.forEach(i =>
 				fd.append('bajarilgan_obyektlar', i),

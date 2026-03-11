@@ -448,10 +448,10 @@ export const api = createApi({
 			providesTags: ['MainTag'],
 		}),
 		PPRbajarildiPOST: builder.mutation({
-			query: formData => ({
+			query: fd => ({
 				url: `/ppr-bajarildi/`,
 				method: 'POST',
-				body: formData,
+				body: fd,
 			}),
 			invalidatesTags: ['MainTag'],
 		}),
@@ -489,9 +489,30 @@ export const api = createApi({
 			query: () => `/kelgan-arizalar/?turi=ijro`,
 			providesTags: ['MainTag'],
 		}),
+		xarid: builder.query({
+			query: ({
+				page = 1,
+				limit = 10,
+				search = '',
+				status = '',
+				tuzilma_nomi = '',
+			}) =>
+				`/xarid-ariza?page=${page}&limit=${limit}&search=${search}&status=${status}&tuzilma_nomi=${tuzilma_nomi}`,
+			providesTags: ['MainTag'],
+		}),
+		xarid_post: builder.mutation({
+			query: body => ({
+				url: `/xarid-ariza/`,
+				method: 'POST',
+				body,
+			}),
+			invalidatesTags: ['MainTag'],
+		}),
 	}),
 })
 export const {
+	useXarid_postMutation,
+	useXaridQuery,
 	useKelganQuery,
 	useAddAplicationsStepsBajarildiMutation,
 	useNotificationViewMutation,

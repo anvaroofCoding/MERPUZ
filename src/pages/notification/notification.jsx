@@ -12,10 +12,12 @@ import {
 	Eye,
 	Package,
 	Search,
+	Users,
 	X,
 	XCircle,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 import { Button } from '@/components/ui/button'
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
@@ -71,46 +73,175 @@ function UserAvatar({ username, size = 'sm' }) {
 		'bg-cyan-500',
 	]
 	const color = colors[username?.charCodeAt(0) % colors.length] || colors[0]
-	const sizeClass = size === 'sm' ? 'w-6 h-6 text-[10px]' : 'w-7 h-7 text-xs'
+	const sizeClass = size === 'sm' ? 'w-6 h-6 text-[10px]' : 'w-8 h-8 text-xs'
 	return (
 		<div
-			className={`${sizeClass} ${color} rounded-full flex items-center justify-center text-white font-bold ring-2 ring-background`}
+			className={`${sizeClass} ${color} rounded-full flex items-center justify-center text-white font-bold ring-2 ring-background flex-shrink-0`}
 		>
 			{initials}
 		</div>
 	)
 }
 
+const AVATAR_COLORS = [
+	'bg-violet-500',
+	'bg-blue-500',
+	'bg-emerald-500',
+	'bg-amber-500',
+	'bg-rose-500',
+	'bg-cyan-500',
+]
+
+// ─── Portal Tooltip — renders into document.body, always on top ───────────────
+function SeenUsersPortal({ usernames, anchorRef, visible }) {
+	const [rect, setRect] = useState(null)
+
+	useEffect(() => {
+		if (!visible || !anchorRef.current) return
+		const r = anchorRef.current.getBoundingClientRect()
+		setRect(r)
+	}, [visible, anchorRef])
+
+	if (!visible || !rect || typeof document === 'undefined') return null
+
+	const top = rect.top + rect.height / 2
+	const left = rect.right + 14
+
+	return createPortal(
+		<div
+			style={{
+				position: 'fixed',
+				top,
+				left,
+				transform: 'translateY(-50%)',
+				zIndex: 999999,
+				width: 220,
+				transformOrigin: 'left center',
+			}}
+			className='bg-popover border border-border rounded-2xl shadow-2xl shadow-black/30 overflow-hidden pointer-events-none animate-in fade-in zoom-in-95 duration-150'
+		>
+			{/* Header */}
+			<div className='flex items-center gap-2 px-3 py-2.5 border-b border-border/60 bg-muted/40'>
+				<Users size={12} className='text-muted-foreground flex-shrink-0' />
+				<span className='text-[11px] font-semibold text-muted-foreground'>
+					Ko'rganlar — {usernames.length} kishi
+				</span>
+			</div>
+
+			{/* User list: max 100 rendered, 260px max height */}
+			<div className='overflow-y-auto py-1' style={{ maxHeight: 260 }}>
+				{usernames.slice(0, 100).map(username => {
+					const color =
+						AVATAR_COLORS[username?.charCodeAt(0) % AVATAR_COLORS.length] ??
+						AVATAR_COLORS[0]
+					return (
+						<div
+							key={username}
+							className='flex items-center gap-2.5 px-3 py-1.5'
+						>
+							<div
+								className={`w-7 h-7 ${color} rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0`}
+							>
+								{username?.slice(0, 2).toUpperCase() ?? '??'}
+							</div>
+							<span className='text-xs font-medium text-foreground truncate'>
+								{username}
+							</span>
+						</div>
+					)
+				})}
+				{usernames.length > 100 && (
+					<div className='px-3 py-2 border-t border-border/40 text-center text-[10px] text-muted-foreground'>
+						+ yana {usernames.length - 100} ta foydalanuvchi
+					</div>
+				)}
+			</div>
+
+			{/* Left-pointing arrow */}
+			<div
+				style={{
+					position: 'absolute',
+					left: -6,
+					top: '50%',
+					transform: 'translateY(-50%) rotate(45deg)',
+					width: 12,
+					height: 12,
+					background: 'hsl(var(--popover))',
+					borderLeft: '1px solid hsl(var(--border))',
+					borderBottom: '1px solid hsl(var(--border))',
+				}}
+			/>
+		</div>,
+		document.body,
+	)
+}
+
 // ─── Seen Users Row ───────────────────────────────────────────────────────────
 function SeenUsers({ usernames = [] }) {
+	const [hovered, setHovered] = useState(false)
+	const anchorRef = useRef(null)
+	const leaveTimer = useRef(null)
+
 	if (!usernames.length) return null
+
 	const MAX = 3
 	const visible = usernames.slice(0, MAX)
 	const extra = usernames.length - MAX
 
+	const enter = () => {
+		clearTimeout(leaveTimer.current)
+		setHovered(true)
+	}
+	const leave = () => {
+		leaveTimer.current = setTimeout(() => setHovered(false), 80)
+	}
+
 	return (
-		<div className='flex items-center gap-1.5 mt-2.5'>
-			<Eye size={11} className='text-muted-foreground' />
-			<div className='flex items-center'>
-				{visible.map((u, i) => (
-					<div key={u} style={{ marginLeft: i === 0 ? 0 : -6 }}>
-						<UserAvatar username={u} size='sm' />
-					</div>
-				))}
-				{extra > 0 && (
-					<div
-						className='w-6 h-6 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[9px] font-bold text-muted-foreground'
-						style={{ marginLeft: -6 }}
-					>
-						+{extra}
-					</div>
-				)}
-			</div>
-			<span className='text-[10px] text-muted-foreground'>
-				{usernames.length === 1
-					? `${usernames[0]} ko'rdi`
-					: `${usernames.length} kishi ko'rdi`}
-			</span>
+		<div className='flex items-center gap-1.5 mt-2.5 w-fit'>
+			<button
+				ref={anchorRef}
+				onMouseEnter={enter}
+				onMouseLeave={leave}
+				onClick={e => e.stopPropagation()}
+				className={`
+					flex items-center gap-1.5 rounded-lg px-1.5 py-0.5 -mx-1.5 -my-0.5
+					transition-colors duration-150 cursor-default
+					${hovered ? 'bg-muted/70' : 'hover:bg-muted/50'}
+				`}
+			>
+				<Eye
+					size={11}
+					className={`flex-shrink-0 transition-colors ${hovered ? 'text-foreground/60' : 'text-muted-foreground'}`}
+				/>
+				<div className='flex items-center'>
+					{visible.map((u, i) => (
+						<div key={u} style={{ marginLeft: i === 0 ? 0 : -6 }}>
+							<UserAvatar username={u} size='sm' />
+						</div>
+					))}
+					{extra > 0 && (
+						<div
+							className='w-6 h-6 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[9px] font-bold text-muted-foreground'
+							style={{ marginLeft: -6 }}
+						>
+							+{extra}
+						</div>
+					)}
+				</div>
+				<span
+					className={`text-[10px] transition-colors ${hovered ? 'text-foreground/70' : 'text-muted-foreground'}`}
+				>
+					{usernames.length === 1
+						? `${usernames[0]} ko'rdi`
+						: `${usernames.length} kishi ko'rdi`}
+				</span>
+			</button>
+
+			<SeenUsersPortal
+				usernames={usernames}
+				anchorRef={anchorRef}
+				visible={hovered}
+			/>
 		</div>
 	)
 }
@@ -181,7 +312,7 @@ function NotifCard({ item, onRead, onAlreadyRead }) {
 						)}
 					</div>
 
-					{/* Seen users */}
+					{/* Seen users — hover triggers tooltip panel */}
 					<SeenUsers usernames={item.seen_usernames} />
 				</div>
 			</div>
