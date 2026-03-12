@@ -358,6 +358,7 @@ export default function Notification() {
 
 	const notifications = data?.results || []
 	const totalCount = data?.count || 0
+	const totalReadings = data?.unread_count || 0
 	const totalPages = Math.ceil(totalCount / limit)
 
 	const [markRead, { isLoading: marking }] = useNotificationViewMutation()
@@ -408,9 +409,9 @@ export default function Notification() {
 					className='relative w-9 h-9 rounded-xl hover:bg-muted transition-all'
 				>
 					<Bell size={18} />
-					{unreadCount > 0 && (
+					{totalReadings > 0 && (
 						<span className='absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-background'>
-							{unreadCount > 9 ? '9+' : unreadCount}
+							{totalReadings > 9 ? '9+' : totalReadings}
 						</span>
 					)}
 				</Button>
@@ -472,13 +473,13 @@ export default function Notification() {
 						<FilterTab
 							label='Yangi'
 							active={filter === 'unread'}
-							count={unreadCount}
+							count={totalReadings}
 							onClick={() => setFilter('unread')}
 						/>
 						<FilterTab
 							label="O'qilgan"
 							active={filter === 'read'}
-							count={readCount}
+							count={totalCount - totalReadings}
 							onClick={() => setFilter('read')}
 						/>
 					</div>

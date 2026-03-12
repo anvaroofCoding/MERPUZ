@@ -58,10 +58,19 @@ function MediaModal({ items, startIndex, onClose }) {
 	}
 
 	return (
-		<div className='fixed inset-0 z-[100] flex flex-col bg-black/90 dark:bg-black/95 backdrop-blur-xl'>
+		<div
+			className='fixed inset-0 z-[100] flex flex-col backdrop-blur-xl'
+			style={{ background: 'oklch(0.141 0.005 285.823 / 0.96)' }}
+		>
 			{/* Top bar */}
-			<div className='flex items-center justify-between px-5 py-4 shrink-0 border-b border-white/10'>
-				<span className='text-white/70 text-sm font-medium truncate max-w-[60%] font-mono'>
+			<div
+				className='flex items-center justify-between px-5 py-4 shrink-0'
+				style={{ borderBottom: '1px solid oklch(1 0 0 / 8%)' }}
+			>
+				<span
+					className='text-sm font-medium truncate max-w-[60%] font-mono'
+					style={{ color: 'var(--muted-foreground)' }}
+				>
 					{item?.name || (isImage ? 'Rasm' : 'Fayl')}
 				</span>
 				<div className='flex items-center gap-1'>
@@ -69,16 +78,37 @@ function MediaModal({ items, startIndex, onClose }) {
 						<>
 							<button
 								onClick={() => setZoom(z => Math.max(0.5, z - 0.25))}
-								className='w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all'
+								className='w-9 h-9 rounded-full flex items-center justify-center transition-all'
+								style={{ color: 'var(--muted-foreground)' }}
+								onMouseEnter={e => {
+									e.currentTarget.style.color = 'oklch(0.985 0 0)'
+									e.currentTarget.style.background = 'oklch(1 0 0 / 8%)'
+								}}
+								onMouseLeave={e => {
+									e.currentTarget.style.color = 'var(--muted-foreground)'
+									e.currentTarget.style.background = 'transparent'
+								}}
 							>
 								<ZoomOut size={16} />
 							</button>
-							<span className='text-white/40 text-xs w-12 text-center font-mono'>
+							<span
+								className='text-xs w-12 text-center font-mono'
+								style={{ color: 'var(--muted-foreground)' }}
+							>
 								{Math.round(zoom * 100)}%
 							</span>
 							<button
 								onClick={() => setZoom(z => Math.min(3, z + 0.25))}
-								className='w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all'
+								className='w-9 h-9 rounded-full flex items-center justify-center transition-all'
+								style={{ color: 'var(--muted-foreground)' }}
+								onMouseEnter={e => {
+									e.currentTarget.style.color = 'oklch(0.985 0 0)'
+									e.currentTarget.style.background = 'oklch(1 0 0 / 8%)'
+								}}
+								onMouseLeave={e => {
+									e.currentTarget.style.color = 'var(--muted-foreground)'
+									e.currentTarget.style.background = 'transparent'
+								}}
 							>
 								<ZoomIn size={16} />
 							</button>
@@ -86,13 +116,31 @@ function MediaModal({ items, startIndex, onClose }) {
 					)}
 					<button
 						onClick={handleDownload}
-						className='w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all'
+						className='w-9 h-9 rounded-full flex items-center justify-center transition-all'
+						style={{ color: 'var(--muted-foreground)' }}
+						onMouseEnter={e => {
+							e.currentTarget.style.color = 'oklch(0.985 0 0)'
+							e.currentTarget.style.background = 'oklch(1 0 0 / 8%)'
+						}}
+						onMouseLeave={e => {
+							e.currentTarget.style.color = 'var(--muted-foreground)'
+							e.currentTarget.style.background = 'transparent'
+						}}
 					>
 						<Download size={16} />
 					</button>
 					<button
 						onClick={onClose}
-						className='w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all ml-1'
+						className='w-9 h-9 rounded-full flex items-center justify-center transition-all ml-1'
+						style={{ color: 'var(--muted-foreground)' }}
+						onMouseEnter={e => {
+							e.currentTarget.style.color = 'oklch(0.985 0 0)'
+							e.currentTarget.style.background = 'oklch(1 0 0 / 8%)'
+						}}
+						onMouseLeave={e => {
+							e.currentTarget.style.color = 'var(--muted-foreground)'
+							e.currentTarget.style.background = 'transparent'
+						}}
 					>
 						<X size={18} />
 					</button>
@@ -112,19 +160,41 @@ function MediaModal({ items, startIndex, onClose }) {
 						}}
 					/>
 				) : (
-					<div className='flex flex-col items-center gap-5 p-10 rounded-3xl bg-white/5 border border-white/10'>
-						<div className='w-24 h-24 rounded-3xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-900/40'>
-							<FileText size={44} className='text-white' />
+					<div
+						className='flex flex-col items-center gap-5 p-10 rounded-3xl'
+						style={{
+							background: 'oklch(1 0 0 / 4%)',
+							border: '1px solid oklch(1 0 0 / 8%)',
+						}}
+					>
+						<div
+							className='w-24 h-24 rounded-3xl flex items-center justify-center shadow-lg'
+							style={{
+								background:
+									'linear-gradient(135deg, var(--primary), oklch(0.424 0.199 265.638))',
+							}}
+						>
+							<FileText
+								size={44}
+								style={{ color: 'var(--primary-foreground)' }}
+							/>
 						</div>
-						<p className='text-white text-base font-semibold text-center max-w-xs break-all'>
+						<p
+							className='text-base font-semibold text-center max-w-xs break-all'
+							style={{ color: 'oklch(0.985 0 0)' }}
+						>
 							{item?.name || 'Fayl'}
 						</p>
 						<button
 							onClick={handleDownload}
-							className='flex items-center gap-2 px-6 py-3 rounded-2xl text-white text-sm font-semibold bg-gradient-to-r from-blue-500 to-blue-700 hover:opacity-90 transition-opacity shadow-lg shadow-blue-900/30'
+							className='flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold transition-opacity hover:opacity-90'
+							style={{
+								background:
+									'linear-gradient(135deg, var(--primary), oklch(0.424 0.199 265.638))',
+								color: 'var(--primary-foreground)',
+							}}
 						>
-							<Download size={16} />
-							Yuklab olish
+							<Download size={16} /> Yuklab olish
 						</button>
 					</div>
 				)}
@@ -136,7 +206,8 @@ function MediaModal({ items, startIndex, onClose }) {
 					<button
 						disabled={current === 0}
 						onClick={() => setCurrent(c => c - 1)}
-						className='w-10 h-10 rounded-full flex items-center justify-center text-white/50 hover:text-white disabled:opacity-20 hover:bg-white/10 transition-all'
+						className='w-10 h-10 rounded-full flex items-center justify-center transition-all disabled:opacity-20'
+						style={{ color: 'var(--muted-foreground)' }}
 					>
 						<ChevronLeft size={22} />
 					</button>
@@ -150,7 +221,7 @@ function MediaModal({ items, startIndex, onClose }) {
 									width: i === current ? 20 : 6,
 									height: 6,
 									background:
-										i === current ? '#3b82f6' : 'rgba(255,255,255,0.25)',
+										i === current ? 'var(--primary)' : 'oklch(1 0 0 / 20%)',
 								}}
 							/>
 						))}
@@ -158,7 +229,8 @@ function MediaModal({ items, startIndex, onClose }) {
 					<button
 						disabled={current === items.length - 1}
 						onClick={() => setCurrent(c => c + 1)}
-						className='w-10 h-10 rounded-full flex items-center justify-center text-white/50 hover:text-white disabled:opacity-20 hover:bg-white/10 transition-all'
+						className='w-10 h-10 rounded-full flex items-center justify-center transition-all disabled:opacity-20'
+						style={{ color: 'var(--muted-foreground)' }}
 					>
 						<ChevronRight size={22} />
 					</button>
@@ -175,30 +247,48 @@ function PasswordModal({ visible, onClose, onConfirm, value, onChange }) {
 
 	return (
 		<div
-			className='fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 dark:bg-black/70 backdrop-blur-md'
+			className='fixed inset-0 z-50 flex items-end sm:items-center justify-center backdrop-blur-md'
+			style={{ background: 'oklch(0 0 0 / 50%)' }}
 			onClick={e => e.target === e.currentTarget && onClose()}
 		>
 			<div
-				className='w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl p-6
-        bg-white dark:bg-[#1c2733]
-        border border-slate-200 dark:border-white/[0.06]
-        shadow-2xl'
+				className='w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl'
+				style={{
+					background: 'var(--card)',
+					border: '1px solid var(--border)',
+				}}
 			>
 				<div className='flex items-center gap-3 mb-5'>
-					<div className='w-10 h-10 rounded-2xl flex items-center justify-center bg-blue-100 dark:bg-blue-500/20'>
-						<Lock size={18} className='text-blue-600 dark:text-blue-400' />
+					<div
+						className='w-10 h-10 rounded-2xl flex items-center justify-center'
+						style={{
+							background:
+								'color-mix(in oklch, var(--primary) 12%, transparent)',
+						}}
+					>
+						<Lock size={18} style={{ color: 'var(--primary)' }} />
 					</div>
 					<div>
-						<h2 className='text-slate-900 dark:text-white font-semibold text-base'>
+						<h2
+							className='font-semibold text-base'
+							style={{ color: 'var(--card-foreground)' }}
+						>
 							Tasdiqlash
 						</h2>
-						<p className='text-slate-500 dark:text-white/40 text-xs'>
+						<p className='text-xs' style={{ color: 'var(--muted-foreground)' }}>
 							Parolingizni kiriting
 						</p>
 					</div>
 					<button
 						onClick={onClose}
-						className='ml-auto text-slate-400 hover:text-slate-600 dark:text-white/30 dark:hover:text-white/60 transition'
+						className='ml-auto transition'
+						style={{ color: 'var(--muted-foreground)' }}
+						onMouseEnter={e =>
+							(e.currentTarget.style.color = 'var(--foreground)')
+						}
+						onMouseLeave={e =>
+							(e.currentTarget.style.color = 'var(--muted-foreground)')
+						}
 					>
 						<X size={18} />
 					</button>
@@ -212,18 +302,32 @@ function PasswordModal({ visible, onClose, onConfirm, value, onChange }) {
 						onChange={onChange}
 						autoFocus
 						onKeyDown={e => e.key === 'Enter' && value && onConfirm()}
-						className='w-full px-4 py-3 rounded-2xl text-sm outline-none transition pr-12
-              bg-slate-100 border border-slate-200 text-slate-900 placeholder-slate-400
-              focus:border-blue-400 focus:bg-white
-              dark:bg-white/[0.06] dark:border-white/10 dark:text-white dark:placeholder-white/20
-              dark:focus:border-blue-500 dark:focus:bg-white/[0.08]'
+						className='w-full px-4 py-3 rounded-2xl text-sm outline-none transition pr-12'
+						style={{
+							background: 'var(--muted)',
+							border: '1px solid var(--border)',
+							color: 'var(--foreground)',
+						}}
+						onFocus={e => {
+							e.currentTarget.style.borderColor = 'var(--primary)'
+							e.currentTarget.style.background = 'var(--background)'
+						}}
+						onBlur={e => {
+							e.currentTarget.style.borderColor = 'var(--border)'
+							e.currentTarget.style.background = 'var(--muted)'
+						}}
 					/>
 					<button
 						type='button'
 						onClick={() => setShow(s => !s)}
-						className='absolute right-3 top-1/2 -translate-y-1/2 transition
-              text-slate-400 hover:text-slate-600
-              dark:text-white/30 dark:hover:text-white/60'
+						className='absolute right-3 top-1/2 -translate-y-1/2 transition'
+						style={{ color: 'var(--muted-foreground)' }}
+						onMouseEnter={e =>
+							(e.currentTarget.style.color = 'var(--foreground)')
+						}
+						onMouseLeave={e =>
+							(e.currentTarget.style.color = 'var(--muted-foreground)')
+						}
 					>
 						{show ? <EyeOff size={16} /> : <Eye size={16} />}
 					</button>
@@ -232,18 +336,27 @@ function PasswordModal({ visible, onClose, onConfirm, value, onChange }) {
 				<div className='flex gap-3'>
 					<button
 						onClick={onClose}
-						className='flex-1 py-3 rounded-2xl text-sm font-medium transition
-              bg-slate-100 text-slate-600 hover:bg-slate-200
-              dark:bg-white/[0.06] dark:text-white/50 dark:hover:text-white dark:border dark:border-white/[0.08] dark:hover:bg-white/10'
+						className='flex-1 py-3 rounded-2xl text-sm font-medium transition-all'
+						style={{
+							background: 'var(--secondary)',
+							color: 'var(--secondary-foreground)',
+							border: '1px solid var(--border)',
+						}}
+						onMouseEnter={e => (e.currentTarget.style.opacity = '0.75')}
+						onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
 					>
 						Bekor qilish
 					</button>
 					<button
 						disabled={!value}
 						onClick={onConfirm}
-						className='flex-1 py-3 rounded-2xl text-white text-sm font-semibold transition
-              bg-gradient-to-r from-blue-500 to-blue-700 hover:opacity-90 disabled:opacity-40
-              shadow-lg shadow-blue-500/20 dark:shadow-blue-900/30'
+						className='flex-1 py-3 rounded-2xl text-sm font-semibold transition-all'
+						style={{
+							background:
+								'linear-gradient(135deg, var(--primary), oklch(0.424 0.199 265.638))',
+							color: 'var(--primary-foreground)',
+							opacity: !value ? 0.4 : 1,
+						}}
 					>
 						Tasdiqlash
 					</button>
@@ -289,19 +402,23 @@ function ChatBubble({ step, isMe, onMediaClick }) {
 			className={`flex w-full mb-1 ${isMe ? 'justify-end' : 'justify-start'}`}
 		>
 			<div
-				className={`relative max-w-[78%] min-w-[80px] px-3.5 pt-2.5 pb-1.5 shadow-sm
-          ${
-						isMe
-							? 'bg-blue-600 dark:bg-[#2b5278] border border-blue-500/20 dark:border-blue-400/20'
-							: 'bg-white dark:bg-[#182533] border border-slate-200 dark:border-white/[0.05]'
-					}`}
+				className='relative max-w-[78%] min-w-[80px] px-3.5 pt-2.5 pb-1.5 shadow-sm'
 				style={{
+					background: isMe
+						? 'color-mix(in oklch, var(--primary) 85%, oklch(0.141 0.005 285.823))'
+						: 'var(--card)',
+					border: isMe
+						? '1px solid color-mix(in oklch, var(--primary) 50%, transparent)'
+						: '1px solid var(--border)',
 					borderRadius: isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
 				}}
 			>
 				{/* Sender */}
 				{!isMe && (
-					<p className='text-xs font-bold mb-1 text-blue-600 dark:text-blue-400 font-mono'>
+					<p
+						className='text-xs font-bold mb-1 font-mono'
+						style={{ color: 'var(--primary)' }}
+					>
 						{step.created_by}
 					</p>
 				)}
@@ -309,9 +426,12 @@ function ChatBubble({ step, isMe, onMediaClick }) {
 				{/* Text */}
 				{step.comment && (
 					<p
-						className={`text-sm leading-relaxed break-words ${
-							isMe ? 'text-white' : 'text-slate-800 dark:text-white/90'
-						}`}
+						className='text-sm leading-relaxed break-words'
+						style={{
+							color: isMe
+								? 'var(--primary-foreground)'
+								: 'var(--card-foreground)',
+						}}
 					>
 						{step.comment}
 					</p>
@@ -325,8 +445,11 @@ function ChatBubble({ step, isMe, onMediaClick }) {
 						{step.rasmlar.map((url, idx) => (
 							<div
 								key={idx}
-								className='relative rounded-xl overflow-hidden cursor-pointer group bg-slate-100 dark:bg-black/20'
-								style={{ height: step.rasmlar.length === 1 ? 200 : 130 }}
+								className='relative rounded-xl overflow-hidden cursor-pointer group'
+								style={{
+									height: step.rasmlar.length === 1 ? 200 : 130,
+									background: 'var(--muted)',
+								}}
 								onClick={() => onMediaClick(allMedia, idx)}
 							>
 								<img
@@ -354,65 +477,81 @@ function ChatBubble({ step, isMe, onMediaClick }) {
 						return (
 							<div
 								key={i}
-								className={`mt-2 flex items-center gap-3 rounded-2xl cursor-pointer transition-all group
-                  ${
-										isMe
-											? 'bg-white/15 hover:bg-white/25'
-											: 'bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/10'
-									}`}
-								style={{ padding: '10px 12px' }}
+								className='mt-2 flex items-center gap-3 rounded-2xl cursor-pointer transition-all'
+								style={{
+									padding: '10px 12px',
+									background: isMe ? 'oklch(1 0 0 / 12%)' : 'var(--muted)',
+								}}
+								onMouseEnter={e =>
+									(e.currentTarget.style.background = isMe
+										? 'oklch(1 0 0 / 20%)'
+										: 'var(--secondary)')
+								}
+								onMouseLeave={e =>
+									(e.currentTarget.style.background = isMe
+										? 'oklch(1 0 0 / 12%)'
+										: 'var(--muted)')
+								}
 								onClick={() => onMediaClick(allMedia, mediaIdx)}
 							>
-								<div className='w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br from-blue-500 to-blue-700 shadow-md shadow-blue-900/20 group-hover:scale-105 transition-transform'>
-									<FileText size={16} className='text-white' />
+								<div
+									className='w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-md transition-transform group-hover:scale-105'
+									style={{
+										background:
+											'linear-gradient(135deg, var(--primary), oklch(0.424 0.199 265.638))',
+										color: 'var(--primary-foreground)',
+									}}
+								>
+									<FileText size={16} />
 								</div>
 								<div className='flex-1 min-w-0'>
 									<p
-										className={`text-xs font-semibold truncate ${
-											isMe
-												? 'text-white/90'
-												: 'text-slate-700 dark:text-white/80'
-										}`}
+										className='text-xs font-semibold truncate'
+										style={{
+											color: isMe
+												? 'oklch(0.985 0 0 / 90%)'
+												: 'var(--foreground)',
+										}}
 									>
 										PDF hujjat
 									</p>
 									<p
-										className={`text-[11px] ${
-											isMe
-												? 'text-white/50'
-												: 'text-slate-400 dark:text-white/35'
-										}`}
+										className='text-[11px]'
+										style={{
+											color: isMe
+												? 'oklch(0.985 0 0 / 50%)'
+												: 'var(--muted-foreground)',
+										}}
 									>
 										Ko'rish uchun bosing
 									</p>
 								</div>
 								<Download
 									size={14}
-									className={`shrink-0 transition ${
-										isMe
-											? 'text-white/30 group-hover:text-white/60'
-											: 'text-slate-400 group-hover:text-slate-600 dark:text-white/30 dark:group-hover:text-white/60'
-									}`}
+									className='shrink-0'
+									style={{
+										color: isMe
+											? 'oklch(0.985 0 0 / 30%)'
+											: 'var(--muted-foreground)',
+									}}
 								/>
 							</div>
 						)
 					})}
 
 				{/* Timestamp */}
-				<div
-					className={`flex items-center justify-end gap-1 mt-1.5 ${
-						isMe ? 'text-white/40' : 'text-slate-400 dark:text-white/30'
-					}`}
-				>
-					<span className='text-[10px] font-mono'>
+				<div className='flex items-center justify-end gap-1 mt-1.5'>
+					<span
+						className='text-[10px] font-mono'
+						style={{
+							color: isMe
+								? 'oklch(0.985 0 0 / 40%)'
+								: 'var(--muted-foreground)',
+						}}
+					>
 						{time} · {dateStr}
 					</span>
-					{isMe && (
-						<CheckCheck
-							size={12}
-							className='text-blue-200 dark:text-blue-400'
-						/>
-					)}
+					{isMe && <CheckCheck size={12} style={{ color: 'var(--chart-2)' }} />}
 				</div>
 			</div>
 		</div>
@@ -520,56 +659,73 @@ export default function AplicationWorkChat({ data }) {
 	const statusBadge = {
 		jarayonda: {
 			label: 'Jarayonda',
-			cls: 'text-amber-600 dark:text-amber-400',
-			dot: 'bg-amber-500',
+			color: 'var(--chart-1)',
+			dot: 'var(--chart-1)',
 		},
 		qaytarildi: {
 			label: 'Qaytarildi',
-			cls: 'text-red-600 dark:text-red-400',
-			dot: 'bg-red-500',
+			color: 'var(--destructive)',
+			dot: 'var(--destructive)',
 		},
 		tasdiqlanmoqda: {
 			label: 'Tasdiqlanmoqda',
-			cls: 'text-blue-600 dark:text-blue-400',
-			dot: 'bg-blue-500',
+			color: 'var(--primary)',
+			dot: 'var(--primary)',
 		},
 		bajarilgan: {
 			label: 'Bajarilgan',
-			cls: 'text-green-600 dark:text-green-400',
-			dot: 'bg-green-500',
+			color: 'var(--chart-2)',
+			dot: 'var(--chart-2)',
 		},
 		rad_etildi: {
 			label: 'Rad etildi',
-			cls: 'text-red-600 dark:text-red-400',
-			dot: 'bg-red-500',
+			color: 'var(--destructive)',
+			dot: 'var(--destructive)',
 		},
 	}
 	const badge = statusBadge[data?.status]
 
 	return (
 		<>
-			<div className='flex flex-col h-full bg-slate-50 dark:bg-[#0d1b2a] rounded-2xl shadow-lg overflow-hidden'>
+			<div
+				className='flex flex-col h-full rounded-2xl shadow-lg overflow-hidden'
+				style={{ background: 'var(--background)' }}
+			>
 				{/* ── Header ── */}
 				<div
-					className='px-4 py-3 flex items-center gap-3 shrink-0
-          bg-white dark:bg-[#0d1b2a]/95
-          border-b border-slate-200 dark:border-white/[0.05]
-          backdrop-blur-md'
+					className='px-4 py-3 flex items-center gap-3 shrink-0'
+					style={{
+						background: 'var(--card)',
+						borderBottom: '1px solid var(--border)',
+					}}
 				>
 					<div
-						className='w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-white font-bold text-sm
-            bg-gradient-to-br from-blue-500 to-blue-700 shadow-md shadow-blue-500/20 dark:shadow-blue-900/40'
+						className='w-9 h-9 rounded-full flex items-center justify-center shrink-0 font-bold text-sm shadow-md'
+						style={{
+							background:
+								'linear-gradient(135deg, var(--primary), oklch(0.424 0.199 265.638))',
+							color: 'var(--primary-foreground)',
+						}}
 					>
 						{data?.id ? String(data.id).slice(-2) : '?'}
 					</div>
 					<div className='flex-1 min-w-0'>
-						<p className='text-slate-900 dark:text-white text-sm font-semibold truncate'>
+						<p
+							className='text-sm font-semibold truncate'
+							style={{ color: 'var(--foreground)' }}
+						>
 							Ariza #{data?.id}
 						</p>
 						{badge && (
 							<div className='flex items-center gap-1.5 mt-0.5'>
-								<span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
-								<span className={`text-xs font-medium ${badge.cls}`}>
+								<span
+									className='w-1.5 h-1.5 rounded-full'
+									style={{ background: badge.dot }}
+								/>
+								<span
+									className='text-xs font-medium'
+									style={{ color: badge.color }}
+								>
 									{badge.label}
 								</span>
 							</div>
@@ -582,17 +738,28 @@ export default function AplicationWorkChat({ data }) {
 					{!data?.steplar?.length && (
 						<div className='flex flex-col items-center justify-center h-40 gap-3'>
 							<div
-								className='w-14 h-14 rounded-full flex items-center justify-center
-                bg-blue-100 dark:bg-blue-500/10'
+								className='w-14 h-14 rounded-full flex items-center justify-center'
+								style={{
+									background:
+										'color-mix(in oklch, var(--primary) 10%, transparent)',
+								}}
 							>
-								<ImageIcon size={24} className='text-blue-400/60' />
+								<ImageIcon
+									size={24}
+									style={{
+										color:
+											'color-mix(in oklch, var(--primary) 50%, transparent)',
+									}}
+								/>
 							</div>
-							<p className='text-slate-400 dark:text-white/20 text-sm'>
+							<p
+								className='text-sm'
+								style={{ color: 'var(--muted-foreground)' }}
+							>
 								Hozircha xabarlar yo'q
 							</p>
 						</div>
 					)}
-
 					{data?.steplar?.map(step => (
 						<ChatBubble
 							key={step.id}
@@ -606,27 +773,36 @@ export default function AplicationWorkChat({ data }) {
 
 				{/* ── Input Area ── */}
 				<div
-					className='shrink-0 px-3 py-3
-          bg-white dark:bg-[#0d1b2a]/98
-          border-t border-slate-200 dark:border-white/[0.05]'
+					className='shrink-0 px-3 py-3'
+					style={{
+						background: 'var(--card)',
+						borderTop: '1px solid var(--border)',
+					}}
 				>
-					{/* Status radio */}
+					{/* Status radio — faqat tasdiqlanmoqda holatida */}
 					{data?.status === 'tasdiqlanmoqda' && (
-						<div className='flex items-center gap-4 mb-3 px-1'>
+						<div
+							className='flex items-center gap-4 mb-3 px-1 py-2 rounded-2xl'
+							style={{ background: 'var(--muted)' }}
+						>
 							<RadioGroup
 								value={form.status}
 								onValueChange={val => setForm({ ...form, status: val })}
-								className='flex items-center gap-5'
+								className='flex items-center gap-5 px-2'
 							>
 								<div className='flex items-center gap-2'>
 									<RadioGroupItem
 										value='bajarilgan'
 										id='opt-done'
-										className='border-green-500 text-green-500'
+										style={{
+											borderColor: 'var(--chart-2)',
+											color: 'var(--chart-2)',
+										}}
 									/>
 									<Label
 										htmlFor='opt-done'
-										className='text-slate-600 dark:text-white/70 text-sm cursor-pointer hover:text-slate-900 dark:hover:text-white transition'
+										className='text-sm cursor-pointer transition'
+										style={{ color: 'var(--muted-foreground)' }}
 									>
 										✓ Bajarildi
 									</Label>
@@ -635,11 +811,15 @@ export default function AplicationWorkChat({ data }) {
 									<RadioGroupItem
 										value='rad_etildi'
 										id='opt-reject'
-										className='border-red-500 text-red-500'
+										style={{
+											borderColor: 'var(--destructive)',
+											color: 'var(--destructive)',
+										}}
 									/>
 									<Label
 										htmlFor='opt-reject'
-										className='text-slate-600 dark:text-white/70 text-sm cursor-pointer hover:text-slate-900 dark:hover:text-white transition'
+										className='text-sm cursor-pointer transition'
+										style={{ color: 'var(--muted-foreground)' }}
 									>
 										✕ Rad etildi
 									</Label>
@@ -654,8 +834,13 @@ export default function AplicationWorkChat({ data }) {
 							{form.photos.map((p, i) => (
 								<div
 									key={i}
-									className='relative shrink-0 rounded-xl overflow-hidden border-2 border-blue-400/40'
-									style={{ width: 60, height: 60 }}
+									className='relative shrink-0 rounded-xl overflow-hidden'
+									style={{
+										width: 60,
+										height: 60,
+										border:
+											'2px solid color-mix(in oklch, var(--primary) 40%, transparent)',
+									}}
 								>
 									<img
 										src={URL.createObjectURL(p)}
@@ -677,20 +862,35 @@ export default function AplicationWorkChat({ data }) {
 					{/* File preview */}
 					{form.bildirgi && (
 						<div
-							className='flex items-center gap-2 px-3 py-2 rounded-xl mb-2 text-sm
-              bg-blue-50 border border-blue-200
-              dark:bg-blue-500/10 dark:border-blue-500/20'
+							className='flex items-center gap-2 px-3 py-2 rounded-xl mb-2 text-sm'
+							style={{
+								background:
+									'color-mix(in oklch, var(--primary) 8%, transparent)',
+								border:
+									'1px solid color-mix(in oklch, var(--primary) 25%, transparent)',
+							}}
 						>
 							<FileText
 								size={14}
-								className='text-blue-600 dark:text-blue-400 shrink-0'
+								className='shrink-0'
+								style={{ color: 'var(--primary)' }}
 							/>
-							<span className='text-slate-700 dark:text-white/70 truncate flex-1'>
+							<span
+								className='truncate flex-1'
+								style={{ color: 'var(--foreground)' }}
+							>
 								{form.bildirgi.name}
 							</span>
 							<button
 								onClick={removeBildirgi}
-								className='text-slate-400 hover:text-slate-600 dark:text-white/30 dark:hover:text-white/60 transition'
+								className='transition'
+								style={{ color: 'var(--muted-foreground)' }}
+								onMouseEnter={e =>
+									(e.currentTarget.style.color = 'var(--destructive)')
+								}
+								onMouseLeave={e =>
+									(e.currentTarget.style.color = 'var(--muted-foreground)')
+								}
 							>
 								<X size={14} />
 							</button>
@@ -699,15 +899,24 @@ export default function AplicationWorkChat({ data }) {
 
 					{/* Input row */}
 					<div
-						className='flex items-end gap-2 rounded-3xl px-3 py-2
-            bg-slate-100 border border-slate-200
-            dark:bg-[#182533] dark:border-white/[0.07]'
+						className='flex items-end gap-2 rounded-3xl px-3 py-2'
+						style={{
+							background: 'var(--muted)',
+							border: '1px solid var(--border)',
+						}}
 					>
 						{/* Photo upload */}
 						<label
-							className='shrink-0 w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition
-              text-slate-500 hover:text-slate-700 hover:bg-slate-200
-              dark:text-white/40 dark:hover:text-white/70 dark:hover:bg-white/10'
+							className='shrink-0 w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-all'
+							style={{ color: 'var(--muted-foreground)' }}
+							onMouseEnter={e => {
+								e.currentTarget.style.color = 'var(--foreground)'
+								e.currentTarget.style.background = 'var(--secondary)'
+							}}
+							onMouseLeave={e => {
+								e.currentTarget.style.color = 'var(--muted-foreground)'
+								e.currentTarget.style.background = 'transparent'
+							}}
 						>
 							<Plus size={18} />
 							<input
@@ -721,9 +930,16 @@ export default function AplicationWorkChat({ data }) {
 
 						{/* File upload */}
 						<label
-							className='shrink-0 w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition
-              text-slate-500 hover:text-slate-700 hover:bg-slate-200
-              dark:text-white/40 dark:hover:text-white/70 dark:hover:bg-white/10'
+							className='shrink-0 w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-all'
+							style={{ color: 'var(--muted-foreground)' }}
+							onMouseEnter={e => {
+								e.currentTarget.style.color = 'var(--foreground)'
+								e.currentTarget.style.background = 'var(--secondary)'
+							}}
+							onMouseLeave={e => {
+								e.currentTarget.style.color = 'var(--muted-foreground)'
+								e.currentTarget.style.background = 'transparent'
+							}}
 						>
 							<Upload size={16} />
 							<input
@@ -740,10 +956,13 @@ export default function AplicationWorkChat({ data }) {
 							value={form.comment}
 							onChange={e => setForm({ ...form, comment: e.target.value })}
 							onKeyDown={handleTextareaKey}
-							className='flex-1 bg-transparent resize-none outline-none text-sm py-1.5 leading-relaxed
-                text-slate-800 placeholder-slate-400 caret-blue-500
-                dark:text-white/85 dark:placeholder-white/25 dark:caret-blue-400'
-							style={{ maxHeight: 120, minHeight: 36 }}
+							className='flex-1 bg-transparent resize-none outline-none text-sm py-1.5 leading-relaxed'
+							style={{
+								maxHeight: 120,
+								minHeight: 36,
+								color: 'var(--foreground)',
+								caretColor: 'var(--primary)',
+							}}
 							rows={1}
 							onInput={e => {
 								e.target.style.height = 'auto'
@@ -756,16 +975,18 @@ export default function AplicationWorkChat({ data }) {
 						<button
 							disabled={!canSend}
 							onClick={() => setShowModal(true)}
-							className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${
-								canSend
-									? 'bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-500/25 dark:shadow-blue-900/40 scale-100'
-									: 'bg-slate-200 dark:bg-white/[0.08] scale-95 opacity-40'
-							}`}
+							className='shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200'
+							style={{
+								background: canSend
+									? 'linear-gradient(135deg, var(--primary), oklch(0.424 0.199 265.638))'
+									: 'var(--secondary)',
+								opacity: canSend ? 1 : 0.4,
+								transform: canSend ? 'scale(1)' : 'scale(0.95)',
+							}}
 						>
 							<Send
 								size={15}
-								className='text-white'
-								style={{ marginLeft: 1 }}
+								style={{ color: 'var(--primary-foreground)', marginLeft: 1 }}
 							/>
 						</button>
 					</div>
