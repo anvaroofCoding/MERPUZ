@@ -544,9 +544,15 @@ export const api = createApi({
 			// Listni avtomatik yangilash uchun:
 			invalidatesTags: ['XaridTastiqlash'],
 		}),
+		ppr_dashboard_statistikasi: builder.query({
+			query: ({ month = '', year = '' }) =>
+				`/dashboard/ppr-statistika/?month=${month}&year=${year}`,
+			providesTags: ['MainTag'],
+		}),
 	}),
 })
 export const {
+	usePpr_dashboard_statistikasiQuery,
 	useXarid_tastiqlash_putMutation,
 	useXarid_tastiqlash_postMutation,
 	useXarid_tastiqlashQuery,

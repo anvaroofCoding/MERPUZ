@@ -9,13 +9,6 @@ import { useTheme } from 'next-themes'
 import { useCallback, useEffect, useState } from 'react'
 import { Toaster as Sonner } from 'sonner'
 
-/**
- * Toaster — iPhone-style blur toasts with rangli/rangsiz toggle
- *
- * localStorage key: "notiv"
- *   "rangli"   → colored glowing icons + glassmorphism bg
- *   "rangsiz"  → monochrome icons + theme-native bg  (default)
- */
 const Toaster = ({ ...props }) => {
 	const { resolvedTheme, theme = 'system' } = useTheme()
 	const [notive, setNotive] = useState('rangsiz')
@@ -31,7 +24,6 @@ const Toaster = ({ ...props }) => {
 		}
 	}, [])
 
-	// Expose a setter so callers can toggle from outside
 	const toggleNotive = useCallback(
 		val => {
 			const next = val ?? (notive === 'rangli' ? 'rangsiz' : 'rangli')
@@ -43,7 +35,7 @@ const Toaster = ({ ...props }) => {
 		[notive],
 	)
 
-	if (!mounted) return null // avoid hydration flicker
+	if (!mounted) return null
 
 	const isDark =
 		resolvedTheme === 'dark' ||
@@ -53,66 +45,69 @@ const Toaster = ({ ...props }) => {
 
 	const isColored = notive === 'rangli'
 
-	/* ─────────────────────────────────────────────
-     CSS custom properties injected via `style`
-  ───────────────────────────────────────────── */
-
+	/* ── RANGLI: vivid solid backgrounds ── */
 	const coloredStyle = {
-		// ── background glass ──
-		'--normal-bg': isDark
-			? 'rgba(15, 15, 20, 0.72)'
-			: 'rgba(255, 255, 255, 0.68)',
-		'--normal-border': isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
-		'--normal-text': isDark ? 'rgba(240,240,255,0.96)' : 'rgba(10,10,20,0.92)',
+		// default / normal
+		'--normal-bg': isDark ? '#1a1a2e' : '#ffffff',
+		'--normal-border': isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+		'--normal-text': isDark ? '#f0f0ff' : '#0a0a14',
 
-		// ── success overrides ──
-		'--success-bg': isDark ? 'rgba(6,50,30,0.78)' : 'rgba(220,255,235,0.82)',
-		'--success-border': isDark
-			? 'rgba(34,197,94,0.25)'
-			: 'rgba(34,197,94,0.30)',
-		'--success-text': isDark ? '#86efac' : '#15803d',
+		// success — yam-yashil
+		'--success-bg': isDark ? '#052e16' : '#dcfce7',
+		'--success-border': isDark ? '#16a34a' : '#16a34a',
+		'--success-text': isDark ? '#4ade80' : '#14532d',
 
-		// ── info overrides ──
-		'--info-bg': isDark ? 'rgba(6,20,60,0.78)' : 'rgba(219,234,254,0.82)',
-		'--info-border': isDark ? 'rgba(59,130,246,0.25)' : 'rgba(59,130,246,0.30)',
-		'--info-text': isDark ? '#93c5fd' : '#1d4ed8',
+		// info — to'q ko'k
+		'--info-bg': isDark ? '#0c1a4a' : '#dbeafe',
+		'--info-border': isDark ? '#2563eb' : '#2563eb',
+		'--info-text': isDark ? '#60a5fa' : '#1e3a8a',
 
-		// ── warning overrides ──
-		'--warning-bg': isDark ? 'rgba(50,35,0,0.78)' : 'rgba(255,251,210,0.85)',
-		'--warning-border': isDark
-			? 'rgba(234,179,8,0.25)'
-			: 'rgba(234,179,8,0.35)',
-		'--warning-text': isDark ? '#fde047' : '#854d0e',
+		// warning — to'q sariq
+		'--warning-bg': isDark ? '#2d1a00' : '#fef9c3',
+		'--warning-border': isDark ? '#ca8a04' : '#ca8a04',
+		'--warning-text': isDark ? '#facc15' : '#713f12',
 
-		// ── error overrides ──
-		'--error-bg': isDark ? 'rgba(50,8,8,0.78)' : 'rgba(254,226,226,0.82)',
-		'--error-border': isDark ? 'rgba(239,68,68,0.25)' : 'rgba(239,68,68,0.30)',
-		'--error-text': isDark ? '#fca5a5' : '#b91c1c',
+		// error — qip-qizil
+		'--error-bg': isDark ? '#2d0606' : '#fee2e2',
+		'--error-border': isDark ? '#dc2626' : '#dc2626',
+		'--error-text': isDark ? '#f87171' : '#7f1d1d',
 
-		// ── shape & blur ──
-		'--border-radius': '18px',
-		backdropFilter: 'blur(24px) saturate(200%) brightness(1.05)',
-		WebkitBackdropFilter: 'blur(24px) saturate(200%) brightness(1.05)',
+		'--border-radius': '14px',
 	}
 
+	/* ── RANGSIZ: theme-native, dark modega mos ── */
 	const defaultStyle = {
-		'--normal-bg': 'var(--popover)',
-		'--normal-text': 'var(--popover-foreground)',
-		'--normal-border': 'var(--border)',
-		'--border-radius': 'var(--radius)',
+		'--normal-bg': isDark ? 'hsl(240 6% 13%)' : 'hsl(0 0% 100%)',
+		'--normal-border': isDark ? 'hsl(240 4% 22%)' : 'hsl(240 6% 90%)',
+		'--normal-text': isDark ? 'hsl(0 0% 95%)' : 'hsl(240 6% 10%)',
+
+		'--success-bg': isDark ? 'hsl(240 6% 13%)' : 'hsl(0 0% 100%)',
+		'--success-border': isDark ? 'hsl(240 4% 22%)' : 'hsl(240 6% 90%)',
+		'--success-text': isDark ? 'hsl(0 0% 95%)' : 'hsl(240 6% 10%)',
+
+		'--info-bg': isDark ? 'hsl(240 6% 13%)' : 'hsl(0 0% 100%)',
+		'--info-border': isDark ? 'hsl(240 4% 22%)' : 'hsl(240 6% 90%)',
+		'--info-text': isDark ? 'hsl(0 0% 95%)' : 'hsl(240 6% 10%)',
+
+		'--warning-bg': isDark ? 'hsl(240 6% 13%)' : 'hsl(0 0% 100%)',
+		'--warning-border': isDark ? 'hsl(240 4% 22%)' : 'hsl(240 6% 90%)',
+		'--warning-text': isDark ? 'hsl(0 0% 95%)' : 'hsl(240 6% 10%)',
+
+		'--error-bg': isDark ? 'hsl(240 6% 13%)' : 'hsl(0 0% 100%)',
+		'--error-border': isDark ? 'hsl(240 4% 22%)' : 'hsl(240 6% 90%)',
+		'--error-text': isDark ? 'hsl(0 0% 95%)' : 'hsl(240 6% 10%)',
+
+		'--border-radius': '10px',
 	}
 
-	/* ─────────────────────────────────────────────
-     Icons
-  ───────────────────────────────────────────── */
-
+	/* ── RANGLI ikonalar — jonli glow ── */
 	const coloredIcons = {
 		success: (
 			<CircleCheckIcon
 				className='size-[18px] shrink-0'
 				style={{
 					color: '#22c55e',
-					filter: 'drop-shadow(0 0 6px rgba(34,197,94,0.65))',
+					filter: 'drop-shadow(0 0 8px #22c55e) drop-shadow(0 0 2px #16a34a)',
 				}}
 			/>
 		),
@@ -121,7 +116,7 @@ const Toaster = ({ ...props }) => {
 				className='size-[18px] shrink-0'
 				style={{
 					color: '#3b82f6',
-					filter: 'drop-shadow(0 0 6px rgba(59,130,246,0.65))',
+					filter: 'drop-shadow(0 0 8px #3b82f6) drop-shadow(0 0 2px #2563eb)',
 				}}
 			/>
 		),
@@ -130,7 +125,7 @@ const Toaster = ({ ...props }) => {
 				className='size-[18px] shrink-0'
 				style={{
 					color: '#eab308',
-					filter: 'drop-shadow(0 0 6px rgba(234,179,8,0.65))',
+					filter: 'drop-shadow(0 0 8px #eab308) drop-shadow(0 0 2px #ca8a04)',
 				}}
 			/>
 		),
@@ -139,25 +134,52 @@ const Toaster = ({ ...props }) => {
 				className='size-[18px] shrink-0'
 				style={{
 					color: '#ef4444',
-					filter: 'drop-shadow(0 0 6px rgba(239,68,68,0.65))',
+					filter: 'drop-shadow(0 0 8px #ef4444) drop-shadow(0 0 2px #dc2626)',
 				}}
 			/>
 		),
 		loading: (
 			<Loader2Icon
 				className='size-[18px] shrink-0 animate-spin'
-				style={{ color: isDark ? '#a5b4fc' : '#6366f1' }}
+				style={{
+					color: isDark ? '#818cf8' : '#4f46e5',
+					filter: 'drop-shadow(0 0 6px #6366f1)',
+				}}
 			/>
 		),
 	}
 
+	/* ── RANGSIZ ikonalar ── */
 	const normalIcons = {
-		success: <CircleCheckIcon className='size-[18px] shrink-0 opacity-80' />,
-		info: <InfoIcon className='size-[18px] shrink-0 opacity-80' />,
-		warning: <TriangleAlertIcon className='size-[18px] shrink-0 opacity-80' />,
-		error: <OctagonXIcon className='size-[18px] shrink-0 opacity-80' />,
+		success: (
+			<CircleCheckIcon
+				className='size-[18px] shrink-0'
+				style={{ color: isDark ? '#a1a1aa' : '#52525b' }}
+			/>
+		),
+		info: (
+			<InfoIcon
+				className='size-[18px] shrink-0'
+				style={{ color: isDark ? '#a1a1aa' : '#52525b' }}
+			/>
+		),
+		warning: (
+			<TriangleAlertIcon
+				className='size-[18px] shrink-0'
+				style={{ color: isDark ? '#a1a1aa' : '#52525b' }}
+			/>
+		),
+		error: (
+			<OctagonXIcon
+				className='size-[18px] shrink-0'
+				style={{ color: isDark ? '#a1a1aa' : '#52525b' }}
+			/>
+		),
 		loading: (
-			<Loader2Icon className='size-[18px] shrink-0 animate-spin opacity-80' />
+			<Loader2Icon
+				className='size-[18px] shrink-0 animate-spin'
+				style={{ color: isDark ? '#a1a1aa' : '#52525b' }}
+			/>
 		),
 	}
 
@@ -165,7 +187,7 @@ const Toaster = ({ ...props }) => {
 		<Sonner
 			theme={theme}
 			className='toaster group'
-			position='bottom-center' // mobile-friendly default
+			position='bottom-center'
 			mobileOffset={16}
 			offset={20}
 			gap={10}
@@ -178,16 +200,15 @@ const Toaster = ({ ...props }) => {
 						'group/toast',
 						'flex items-start gap-3 w-full',
 						'px-4 py-3 text-sm font-medium',
-						'shadow-xl',
-						// smooth entry/exit handled by Sonner internally
+						isColored ? 'shadow-2xl border-l-[3px]' : 'shadow-md border',
 					].join(' '),
 					title: 'font-semibold text-[13px] leading-snug',
-					description: 'text-[12px] leading-relaxed opacity-75 mt-0.5',
+					description: 'text-[12px] leading-relaxed opacity-70 mt-0.5',
 					actionButton:
-						'rounded-md px-3 py-1 text-xs font-semibold bg-white/20 hover:bg-white/30 transition-colors',
+						'rounded px-3 py-1 text-xs font-semibold bg-current/10 hover:bg-current/20 transition-colors',
 					cancelButton:
-						'rounded-md px-3 py-1 text-xs font-semibold opacity-60 hover:opacity-90 transition-opacity',
-					closeButton: 'opacity-40 hover:opacity-80 transition-opacity',
+						'rounded px-3 py-1 text-xs font-semibold opacity-50 hover:opacity-80 transition-opacity',
+					closeButton: 'opacity-40 hover:opacity-90 transition-opacity',
 				},
 			}}
 			{...props}

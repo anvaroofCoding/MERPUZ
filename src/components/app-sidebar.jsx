@@ -105,23 +105,23 @@ export function AppSidebar({ ...props }) {
 					},
 				],
 			},
-			{
-				title: 'Xaridlar',
-				url: '#',
-				icon: NotebookPen,
-				items: [
-					{
-						title: 'Xaridlar qilish',
-						url: 'xarid-qilish',
-						roles: ['admin', 'monitoring', 'tarkibiy', 'bekat', 'bolim'],
-					},
-					{
-						title: 'Xaridlarni tastiqlash',
-						url: 'xarid-tastiqlash',
-						roles: ['admin', 'monitoring', 'tarkibiy', 'bekat', 'bolim'],
-					},
-				],
-			},
+			// {
+			// 	title: 'Xaridlar',
+			// 	url: '#',
+			// 	icon: NotebookPen,
+			// 	items: [
+			// 		{
+			// 			title: 'Xaridlar qilish',
+			// 			url: 'xarid-qilish',
+			// 			roles: ['admin', 'monitoring', 'tarkibiy', 'bekat', 'bolim'],
+			// 		},
+			// 		{
+			// 			title: 'Xaridlarni tastiqlash',
+			// 			url: 'xarid-tastiqlash',
+			// 			roles: ['admin', 'monitoring', 'tarkibiy', 'bekat', 'bolim'],
+			// 		},
+			// 	],
+			// },
 		],
 		projects: [
 			{
